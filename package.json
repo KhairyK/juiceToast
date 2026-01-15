@@ -1,0 +1,35 @@
+{
+  "name": "juice-toast",
+  "version": "1.0.0",
+  "description": "Lightweight, dependency-free toast notification library",
+  "keywords": ["toast", "notification", "ui"],
+  "license": "MIT",
+  "author": "KhairyK",
+  "homepage": "https://github.com/KhairyK/juiceToast",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KhairyK/juiceToast.git"
+  },
+
+  "main": "dist/juice-toast.umd.js",
+  "module": "dist/juice-toast.esm.js",
+  "types": "dist/juice-toast.d.ts",
+
+  "exports": {
+    ".": {
+      "require": "./dist/juice-toast.umd.js",
+      "import": "./dist/juice-toast.esm.js",
+      "types": "./dist/juice-toast.d.ts"
+    }
+  },
+
+  "files": [
+    "dist"
+  ],
+
+  "sideEffects": false,
+
+  "scripts": {
+    "build": "node build.js"
+  }
+}
