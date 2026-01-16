@@ -1,3 +1,8 @@
+/**
+ * OpenDN Foundation (C) 2026
+ * Source Of Juice Toast v1.1.0
+ * Read CONTRIBUTE.md To Contribute
+ */
 (function(root, factory) {
   if (typeof define === "function" && define.amd) {
     define([], factory);
@@ -114,58 +119,115 @@
     cfg.iconAnimate = cfg.iconAnimate ?? cfg.icon_onClick_animate;
     cfg.position = cfg.position ?? cfg.toast;
     cfg.closable = cfg.closable ?? cfg.closeable;
+    cfg.iconPosition = cfg.iconPosition || "left";
+    cfg.compact = !!cfg.compact;
     
     const theme = themes[cfg.theme || this._theme] || {};
     
     const toast = document.createElement("div");
     toast.className = "juice-toast";
+
+    /* SIZE PRESET */
+    if (cfg.size && sizePreset[cfg.size]) {
+      const p = sizePreset[cfg.size];
+      if (p.width) toast.style.width = p.width;
+      if (p.padding) toast.style.padding = p.padding;
+    }
+
+    /* MANUAL WIDTH / HEIGHT */
+    if (cfg.width) toast.style.width = cfg.width;
+    if (cfg.height) toast.style.height = cfg.height;
+    
     toast.style.background = cfg.bg || theme.bg;
     toast.style.color = cfg.color || theme.color;
     toast.style.border = cfg.border || theme.border;
     
-    /* ICON */
-    if (cfg.icon) {
-      const icon = document.createElement("i");
-      icon.className = [
-        "icon",
-        cfg.iconPack || "",
-        cfg.icon
-      ].join(" ").trim();
-      
-      if (cfg.iconLink || cfg.iconAnimate) {
-        icon.classList.add("icon-clickable");
-        icon.onclick = e => {
-          e.stopPropagation();
-          if (cfg.iconAnimate) {
-            icon.classList.remove(cfg.iconAnimate);
-            void icon.offsetWidth;
-            icon.classList.add(cfg.iconAnimate);
-          }
-          if (cfg.iconLink) {
-            window.open(cfg.iconLink, "_blank", "noopener");
-          }
-        };
+/* ICON */
+let icon = null;
+
+if (cfg.icon) {
+  icon = document.createElement("i");
+  icon.className = [
+    "icon",
+    cfg.iconPack || "",
+    cfg.icon
+  ].join(" ").trim();
+  
+  if (cfg.iconSize) {
+    icon.style.fontSize = cfg.iconSize;
+  }
+  
+  if (cfg.iconLink || cfg.iconAnimate) {
+    icon.classList.add("icon-clickable");
+    icon.onclick = e => {
+      e.stopPropagation();
+      if (cfg.iconAnimate) {
+        icon.classList.remove(cfg.iconAnimate);
+        void icon.offsetWidth;
+        icon.classList.add(cfg.iconAnimate);
       }
-      toast.appendChild(icon);
-    }
+      if (cfg.iconLink) {
+        window.open(cfg.iconLink, "_blank", "noopener");
+      }
+    };
+  }
+}
+
+/* CONTENT */
+const content = document.createElement("div");
+content.className = "jt-content";
+
+if (cfg.title) {
+  const t = document.createElement("div");
+  t.className = "jt-title";
+  t.textContent = cfg.title;
+  content.appendChild(t);
+}
+
+const msg = document.createElement("div");
+msg.className = "jt-message";
+msg.textContent = cfg.message || "";
+content.appendChild(msg);
+
+/* ICON POSITION */
+if (icon && cfg.iconPosition === "top") {
+  toast.classList.add("jt-icon-top");
+  toast.appendChild(icon);
+  toast.appendChild(content);
+}
+else if (icon && cfg.iconPosition === "right") {
+  toast.appendChild(content);
+  toast.appendChild(icon);
+}
+else {
+  if (icon) toast.appendChild(icon);
+  toast.appendChild(content);
+}
+
+if (Array.isArray(cfg.actions) && cfg.actions.length) {
+  const actionWrap = document.createElement("div");
+  actionWrap.className = "jt-actions";
+  
+  cfg.actions.forEach(act => {
+    const btn = document.createElement("button");
+    btn.className = "jt-action";
+    btn.textContent = act.label;
     
-    /* CONTENT */
-    const content = document.createElement("div");
-    content.className = "jt-content";
+    btn.onclick = (ev) => {
+      ev.stopPropagation();
+      act.onClick?.(ev);
+      
+      if (act.closeOnClick) {
+        toast.remove();
+        this._next();
+      }
+    };
     
-    if (cfg.title) {
-      const t = document.createElement("div");
-      t.className = "jt-title";
-      t.textContent = cfg.title;
-      content.appendChild(t);
-    }
-    
-    const msg = document.createElement("div");
-    msg.className = "jt-message";
-    msg.textContent = cfg.message || "";
-    content.appendChild(msg);
-    
-    toast.appendChild(content);
+    actionWrap.appendChild(btn);
+  });
+  
+  content.appendChild(actionWrap);
+}
     
     /* CLOSE */
     if (cfg.closable) {

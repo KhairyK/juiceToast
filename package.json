@@ -1,20 +1,33 @@
 {
   "name": "juice-toast",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Lightweight, dependency-free toast notification library",
-  "keywords": ["toast", "notification", "ui"],
+  "keywords": [
+    "toast",
+    "notification",
+    "ui",
+    "javascript",
+    "frontend",
+    "browser",
+    "vanilla-js"
+  ],
   "license": "MIT",
   "author": "KhairyK",
   "homepage": "https://github.com/KhairyK/juiceToast",
+  "bugs": {
+    "url": "https://github.com/KhairyK/juiceToast/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/KhairyK/juiceToast.git"
+    "url": "git+https://github.com/KhairyK/juiceToast.git"
   },
-
+  "funding": "https://patreon.com/Khairy47",
+  "engines": {
+    "node": ">=14"
+  },
   "main": "dist/juice-toast.umd.js",
   "module": "dist/juice-toast.esm.js",
   "types": "dist/juice-toast.d.ts",
-
   "exports": {
     ".": {
       "require": "./dist/juice-toast.umd.js",
@@ -22,14 +35,14 @@
       "types": "./dist/juice-toast.d.ts"
     }
   },
-
-  "files": [
-    "dist"
-  ],
-
+  "files": ["dist"],
   "sideEffects": false,
-
+  "publishConfig": {
+    "access": "public"
+  },
+  "unpkg": "dist/juice-toast.umd.js",
+  "jsdelivr": "dist/juice-toast.umd.js",
   "scripts": {
-    "build": "node build.js"
+    "dev": "live-server"
   }
 }
