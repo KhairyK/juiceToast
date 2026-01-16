@@ -25,13 +25,18 @@ Suitable for small projects up to custom-built frameworks.
 
 ### ESM
 ```js
-import juiceToast from "./juice-toast.esm.js";
+import juiceToast from "https://cdn.kyrt.my.id/libs/js;juice-toast/1.0.0/juice-toast.esm.js";
 ```
 
 ### UMD (Browser)
 ```html
-<script src="juice-toast.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.css" />
+<script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.0.0/juice-toast.umd.js"></script>
 <script>
+  juiceToast.setup({
+   success: {
+    bg: "#01AA38"
+  });
   juiceToast.success("Hello world!");
 </script>
 ```
