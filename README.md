@@ -26,16 +26,16 @@ It supports **ESM and UMD**, **dynamic toast types**, **theme management**, **qu
 
 ### ESM
 ```js
-import juiceToast from "https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.esm.js";
+import juiceToast from "https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.esm.min.js";
 ```
 
 ### UMD (Browser)
 ```html
 <link
   rel="stylesheet"
-  href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.css"
+  href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.min.css"
 />
-<script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.umd.js"></script>
+<script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.umd.min.js"></script>
 
 <script>
   juiceToast.setup({
