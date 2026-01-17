@@ -45,7 +45,7 @@ jobs:
         if: steps.publish_check.outputs.publish == 'true'
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Remove npm.publish.auto
         if: steps.publish_check.outputs.publish == 'true'
