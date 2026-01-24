@@ -9,4 +9,5 @@ v1.0.1
 - Add Forget File `style.css`
 
 v1.0.0
-- Published In Fisrt Time
+- Published In First Time
+
