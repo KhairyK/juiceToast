@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "0.0.0-next.1202026",
+  "version": "0.0.1-next.1202026",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
