@@ -1,5 +1,9 @@
 name: Node.js Package
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   release:
     types: [created]
@@ -15,7 +19,6 @@ jobs:
           node-version: 20
 
       - run: npm ci
-      - run: echo "TEST ARE SKIP, THE TEST IS ALIVABLE ON DEVELOMENT. NOT CI/CD (EXIT LIVE SERVER)"
 
   publish-npm:
     needs: build
@@ -43,16 +46,6 @@ jobs:
 
       - name: Publish to NPM
         if: steps.publish_check.outputs.publish == 'true'
-        run: npm publish
+        run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Remove npm.publish.auto
-        if: steps.publish_check.outputs.publish == 'true'
-        run: |
-          rm npm.publish.auto
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add npm.publish.auto
-          git commit -m "chore: auto remove npm.publish.auto after publish"
-          git push
