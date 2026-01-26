@@ -1,9 +1,8 @@
-v1.2.0
+NEXT 120/2026
 - Adding Swipe to Dismiss
 - Adding Pause on Hover
 - Adding `playSound`
 - Adding GlassUI (WARNING: This Function Still In BETA, it not worked or it can make error)
-- Adding 
 
 v1.1.0
 - Adding **Size Preset**
@@ -17,4 +16,5 @@ v1.0.1
 
 v1.0.0
 - Published In First Time
+
 
