@@ -4,6 +4,8 @@
  * @license MIT
  */
 
+/// <reference lib="dom" />
+
 /* ================= BASIC TYPES ================= */
 
 export type ToastPosition =
@@ -64,12 +66,12 @@ export interface ToastPayload {
   position?: ToastPosition;
   toast?: ToastPosition; // legacy
 
-  pauseOnHover?: boolean; // default true
-  swipeToDismiss?: boolean; // default true
+  pauseOnHover?: boolean;
+  swipeToDismiss?: boolean;
 
   /* -------- close -------- */
   closable?: boolean;
-  closeable?: boolean; // legacy
+  closeable?: boolean; // legacy typo support
 
   /* -------- icon (modern) -------- */
   icon?: string;
@@ -84,9 +86,10 @@ export interface ToastPayload {
   icon_config?: string;
   icon_onClick_url?: string;
   icon_onClick_animate?: string;
-  
-  playSound ? : string | boolean;
-  glassUI ? : boolean;
+
+  /* -------- effects -------- */
+  playSound?: string | boolean;
+  glassUI?: boolean | number;
 
   /* -------- actions -------- */
   actions?: ToastAction[];
@@ -119,44 +122,23 @@ export interface JuiceToastDefaults {
 /* ================= CORE API ================= */
 
 export interface JuiceToastAPI {
-  /**
-   * Register toast types in bulk
-   */
   setup<T extends Record<string, ToastTypeConfig>>(
     config?: T & JuiceToastDefaults
   ): void;
 
-  /**
-   * Add or override a single toast type
-   */
   addType<T extends ToastTypeConfig>(
     name: string,
     config?: T
   ): void;
 
-  /**
-   * Global defaults
-   */
   defaults(config: JuiceToastDefaults): void;
 
-  /**
-   * Theme system
-   */
   defineTheme(name: string, styles: ToastTheme): void;
   setTheme(name: string): void;
 
-  /**
-   * Queue control
-   */
   clear(): void;
   destroy(): void;
 
-  /**
-   * Dynamic toast methods
-   * juiceToast.success(...)
-   * juiceToast.error(...)
-   * juiceToast.anything(...)
-   */
   [type: string]:
     | ((payload?: string | number | ToastPayload) => void)
     | unknown;
