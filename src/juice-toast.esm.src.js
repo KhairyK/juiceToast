@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.1.0
+ * Source Of Juice Toast v120/2026 (NEXT)
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
@@ -39,8 +39,9 @@ const juiceToast = {
   /* ===== PUBLIC API ===== */
   
   setup(cfg = {}) {
-    this._config = cfg;
-    this._registerTypes();
+   this._config = cfg;
+   this._defaults = { ...this._defaults, ...cfg };
+   this._registerTypes();
   },
   
   addType(name, cfg = {}) {
@@ -95,6 +96,16 @@ const juiceToast = {
     this._showToast(item.type, item.payload);
   },
   
+  _normalizeGlass(value) {
+  if (value === true) return 60;
+  if (value === false || value == null) return 0;
+  
+  const n = Number(value);
+  return Number.isFinite(n) ?
+    Math.max(0, Math.min(100, n)) :
+    0;
+},
+  
   _getRoot(position) {
     if (!isBrowser) return null;
     let root = document.getElementById("juice-toast-root");
@@ -107,6 +118,30 @@ const juiceToast = {
     root.dataset.theme = this._theme;
     return root;
   },
+  _defaults: {
+  duration: 2500,
+  maxVisible: 3,
+  swipeThreshold: 60,
+  glassUI: 0,
+  playSound: null
+},
+
+_playSound(src) {
+  if (!isBrowser) return;
+  
+  const sound =
+    typeof src === "string" && src ?
+    src :
+    this._defaults.playSound;
+  
+  if (!sound) return;
+  
+  try {
+    const audio = new Audio(sound);
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch {}
+},
   
   _showToast(type, payload) {
     if (!isBrowser) return;
@@ -141,18 +176,35 @@ const juiceToast = {
       if (p.padding) toast.style.padding = p.padding;
     }
     
+    /* GLASS UI */
+const glass = this._normalizeGlass(
+  cfg.glassUI ?? this._defaults.glassUI
+);
+
+if (glass > 0) {
+  toast.classList.add("jt-glass");
+  toast.style.setProperty("--jt-glass", glass);
+}
+
+/* STYLE */
+if (!glass) {
+  toast.style.background = cfg.bg || theme.bg;
+}
+toast.style.color = cfg.color || theme.color;
+toast.style.border = cfg.border || theme.border;
+    
     /* COMPACT */
     if (cfg.compact) {
      toast.classList.add("jt-compact");
+    }
+    
+    if (cfg.glassUI ?? this._defaults.glassUI) {
+     toast.classList.add("jt-glass");
     }
 
     /* MANUAL WIDTH / HEIGHT */
     if (cfg.width) toast.style.width = cfg.width;
     if (cfg.height) toast.style.height = cfg.height;
-    
-    toast.style.background = cfg.bg || theme.bg;
-    toast.style.color = cfg.color || theme.color;
-    toast.style.border = cfg.border || theme.border;
     
 /* ICON */
 let icon = null;
@@ -184,6 +236,31 @@ if (cfg.icon) {
     };
   }
 }
+
+let startX = 0;
+let currentX = 0;
+
+toast.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+toast.addEventListener("touchmove", e => {
+  currentX = e.touches[0].clientX - startX;
+  toast.style.transform = `translateX(${currentX}px)`;
+});
+
+toast.addEventListener("touchend", () => {
+  if (Math.abs(currentX) > this._defaults.swipeThreshold) {
+    toast.style.transform = `translateX(${currentX > 0 ? 1000 : -1000}px)`;
+    setTimeout(() => {
+      toast.remove();
+      this._next();
+    }, 200);
+  } else {
+    toast.style.transform = "";
+  }
+  startX = currentX = 0;
+});
 
 /* CONTENT */
 const content = document.createElement("div");
@@ -254,6 +331,10 @@ if (Array.isArray(cfg.actions) && cfg.actions.length) {
     }
     
     const root = this._getRoot(cfg.position);
+    const max = this._defaults.maxVisible;
+    if (max && root.children.length >= max) {
+     root.firstChild.remove();
+    }
     root.appendChild(toast);
     
     requestAnimationFrame(() => toast.classList.add("show"));
@@ -261,13 +342,37 @@ if (Array.isArray(cfg.actions) && cfg.actions.length) {
     const duration = cfg.duration ?? 2500;
     if (duration === 0) return;
     
+    let start = Date.now();
+let remaining = cfg.duration ?? this._defaults.duration;
+let raf;
+
+const tick = () => {
+  if (!toast.__paused) {
+    const now = Date.now();
+    remaining -= now - start;
+    start = now;
+  } else {
+    start = Date.now();
+  }
+  
+  if (remaining <= 0) {
+    toast.classList.remove("show");
     setTimeout(() => {
-      toast.classList.remove("show");
-      setTimeout(() => {
-        toast.remove();
-        this._next();
-      }, 300);
-    }, duration);
+      toast.remove();
+      this._next();
+    }, 300);
+  } else {
+    raf = requestAnimationFrame(tick);
+  }
+};
+
+toast.addEventListener("mouseenter", () => toast.__paused = true);
+toast.addEventListener("mouseleave", () => toast.__paused = false);
+
+toast.addEventListener("touchstart", () => toast.__paused = true);
+toast.addEventListener("touchend", () => toast.__paused = false);
+
+requestAnimationFrame(tick);
   }
 };
 

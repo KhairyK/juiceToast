@@ -1,0 +1,648 @@
+@font-face {
+  font-family: 'fontic';
+  src:  url('fontic.eot?cvzxrp');
+  src:  url('fontic.eot?cvzxrp#iefix') format('embedded-opentype'),
+    url('fontic.ttf?cvzxrp') format('truetype'),
+    url('fontic.woff?cvzxrp') format('woff'),
+    url('fontic.woff2?cvzxrp') format('woff2'),
+    url('fontic.svg?cvzxrp#fontic') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.fontic {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'fontic' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering From Font-Set@1.0.0 =========== */
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke: 0.0px;
+  -webkit-font-smoothing: subpixel-antialiased;
+  font-smooth: always;
+  font-smooth: 2em;
+  -apple-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  text-rendering: geometricPrecision;
+  text-shadow: rgba(0,0,0,0.01) 0 0 1px;
+}
+
+.fontic-lamp:before {
+  content: "\e033";
+}
+.fontic-linux:before {
+  content: "\e034";
+}
+.fontic-no-data:before {
+  content: "\e032";
+}
+.fontic-whatsapp-fill:before {
+  content: "\e031";
+}
+.fontic-facebook-rounded:before {
+  content: "\e030";
+}
+.fontic-wifi:before {
+  content: "\e016";
+}
+.fontic-signal:before {
+  content: "\e065";
+}
+.fontic-hostpot:before {
+  content: "\e064";
+}
+.fontic-clipboard:before {
+  content: "\e074";
+}
+.fontic-stack:before {
+  content: "\e018";
+}
+.fontic-folder:before {
+  content: "\e019";
+}
+.fontic-folder-open:before {
+  content: "\e020";
+}
+.fontic-folder-plus:before {
+  content: "\e021";
+}
+.fontic-folder-minus:before {
+  content: "\e022";
+}
+.fontic-folder-download:before {
+  content: "\e023";
+}
+.fontic-folder-upload:before {
+  content: "\e024";
+}
+.fontic-price-tag:before {
+  content: "\e072";
+}
+.fontic-price-tag-double:before {
+  content: "\e071";
+}
+.fontic-barcode:before {
+  content: "\e070";
+}
+.fontic-qrcode:before {
+  content: "\e069";
+}
+.fontic-ticket:before {
+  content: "\e073";
+}
+.fontic-cart:before {
+  content: "\e068";
+}
+.fontic-calendar:before {
+  content: "\e082";
+}
+.fontic-printer:before {
+  content: "\e066";
+}
+.fontic-keyboard:before {
+  content: "\e067";
+}
+.fontic-pc:before {
+  content: "\e075";
+}
+.fontic-laptop:before {
+  content: "\e076";
+}
+.fontic-mobile:before {
+  content: "\e077";
+}
+.fontic-mobile2:before {
+  content: "\e078";
+}
+.fontic-tablet:before {
+  content: "\e079";
+}
+.fontic-tv:before {
+  content: "\e080";
+}
+.fontic-floppy-disk:before {
+  content: "\e081";
+}
+.fontic-drive:before {
+  content: "\e025";
+}
+.fontic-database:before {
+  content: "\e017";
+}
+.fontic-bubble:before {
+  content: "\e083";
+}
+.fontic-cog:before {
+  content: "\e994";
+}
+.fontic-bug:before {
+  content: "\e026";
+}
+.fontic-pie-chart:before {
+  content: "\e027";
+}
+.fontic-leaf:before {
+  content: "\e089";
+}
+.fontic-rocket:before {
+  content: "\e084";
+}
+.fontic-meter:before {
+  content: "\e9a6";
+}
+.fontic-meter2:before {
+  content: "\e9a7";
+}
+.fontic-hammer2:before {
+  content: "\e9a8";
+}
+.fontic-fire:before {
+  content: "\e085";
+}
+.fontic-lab:before {
+  content: "\e9aa";
+}
+.fontic-u-magnet:before {
+  content: "\e091";
+}
+.fontic-bin:before {
+  content: "\e087";
+}
+.fontic-bin-fill:before {
+  content: "\e088";
+}
+.fontic-briefcase:before {
+  content: "\e090";
+}
+.fontic-airplane:before {
+  content: "\e086";
+}
+.fontic-truck:before {
+  content: "\e120";
+}
+.fontic-rail:before {
+  content: "\e119";
+}
+.fontic-accessibility:before {
+  content: "\e118";
+}
+.fontic-target:before {
+  content: "\e117";
+}
+.fontic-shield:before {
+  content: "\e121";
+}
+.fontic-power:before {
+  content: "\e122";
+}
+.fontic-switch:before {
+  content: "\e123";
+}
+.fontic-power-cord:before {
+  content: "\e104";
+}
+.fontic-clipboard-check:before {
+  content: "\e103";
+}
+.fontic-tree:before {
+  content: "\e102";
+}
+.fontic-cloud:before {
+  content: "\e101";
+}
+.fontic-cloud-download:before {
+  content: "\e100";
+}
+.fontic-cloud-upload:before {
+  content: "\e099";
+}
+.fontic-cloud-check:before {
+  content: "\e098";
+}
+.fontic-download1:before {
+  content: "\e124";
+}
+.fontic-upload1:before {
+  content: "\e125";
+}
+.fontic-download2:before {
+  content: "\e126";
+}
+.fontic-upload2:before {
+  content: "\e127";
+}
+.fontic-sphere:before {
+  content: "\e097";
+}
+.fontic-earth:before {
+  content: "\e093";
+}
+.fontic-link:before {
+  content: "\e094";
+}
+.fontic-flag:before {
+  content: "\e095";
+}
+.fontic-attachment:before {
+  content: "\e096";
+}
+.fontic-eye:before {
+  content: "\e105";
+}
+.fontic-eye-plus:before {
+  content: "\e106";
+}
+.fontic-eye-minus:before {
+  content: "\e107";
+}
+.fontic-eye-blocked:before {
+  content: "\e108";
+}
+.fontic-bookmark:before {
+  content: "\e109";
+}
+.fontic-bookmarks:before {
+  content: "\e110";
+}
+.fontic-sun:before {
+  content: "\e111";
+}
+.fontic-contrast:before {
+  content: "\e112";
+}
+.fontic-brightness-contrast:before {
+  content: "\e113";
+}
+.fontic-star-empty:before {
+  content: "\e114";
+}
+.fontic-star-half:before {
+  content: "\e115";
+}
+.fontic-star-full:before {
+  content: "\e116";
+}
+.fontic-heart:before {
+  content: "\e128";
+}
+.fontic-heart-broken:before {
+  content: "\e129";
+}
+.fontic-man:before {
+  content: "\e130";
+}
+.fontic-woman:before {
+  content: "\e131";
+}
+.fontic-man-woman:before {
+  content: "\e132";
+}
+.fontic-warning:before {
+  content: "\e133";
+}
+.fontic-notification:before {
+  content: "\e134";
+}
+.fontic-question:before {
+  content: "\e135";
+}
+.fontic-plus:before {
+  content: "\e136";
+}
+.fontic-minus:before {
+  content: "\e137";
+}
+.fontic-info:before {
+  content: "\e138";
+}
+.fontic-cancel-rounded:before {
+  content: "\e139";
+}
+.fontic-blocked:before {
+  content: "\e140";
+}
+.fontic-cross:before {
+  content: "\e141";
+}
+.fontic-checkmark-fill:before {
+  content: "\e142";
+}
+.fontic-checkmark:before {
+  content: "\e143";
+}
+.fontic-login:before {
+  content: "\e144";
+}
+.fontic-exit:before {
+  content: "\e145";
+}
+.fontic-play:before {
+  content: "\e146";
+}
+.fontic-pause:before {
+  content: "\e147";
+}
+.fontic-stop:before {
+  content: "\e148";
+}
+.fontic-previous:before {
+  content: "\e149";
+}
+.fontic-next:before {
+  content: "\e150";
+}
+.fontic-backward:before {
+  content: "\e151";
+}
+.fontic-forward2:before {
+  content: "\e152";
+}
+.fontic-play-fill:before {
+  content: "\e153";
+}
+.fontic-pause-fill:before {
+  content: "\e154";
+}
+.fontic-stop-fill:before {
+  content: "\e155";
+}
+.fontic-backward-thin:before {
+  content: "\e156";
+}
+.fontic-forward-thin:before {
+  content: "\e157";
+}
+.fontic-first:before {
+  content: "\e158";
+}
+.fontic-last:before {
+  content: "\e159";
+}
+.fontic-previous-thin:before {
+  content: "\e160";
+}
+.fontic-next-thin:before {
+  content: "\e161";
+}
+.fontic-eject:before {
+  content: "\e162";
+}
+.fontic-volume-high:before {
+  content: "\e163";
+}
+.fontic-volume-medium:before {
+  content: "\e164";
+}
+.fontic-volume-low:before {
+  content: "\e165";
+}
+.fontic-volume-mute:before {
+  content: "\e166";
+}
+.fontic-volume-x:before {
+  content: "\e167";
+}
+.fontic-volume-increase:before {
+  content: "\e168";
+}
+.fontic-volume-decrease:before {
+  content: "\e169";
+}
+.fontic-loop:before {
+  content: "\e170";
+}
+.fontic-loop-rounded:before {
+  content: "\e171";
+}
+.fontic-infinite:before {
+  content: "\e172";
+}
+.fontic-arrow-up-left:before {
+  content: "\e200";
+}
+.fontic-arrow-up:before {
+  content: "\e173";
+}
+.fontic-arrow-up-right:before {
+  content: "\e174";
+}
+.fontic-arrow-right:before {
+  content: "\e175";
+}
+.fontic-arrow-down-right:before {
+  content: "\e176";
+}
+.fontic-arrow-down:before {
+  content: "\e177";
+}
+.fontic-arrow-down-left:before {
+  content: "\e178";
+}
+.fontic-arrow-left:before {
+  content: "\e179";
+}
+.fontic-arrow-up-left2:before {
+  content: "\e180";
+}
+.fontic-arrow-up2:before {
+  content: "\e181";
+}
+.fontic-arrow-up-right2:before {
+  content: "\e182";
+}
+.fontic-arrow-right2:before {
+  content: "\e183";
+}
+.fontic-arrow-down-right2:before {
+  content: "\e184";
+}
+.fontic-arrow-down2:before {
+  content: "\e185";
+}
+.fontic-arrow-down-left2:before {
+  content: "\e186";
+}
+.fontic-arrow-left2:before {
+  content: "\e187";
+}
+.fontic-circle-up:before {
+  content: "\e188";
+}
+.fontic-circle-right:before {
+  content: "\e189";
+}
+.fontic-circle-down:before {
+  content: "\e190";
+}
+.fontic-circle-left:before {
+  content: "\e191";
+}
+.fontic-checkbox-checked:before {
+  content: "\e052";
+}
+.fontic-checkbox-unchecked:before {
+  content: "\e053";
+}
+.fontic-radio-checked:before {
+  content: "\e054";
+}
+.fontic-radio-checked-fill:before {
+  content: "\e055";
+}
+.fontic-scissors:before {
+  content: "\e192";
+}
+.fontic-code:before {
+  content: "\e057";
+}
+.fontic-code-slash:before {
+  content: "\e058";
+}
+.fontic-terminal:before {
+  content: "\e056";
+}
+.fontic-share:before {
+  content: "\e059";
+}
+.fontic-mail:before {
+  content: "\e061";
+}
+.fontic-mail-rounded:before {
+  content: "\e060";
+}
+.fontic-amazon:before {
+  content: "\e010";
+}
+.fontic-google:before {
+  content: "\e009";
+}
+.fontic-google-plus:before {
+  content: "\e011";
+}
+.fontic-hangouts:before {
+  content: "\e193";
+}
+.fontic-google-drive:before {
+  content: "\e008";
+}
+.fontic-facebook:before {
+  content: "\e048";
+}
+.fontic-facebook-fill:before {
+  content: "\e047";
+}
+.fontic-instagram:before {
+  content: "\e051";
+}
+.fontic-whatsapp:before {
+  content: "\e043";
+}
+.fontic-spotify:before {
+  content: "\e007";
+}
+.fontic-twitter:before {
+  content: "\e012";
+}
+.fontic-youtube:before {
+  content: "\e029";
+}
+.fontic-youtube-old:before {
+  content: "\e013";
+}
+.fontic-twitch:before {
+  content: "\e194";
+}
+.fontic-steam:before {
+  content: "\e063";
+}
+.fontic-steam-fill:before {
+  content: "\e062";
+}
+.fontic-github:before {
+  content: "\e006";
+}
+.fontic-npm:before {
+  content: "\e042";
+}
+.fontic-wordpress:before {
+  content: "\e028";
+}
+.fontic-joomla:before {
+  content: "\e044";
+}
+.fontic-linux-head:before {
+  content: "\e035";
+}
+.fontic-apple:before {
+  content: "\e038";
+}
+.fontic-macintosh:before {
+  content: "\e049";
+}
+.fontic-android:before {
+  content: "\e005";
+}
+.fontic-windows-old:before {
+  content: "\e046";
+}
+.fontic-windows:before {
+  content: "\e045";
+}
+.fontic-skype:before {
+  content: "\e039";
+}
+.fontic-wikipedia:before {
+  content: "\e050";
+}
+.fontic-titles:before {
+  content: "\e199";
+}
+.fontic-stackoverflow:before {
+  content: "\e004";
+}
+.fontic-pinterest-fill:before {
+  content: "\e041";
+}
+.fontic-pinterest:before {
+  content: "\e040";
+}
+.fontic-paypal:before {
+  content: "\e037";
+}
+.fontic-chrome:before {
+  content: "\e003";
+}
+.fontic-firefox:before {
+  content: "\e036";
+}
+.fontic-IE:before {
+  content: "\e002";
+}
+.fontic-edge:before {
+  content: "\e198";
+}
+.fontic-safari:before {
+  content: "\e195";
+}
+.fontic-opera:before {
+  content: "\e196";
+}
+.fontic-html5-fill:before {
+  content: "\e001";
+}
+.fontic-html5:before {
+  content: "\e014";
+}
+.fontic-css3:before {
+  content: "\e197";
+}
+.fontic-git:before {
+  content: "\e015";
+}

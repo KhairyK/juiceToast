@@ -1,4 +1,5 @@
-import juiceToast from "../dist/juice-toast.esm.js";
+// Next Juice Toast
+import juiceToast from "../src/juice-toast.esm.src.js";
 
 juiceToast.setup({
   success: {
@@ -8,12 +9,13 @@ juiceToast.setup({
     bg: "#FA2116"
   },
   info: {
-    bg: "#0721AF"
+    glassUI: 100
   }
 });
 
 juiceToast.info({
   message: "Update available",
+  position: "center",
   size: "lg",
   actions: [
     {
@@ -34,6 +36,7 @@ if (isUpload) {
   message: "File berhasil diupload",
   size: "lg",
   width: "480px",
+  position: "center",
   icon: "fontic-cloud-upload",
   iconPack: "fontic",
   iconSize: "1.8rem",
@@ -45,6 +48,7 @@ if (isUpload) {
     title: "Gagal Upload",
     message: "File yang anda kirim Gagal diupload",
     size: "lg",
+    position: "center",
     width: "480px",
     icon: "fontic-no-data",
     iconPack: "fontic",
@@ -53,3 +57,4 @@ if (isUpload) {
     closable: true
   });
 }
+

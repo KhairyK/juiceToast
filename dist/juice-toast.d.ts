@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Juice Toast v1.1.0 — Type Definitions
+ * Juice Toast — Type Definitions
  * @license MIT
  */
 
@@ -12,8 +12,10 @@ export type ToastPosition =
   | "bottom"
   | "top-left"
   | "top-right"
+  | "top-center"
   | "bottom-left"
-  | "bottom-right";
+  | "bottom-right"
+  | "bottom-center";
 
 export type ToastSize = "sm" | "md" | "lg";
 
@@ -62,6 +64,9 @@ export interface ToastPayload {
   position?: ToastPosition;
   toast?: ToastPosition; // legacy
 
+  pauseOnHover?: boolean; // default true
+  swipeToDismiss?: boolean; // default true
+
   /* -------- close -------- */
   closable?: boolean;
   closeable?: boolean; // legacy
@@ -79,9 +84,15 @@ export interface ToastPayload {
   icon_config?: string;
   icon_onClick_url?: string;
   icon_onClick_animate?: string;
+  
+  playSound ? : string | boolean;
+  glassUI ? : boolean;
 
   /* -------- actions -------- */
   actions?: ToastAction[];
+
+  /* -------- advanced -------- */
+  render?: (root: HTMLElement) => void;
 
   /* -------- escape hatch -------- */
   [key: string]: unknown;
@@ -91,13 +102,29 @@ export interface ToastPayload {
 
 export interface ToastTypeConfig extends ToastPayload {}
 
+/* ================= GLOBAL CONFIG ================= */
+
+export interface JuiceToastDefaults {
+  duration?: ToastDuration;
+  position?: ToastPosition;
+  maxVisible?: number;
+  swipeThreshold?: number;
+  pauseOnHover?: boolean;
+  swipeToDismiss?: boolean;
+  closable?: boolean;
+  playSound?: string | boolean;
+  glassUI?: boolean | number;
+}
+
 /* ================= CORE API ================= */
 
 export interface JuiceToastAPI {
   /**
    * Register toast types in bulk
    */
-  setup<T extends Record<string, ToastTypeConfig>>(config?: T): void;
+  setup<T extends Record<string, ToastTypeConfig>>(
+    config?: T & JuiceToastDefaults
+  ): void;
 
   /**
    * Add or override a single toast type
@@ -106,6 +133,11 @@ export interface JuiceToastAPI {
     name: string,
     config?: T
   ): void;
+
+  /**
+   * Global defaults
+   */
+  defaults(config: JuiceToastDefaults): void;
 
   /**
    * Theme system
