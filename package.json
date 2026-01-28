@@ -35,7 +35,7 @@
       "types": "./dist/juice-toast.d.ts"
     }
   },
-  "files": ["dist", "CHANGELOG.md", "CODE_OF_CONDUCT.md", "LICENSE", "README.md", "CONTRIBUTING.md"],
+  "files": ["dist", "CHANGELOG.md", "CODE_OF_CONDUCT.md", "LICENSE", "README.md", "CONTRIBUTING.md", " WARNER_NEXT_VERSION.md"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
