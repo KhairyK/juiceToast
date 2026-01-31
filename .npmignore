@@ -4,4 +4,3 @@ test/
 npm.publish.auto
 .gitignore
 .editorconfig
-SIGNTERM.sha256
