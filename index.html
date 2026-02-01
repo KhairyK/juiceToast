@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JuiceToast Documentation</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- JuiceToast CSS -->
+  <link rel="stylesheet" href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.min.css">
+
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+    }
+    nav {
+      width: 250px;
+      flex-shrink: 0;
+      border-right: 1px solid #dee2e6;
+      padding: 1rem;
+      background-color: #f8f9fa;
+    }
+    main {
+      flex-grow: 1;
+      padding: 2rem;
+    }
+    pre code {
+      background-color: #f1f1f1;
+      padding: 0.5rem;
+      display: block;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .toast-btn {
+      margin: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <nav>
+    <h4><i class="bi bi-cup"></i> JuiceToast Docs</h4>
+    <ul class="nav flex-column mt-3">
+      <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+      <li class="nav-item"><a class="nav-link" href="#installation">Installation</a></li>
+      <li class="nav-item"><a class="nav-link" href="#quickstart">Quick Start</a></li>
+      <li class="nav-item"><a class="nav-link" href="#api">API Reference</a></li>
+      <li class="nav-item"><a class="nav-link" href="#themes">Themes</a></li>
+      <li class="nav-item"><a class="nav-link" href="#notes">Notes</a></li>
+      <li class="nav-item"><a class="nav-link" href="#license">License</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <section id="overview">
+      <h2>🍹 Overview</h2>
+      <p><strong>JuiceToast</strong> is a lightweight, flexible, and dependency-free toast notification library for modern web apps.</p>
+      <ul>
+        <li>Zero dependencies</li>
+        <li>ESM & UMD support</li>
+        <li>Queue handling, theme management</li>
+        <li>Dynamic toast types and backward compatibility</li>
+      </ul>
+    </section>
+
+    <section id="installation" class="mt-5">
+      <h2>📦 Installation</h2>
+      <h5>ESM</h5>
+      <pre><code>import juiceToast from "https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.esm.min.js";</code></pre>
+      <h5>UMD (Browser)</h5>
+      <pre><code>&lt;link rel="stylesheet" href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.min.css"&gt;
+&lt;script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.umd.min.js"&gt;&lt;/script&gt;</code></pre>
+    </section>
+
+    <section id="quickstart" class="mt-5">
+      <h2>🚀 Quick Start</h2>
+      <pre><code>juiceToast.setup({
+  success: { icon: "check", theme: "light", duration: 2000 },
+  error: { icon: "x", bg: "#7f1d1d", color: "#fff", closable: true }
+});
+
+juiceToast.success("Operation completed successfully.");
+juiceToast.error({ title: "Error", message: "Unexpected error." });</code></pre>
+
+      <div class="mt-3">
+        <button class="btn btn-success toast-btn" id="btn-success"><i class="bi bi-check-circle"></i> Show Success</button>
+        <button class="btn btn-danger toast-btn" id="btn-error"><i class="bi bi-x-circle"></i> Show Error</button>
+      </div>
+    </section>
+
+    <section id="api" class="mt-5">
+      <h2>⚙️ API Reference</h2>
+      <h5>setup(config)</h5>
+      <pre><code>juiceToast.setup({ success: { bg: "green" }, error: { bg: "red" } });</code></pre>
+
+      <h5>addType(name, config)</h5>
+      <pre><code>juiceToast.addType("warning", { bg: "#facc15", color: "#111" });</code></pre>
+
+      <h5>defineTheme(name, styles)</h5>
+      <pre><code>juiceToast.defineTheme("ocean", { bg: "#0ea5e9", color: "#fff" });</code></pre>
+
+      <h5>setTheme(name)</h5>
+      <pre><code>juiceToast.setTheme("dark");</code></pre>
+
+      <h5>clear()</h5>
+      <pre><code>juiceToast.clear();</code></pre>
+
+      <h5>destroy()</h5>
+      <pre><code>juiceToast.destroy();</code></pre>
+    </section>
+
+    <section id="themes" class="mt-5">
+      <h2>🎨 Default Themes</h2>
+      <pre><code>light: { bg: "#ffffff", color: "#111", border: "1px solid #e5e7eb" }
+dark: { bg: "#1f2937", color: "#fff", border: "1px solid rgba(255,255,255,.08)" }</code></pre>
+    </section>
+
+    <section id="notes" class="mt-5">
+      <h2>📌 Notes</h2>
+      <ul>
+        <li>Browser-only (DOM required)</li>
+        <li>Root element auto-created: <code>#juice-toast-root</code></li>
+        <li>Works with frameworks and custom runtimes</li>
+      </ul>
+    </section>
+
+    <section id="license" class="mt-5">
+      <h2>📄 License</h2>
+      <p>MIT License © OpenDN Foundation</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.umd.min.js"></script>
+
+  <script>
+    // Setup JuiceToast
+    juiceToast.setup({
+      success: { icon: "check", theme: "light", duration: 2000 },
+      error: { icon: "x", bg: "#7f1d1d", color: "#fff", closable: true }
+    });
+
+    // Interactive buttons
+    document.getElementById("btn-success").addEventListener("click", () => {
+      juiceToast.success("Success toast triggered!");
+    });
+
+    document.getElementById("btn-error").addEventListener("click", () => {
+      juiceToast.error({ title: "Error", message: "Error toast triggered!" });
+    });
+  </script>
+</body>
+</html>
