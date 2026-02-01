@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v120/2026 (NEXT)
+ * Source Of Juice Toast v1.2.0-rc.2026 (Release Candidate)
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
@@ -106,18 +106,38 @@ const juiceToast = {
     0;
 },
   
-  _getRoot(position) {
-    if (!isBrowser) return null;
-    let root = document.getElementById("juice-toast-root");
-    if (!root) {
-      root = document.createElement("div");
-      root.id = "juice-toast-root";
-      document.body.appendChild(root);
-    }
-    root.dataset.position = position || "bottom";
+  _getRoot(position = "bottom-right") {
+  if (!isBrowser) return null;
+  let root = document.getElementById(`juice-toast-root-${position}`);
+  if (!root) {
+    root = document.createElement("div");
+    root.id = `juice-toast-root-${position}`;
+    root.dataset.position = position;
     root.dataset.theme = this._theme;
-    return root;
-  },
+    
+    root.style.position = "fixed";
+    root.style.zIndex = 9999;
+    
+    switch(position) {
+      case "top-left":
+        root.style.top = "20px"; root.style.left = "20px"; break;
+      case "top-right":
+        root.style.top = "20px"; root.style.right = "20px"; break;
+      case "bottom-left":
+        root.style.bottom = "20px"; root.style.left = "20px"; break;
+      case "bottom-right":
+        root.style.bottom = "20px"; root.style.right = "20px"; break;
+      case "top-center":
+        root.style.top = "20px"; root.style.left = "50%"; root.style.transform = "translateX(-50%)"; break;
+      case "bottom-center":
+        root.style.bottom = "20px"; root.style.left = "50%"; root.style.transform = "translateX(-50%)"; break;
+    }
+
+    document.body.appendChild(root);
+  }
+  return root;
+},
+
   _defaults: {
   duration: 2500,
   maxVisible: 3,
@@ -153,7 +173,7 @@ _playSound(src) {
       { message: String(payload) };
     
     const cfg = { ...base, ...data };
-    
+
     /* BACKWARD COMPAT */
     cfg.icon = cfg.icon ?? cfg.icon_left_top;
     cfg.iconPack = cfg.iconPack ?? cfg.icon_config;
@@ -168,6 +188,13 @@ _playSound(src) {
     
     const toast = document.createElement("div");
     toast.className = "juice-toast";
+
+    const animation = cfg.animation || "slide-in";
+    toast.style.animation = `${animation} 0.4s ease forwards`;
+
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "polite");
+    toast.tabIndex = 0;
 
     /* SIZE PRESET */
     if (cfg.size && sizePreset[cfg.size]) {

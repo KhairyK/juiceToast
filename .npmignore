@@ -4,3 +4,7 @@ test/
 npm.publish.auto
 .gitignore
 .editorconfig
+log/
+output-ts/
+node_modules
+eol/

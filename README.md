@@ -189,6 +189,8 @@ interface ToastPayload {
   width?: string;
   height?: string;
 
+  animation?: string;
+
   actions?: {
     label: string;
     onClick?: (event: MouseEvent) => void;

@@ -1,5 +1,4 @@
-// Next Juice Toast
-import juiceToast from "../src/juice-toast.esm.src.js";
+import juiceToast from "juice-toast";
 
 juiceToast.setup({
   success: {
@@ -8,27 +7,9 @@ juiceToast.setup({
   error: {
     bg: "#FA2116"
   },
-  info: {
-    glassUI: 100
-  }
 });
 
-juiceToast.info({
-  message: "Update available",
-  position: "center",
-  size: "lg",
-  actions: [
-    {
-      label: "Reload",
-      onClick() {
-        location.reload();
-      },
-      closeOnClick: true,
-    },
-  ],
-});
-
-const isUpload = true;
+const isUpload = false;
 
 if (isUpload) {
   juiceToast.success({
@@ -41,7 +22,8 @@ if (isUpload) {
   iconPack: "fontic",
   iconSize: "1.8rem",
   duration: 4000,
-  closable: true
+  closable: true,
+  animation: "fade-in"
  });
 } else {
   juiceToast.error({
@@ -54,7 +36,8 @@ if (isUpload) {
     iconPack: "fontic",
     iconSize: "1.8rem",
     duration: 4000,
-    closable: true
+    closable: true,
+    animation: "bounce-in"
   });
 }
 

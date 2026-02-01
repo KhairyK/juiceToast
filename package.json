@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "0.0.1-next.1202026",
+  "version": "1.2.0-rc.2026",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
@@ -25,27 +25,39 @@
   "engines": {
     "node": ">=15"
   },
-  "main": "dist/juice-toast.umd.js",
   "module": "dist/juice-toast.esm.js",
   "types": "dist/juice-toast.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/juice-toast.umd.js",
       "import": "./dist/juice-toast.esm.js",
       "types": "./dist/juice-toast.d.ts"
     }
   },
-  "files": ["dist", "CHANGELOG.md", "CODE_OF_CONDUCT.md", "LICENSE", "README.md", "CONTRIBUTING.md", " WARNER_NEXT_VERSION.md"],
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "LICENSE",
+    "README.md",
+    "CONTRIBUTING.md",
+    "WARNER_NEXT_VERSION.md",
+    "EoL.md",
+    "NEW_FUNCTION.md"
+  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
-  "unpkg": "dist/juice-toast.umd.js",
-  "jsdelivr": "dist/juice-toast.umd.js",
+  "unpkg": "dist/juice-toast.esm.js",
+  "jsdelivr": "dist/juice-toast.esm.js",
   "scripts": {
-    "test": "live-server"
+    "test": "npx jest",
+    "publish": "npm publish"
   },
   "devDependencies": {
-    "live-server": "1.2.2"
+    "jest": "^30.2.0"
+  },
+  "dependencies": {
+    "debug": "^4.4.3"
   }
 }

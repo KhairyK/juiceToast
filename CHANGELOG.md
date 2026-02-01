@@ -1,8 +1,14 @@
+v1.2.0-rc.2026
+- Adding A11Y
+- Adding More Placement
+- GlassUI Fix (WARNING: Maybe it's Not Working)
+- Adding Animation
+
 NEXT 120/2026
 - Adding Swipe to Dismiss
 - Adding Pause on Hover
 - Adding `playSound`
-- Adding GlassUI (WARNING: This Function Still In BETA, it not worked or it can make error)
+- Adding GlassUI
 
 v1.1.0
 - Adding **Size Preset**

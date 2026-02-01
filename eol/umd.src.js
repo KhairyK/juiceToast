@@ -1,7 +1,7 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v120/2026 (NEXT)
- * Read CONTRIBUTE.md To Contribute
+ * EoL
+ * READ ONLY
  */
 (function(root, factory) {
   if (typeof define === "function" && define.amd) {
