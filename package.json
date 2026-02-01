@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.2.0-rc.2026",
+  "version": "1.2.1",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
@@ -51,7 +51,6 @@
   "unpkg": "dist/juice-toast.esm.js",
   "jsdelivr": "dist/juice-toast.esm.js",
   "scripts": {
-    "test": "npx jest",
     "publish": "npm publish"
   },
   "devDependencies": {

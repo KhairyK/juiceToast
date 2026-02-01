@@ -1,3 +1,0 @@
-# WARNING FOR VERSION OF NEXT 120/2026
-- The Glass UI Are Not Working Properly, So Don't Try it
-- **UMD AND TYPES MAYBE NOT WORKING, YOU SHOULD USE ESM**
