@@ -38,6 +38,7 @@ export type ToastPayload = {
   duration?: number; // ms, 0 = persistent
   position?: ToastPosition;
   theme?: string;
+  bg?: string;
   size?: ToastSizePreset;
   width?: string;
   height?: string;

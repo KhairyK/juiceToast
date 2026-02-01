@@ -6,7 +6,6 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2020", "DOM"],
 
-    "outDir": "output-ts",
     "rootDir": "test",
     
     "strict": true,
