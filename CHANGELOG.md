@@ -1,26 +1,38 @@
-v1.2.0-rc.2026
-- Adding A11Y
-- Adding More Placement
-- GlassUI Fix (WARNING: Maybe it's Not Working)
-- Adding Animation
+v1.3.0
+- Add CSS Injection System (no external `style.css` needed)
+- Add Reduced Motion Support (prefers-reduced-motion)
+- Improve Animation System (enterAnimation + type animation)
+- Improve Glass UI with intensity control (0–100)
+- Improve Swipe to Dismiss
+- Improve Pause on Hover & Touch
+- Add Plugin System
+- Improve Accessibility (ARIA, keyboard focus)
+- Improve Icon Interaction & Animation
+- Add Animation Preset
+- Add Progress Bar
+- Bug fixes & internal refactor
+
+v1.2.0-rc.2026 / v1.2.1
+- Add A11Y support
+- Add Multiple Placement / Position
+- Experimental Glass UI (unstable)
 
 NEXT 120/2026
-- Adding Swipe to Dismiss
-- Adding Pause on Hover
-- Adding `playSound`
-- Adding GlassUI
+- Improve Sound API (per-toast sound)
+- Add Exit Animation
+- Add Promise-based Toast API
+- Add Stack Grouping
+- Improve TypeScript Definitions
 
 v1.1.0
-- Adding **Size Preset**
-- Adding Compact
-- Improve Style And Fix Bugs
+- Add Size Preset
+- Add Compact Mode
+- Add Actions Button
+- Improve Style
 - Improve `.d.ts`
-- Adding **Actions Button**
 
 v1.0.1
-- Add Forget File `style.css`
+- Add `style.css` file
 
 v1.0.0
-- Published In First Time
-
-
+- Initial release

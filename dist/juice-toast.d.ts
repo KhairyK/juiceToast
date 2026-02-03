@@ -1,107 +1,186 @@
 /* --------------------------------------------------
  * 2026 (C) OpenDN Foundation
- * Juice Toast v1.2.0-rc.2026 Type Definitions
+ * Juice Toast v1.3.0 Type Definitions
  * -------------------------------------------------- */
+declare module "juice-toast" {
+  /* ================= BASIC ================= */
 
-export type ToastTheme = {
-  bg?: string;
-  color?: string;
-  border?: string;
-};
+  export type ToastPosition =
+    | "top-left"
+    | "top-right"
+    | "top-center"
+    | "bottom-left"
+    | "bottom-right"
+    | "bottom-center"
+    | "center"
+    | "top"
+    | "bottom";
 
-export type ToastSizePreset = "sm" | "md" | "lg";
+  export type ToastSize = "sm" | "md" | "lg";
 
-export type ToastPosition =
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right"
-  | "top-center"
-  | "bottom-center";
+  export type IconPosition = "left" | "right" | "top";
 
-export type ToastAnimation =
-  | "slide-in"
-  | "fade-in"
-  | "bounce-in"
-  | string;
+  export type EnterAnimation =
+    | "spin"
+    | "pulse"
+    | "shake"
+    | "bounce"
+    | "wiggle"
+    | "pop";
 
-export type ToastAction = {
-  label: string;
-  onClick?: (event: Event) => void;
-  closeOnClick?: boolean;
-};
+  export type Animation = string;
 
-export type ToastPayload = {
-  message?: string;
-  title?: string;
+  /* ================= ACTION ================= */
 
-  duration?: number; // ms, 0 = persistent
-  position?: ToastPosition;
-  theme?: string;
-  bg?: string;
-  size?: ToastSizePreset;
-  width?: string;
-  height?: string;
-  compact?: boolean;
-  closable?: boolean;
-  glassUI?: boolean | number;
+  export interface ToastAction {
+    label: string;
+    onClick?: (ev: MouseEvent) => void;
+    closeOnClick?: boolean;
+  }
 
-  icon?: string;
-  iconPack?: string;
-  iconSize?: string;
-  iconPosition?: "left" | "right" | "top";
-  iconLink?: string;
-  iconAnimate?: string;
+  /* ================= PAYLOAD ================= */
 
-  animation?: ToastAnimation;
+  export interface ToastPayload {
+    /* content */
+    title?: string;
+    message?: string;
 
-  actions?: ToastAction[];
-};
+    /* size / layout */
+    size?: ToastSize;
+    width?: string;
+    height?: string;
+    compact?: boolean;
 
-export type ToastDefaults = {
-  duration: number;
-  maxVisible: number;
-  swipeThreshold: number;
-  glassUI: number;
-  playSound: string | null;
-};
+    /* position */
+    position?: ToastPosition;
 
-export interface JuiceToast {
-  /* ================= PUBLIC API ================= */
+    /* timing */
+    duration?: number;
 
-  setup(cfg?: Record<string, ToastPayload>): void;
+    /* icon */
+    icon?: string;
+    iconPack?: string;
+    iconSize?: string;
+    iconPosition?: IconPosition;
+    iconLink?: string;
+    iconAnimate?: EnterAnimation;
 
-  addType(name: string, cfg?: ToastPayload): void;
+    /* animation */
+    animation?: Animation;
+    enterAnimation?: EnterAnimation;
 
-  defineTheme(name: string, styles?: ToastTheme): void;
+    /* style */
+    theme?: string;
+    bg?: string;
+    color?: string;
+    border?: string;
 
-  setTheme(name: string): void;
+    /* glass */
+    glassUI?: boolean | number;
 
-  clear(): void;
+    /* progress */
+    progress?: boolean;
+    progressColor?: string;
 
-  destroy(): void;
+    /* close */
+    closable?: boolean;
 
-  /* ================= INTERNAL ================= */
+    /* sound */
+    playSound?: string | null;
 
-  _config: Record<string, ToastPayload>;
-  _queue: Array<{ type: string; payload: any }>;
-  _showing: boolean;
-  _theme: string;
-  _defaults: ToastDefaults;
+    /* actions */
+    actions?: readonly ToastAction[];
 
-  _registerTypes(): void;
-  _enqueue(type: string, payload: any): void;
-  _next(): void;
-  _normalizeGlass(value?: boolean | number): number;
-  _getRoot(position?: ToastPosition): HTMLElement | null;
-  _playSound(src?: string): void;
-  _showToast(type: string, payload: ToastPayload | string): void;
+    /* backward compatibility */
+    toast?: ToastPosition;
+    closeable?: boolean;
+    icon_left_top?: string;
+    icon_config?: string;
+    icon_onClick_url?: string;
+    icon_onClick_animate?: EnterAnimation;
+  }
 
-  /* ================= DYNAMIC TOAST METHODS ================= */
-  [type: string]: ((payload?: ToastPayload | string) => void) | any;
+  /* ================= SETUP ================= */
+
+  export interface JuiceToastDefaults {
+    duration?: number;
+    maxVisible?: number;
+    swipeThreshold?: number;
+    glassUI?: number | boolean;
+    playSound?: string | null;
+    dev?: boolean;
+    injectCSS?: boolean;
+    css?: string | null;
+  }
+
+  /**
+   * setup() config:
+   * - known global defaults
+   * - custom toast types via index signature
+   */
+  export type JuiceToastSetup =
+    JuiceToastDefaults & {
+      readonly [toastType: string]:
+        | ToastPayload
+        | number
+        | string
+        | boolean
+        | undefined;
+    };
+
+  /* ================= PLUGIN ================= */
+
+  export interface JuiceToastPluginContext {
+    toast: HTMLElement;
+    cfg: Readonly<ToastPayload>;
+    type: string;
+    root: HTMLElement;
+  }
+
+  export type JuiceToastPlugin = (
+    ctx: JuiceToastPluginContext
+  ) => void;
+
+  /* ================= MAIN API ================= */
+
+  export interface JuiceToast {
+    /* core */
+    setup(cfg?: JuiceToastSetup): void;
+    clear(): void;
+    destroy(): void;
+
+    /* theme */
+    defineTheme(
+      name: string,
+      styles: Readonly<{
+        bg?: string;
+        color?: string;
+        border?: string;
+      }>
+    ): void;
+
+    setTheme(name: string): void;
+
+    /* types */
+    addType(
+      name: string,
+      cfg?: Readonly<ToastPayload>
+    ): void;
+
+    /* plugin */
+    use(plugin: JuiceToastPlugin): void;
+
+    /**
+     * Dynamic toast methods
+     * success(), error(), warning(), info(), loading(), custom...
+     */
+    readonly [type: string]:
+      | ((payload?: Readonly<ToastPayload> | string) => void)
+      | unknown;
+  }
+
+  const juiceToast: JuiceToast;
+
+  export default juiceToast;
+  export { juiceToast };
 }
-
-declare const juiceToast: JuiceToast;
-
-export default juiceToast;
-export { juiceToast };
