@@ -3,14 +3,14 @@
 **JuiceToast** is a lightweight, flexible, and dependency-free toast notification library for modern web applications.  
 Designed with a **clean API**, **extensive customization**, and **strong backward compatibility**, JuiceToast fits both small projects and enterprise-scale systems.
 
-It supports **ESM and UMD**, **dynamic toast types**, **theme management**, **queue handling**, and **legacy API compatibility** out of the box.
+It supports **ESM**, **dynamic toast types**, **theme management**, **queue handling**, and **legacy API compatibility** out of the box.
 
 ---
 
 ## ✨ Key Features
 
 - 🚀 Zero dependencies
-- 📦 Supports **ESM** and **UMD**
+- 📦 Supports **ESM**
 - 🔁 Built-in queue system (one toast displayed at a time)
 - 🎨 Theme system (light, dark, and custom themes)
 - 🧩 Dynamic toast types (`success`, `error`, etc.)
@@ -26,26 +26,7 @@ It supports **ESM and UMD**, **dynamic toast types**, **theme management**, **qu
 
 ### ESM
 ```js
-import juiceToast from "https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.esm.min.js";
-```
-
-### UMD (Browser)
-```html
-<link
-  rel="stylesheet"
-  href="https://cdn.kyrt.my.id/libs/css/fontic/2.0.0/juice-toast/style.min.css"
-/>
-<script src="https://cdn.kyrt.my.id/libs/js/juice-toast/1.1.0/juice-toast.umd.min.js"></script>
-
-<script>
-  juiceToast.setup({
-    success: {
-      bg: "#01AA38"
-    }
-  });
-
-  juiceToast.success("Hello world!");
-</script>
+import juiceToast from "https://npdn.kyrt.my.id/npm/juice-toast@1.3.0/dist/juice-toast.esm.js";
 ```
 
 ---
@@ -241,6 +222,9 @@ dark: {
 - Browser-only (DOM required)
 - Root element is automatically created: `#juice-toast-root`
 - Suitable for frameworks, custom runtimes, etc.
+- For JuiceToast ^v1.3.0, You don't need import `style.css` manually.
+- UMD Are deprecated for maintain reason
+- Need Improvment for Handphone user or WebKit user
 
 ---
 
