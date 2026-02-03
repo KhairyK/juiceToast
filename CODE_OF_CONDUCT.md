@@ -49,7 +49,7 @@ Here are some ways you can help make Juice Toast a positive community:
 If you see or experience something that breaks this Code of Conduct:
 
 1. **Stay calm** and don’t respond aggressively.
-2. **Report it** to the maintainers at **[your-email@example.com]**.
+2. **Report it** to the maintainers at **[musickhairy@gmail.com]**.
 3. Maintainers will **review and respond quickly and fairly**, keeping the reporter anonymous if requested.
 4. Actions can include **warnings, temporary restrictions, or banning**, depending on severity.
 
