@@ -1,5 +1,5 @@
-# NEXT UPDATE FOR JuiceToast
+# JuiceToast v1.3.1
 
-v1.3.1
-- WebKit Support
-- HandPhone Support
+### Enhancements
+- Fixed WebKit-specific rendering issues (Safari / iOS)
+- Improved mobile touch handling and viewport responsiveness
