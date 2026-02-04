@@ -1,12 +1,12 @@
 import juiceToast from 'juice-toast';
-juiceToast.setup({
+
+(juiceToast as any).setup({
     success: {
         duration: 3000,
         position: 'top-left',
         progress: true,
         bg: '#28a745',
-        size: "lg",
-        width: "360px"
     }
 });
-juiceToast.success('Operation completed successfully!');
+
+(juiceToast as any).success('Operation completed successfully!');

@@ -30,7 +30,8 @@
   "exports": {
     ".": {
       "import": "./dist/juice-toast.esm.js",
-      "types": "./dist/juice-toast.d.ts"
+      "types": "./dist/juice-toast.d.ts",
+      "ios": "./src/ios/juice-toast.ios.js"
     }
   },
   "files": [
