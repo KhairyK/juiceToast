@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.0 (iOS-friendly)
+ * Source Of Juice Toast v1.3.0 (For iOS user)
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
