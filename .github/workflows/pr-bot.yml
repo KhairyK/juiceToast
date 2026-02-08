@@ -7,6 +7,7 @@ on:
 permissions:
   pull-requests: write
   issues: write
+  contents: read
 
 jobs:
   triage:
@@ -19,7 +20,7 @@ jobs:
             github.rest.issues.addAssignees({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: context.payload.pull_request.number,
               assignees: ["KhairyK"]
             })
 
@@ -27,53 +28,65 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const title = context.payload.pull_request.title.toLowerCase()
-            const labels = []
+            const title = context.payload.pull_request.title.toLowerCase();
+            const labels = [];
 
-            if (title.includes("fix")) labels.push("bug")
-            if (title.includes("feat") || title.includes("feature")) labels.push("feature")
-            if (title.includes("docs")) labels.push("documentation")
-            if (title.includes("refactor")) labels.push("refactor")
-            if (title.includes("chore")) labels.push("chore")
-            if (title.includes("test")) labels.push("tests")
-            if (title.includes("deps") || title.includes("dependabot")) labels.push("dependencies")
+            if (title.includes("fix")) labels.push("bug");
+            if (title.includes("feat") || title.includes("feature")) labels.push("feature");
+            if (title.includes("docs")) labels.push("documentation");
+            if (title.includes("refactor")) labels.push("refactor");
+            if (title.includes("chore")) labels.push("chore");
+            if (title.includes("test")) labels.push("tests");
+            if (title.includes("deps") || title.includes("dependabot")) labels.push("dependencies");
 
             if (labels.length > 0) {
               github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.issue.number,
+                issue_number: context.payload.pull_request.number,
                 labels
-              })
+              });
             }
 
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
           script: |
+            const body = `
+👋 **Hello and welcome to JuiceToast!**
+
+First of all, thank you so much for taking the time to contribute. Your PR has been successfully received and is now under review.
+
+---
+
+### What’s happening now?
+- ✅ **Maintainer Assignment:** This PR has been automatically assigned to a maintainer.
+- 🏷️ **Labeling:** Based on the title, relevant labels have been added.
+- 🔍 **Review:** We’ll carefully review your changes and provide feedback.
+
+---
+
+### Contribution Tips
+- Keep your changes focused and clear.
+- Document your code properly; comments are appreciated!
+- Avoid breaking backward compatibility.
+- If your PR fixes an issue, please reference it explicitly (e.g., "Fixes #123").
+- Tests are highly appreciated for new features or bug fixes.
+- Be patient — reviews may take some time depending on the workload.
+
+---
+
+### Community & Support
+We love collaboration! Feel free to discuss your PR, ask questions, or suggest improvements. Every contribution, big or small, makes JuiceToast better 🍹.
+
+---
+
+**Thanks again for your effort — happy coding and keep rocking!** 🚀💙
+`;
+
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `
-👋 **Hello and thank you for your Pull Request!**
-
-Thanks for contributing to **JuiceToast** 🍹  
-Your PR has been successfully received and is now under review.
-
-### What happens next?
-- ✅ Maintainer has been automatically assigned
-- 🏷️ Relevant labels have been added
-- 🔍 We'll review your changes carefully
-
-### Contribution tips:
-- Keep changes focused and well-documented
-- Avoid breaking backward compatibility
-- If this PR fixes an issue, please reference it
-
-We truly appreciate your effort in improving JuiceToast.  
-Every contribution helps make the project better 🚀
-
-Happy coding! 💙
-`
-            })
+              issue_number: context.payload.pull_request.number,
+              body
+            });
