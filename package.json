@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
@@ -23,15 +23,18 @@
   },
   "funding": "https://patreon.com/Khairy47",
   "engines": {
-    "node": ">=15"
+    "node": ">=18"
   },
   "module": "dist/juice-toast.esm.js",
   "types": "dist/juice-toast.d.ts",
   "exports": {
     ".": {
       "import": "./dist/juice-toast.esm.js",
-      "types": "./dist/juice-toast.d.ts",
-      "ios": "./src/ios/juice-toast.ios.js"
+      "types": "./dist/juice-toast.d.ts"
+    }, 
+    "./ios": {
+      "import": "./dist/juice-toast.ios.js", 
+      "types": "./dist/juice-toast-ios.d.ts"
     }
   },
   "files": [

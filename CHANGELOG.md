@@ -1,3 +1,11 @@
+## v1.3.1
+- Improved iOS / Safari (WebKit) compatibility
+- Smoother swipe-to-dismiss on mobile
+- Better pause-on-touch behavior
+- Progress bar sync fixes
+- Accessibility & stability improvements
+- Bug fixes & internal refactor
+
 v1.3.0
 - Add CSS Injection System (no external `style.css` needed)
 - Add Reduced Motion Support (prefers-reduced-motion)

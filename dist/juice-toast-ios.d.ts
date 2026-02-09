@@ -1,4 +1,4 @@
-/* JuiceToast v1.3.1
+/* JuiceToast v1.3.1 (iOS Enhanced)
  * (C) 2026 OpenDN Foundation
  * Type Definitions
  */
@@ -79,6 +79,14 @@ export interface ToastOptions {
 
   /* sound */
   playSound?: string | null
+
+  /* legacy / alias (still supported internally) */
+  toast?: ToastPosition
+  closeable?: boolean
+  icon_left_top?: string
+  icon_config?: string
+  icon_onClick_url?: string
+  icon_onClick_animate?: AnimationType
 }
 
 export interface JuiceToastConfig {
@@ -91,6 +99,7 @@ export interface JuiceToastConfig {
   injectCSS?: boolean
   css?: string
 
+  /* custom toast type defaults */
   [type: string]: any
 }
 
@@ -104,23 +113,26 @@ export interface ToastPluginContext {
 export type JuiceToastPlugin = (ctx: ToastPluginContext) => void
 
 export interface JuiceToast {
-  /* core */
+  /* lifecycle */
   setup(config?: JuiceToastConfig): void
   clear(): void
   destroy(): void
 
-  /* toast types */
-  [key: string]: any
-
   /* extension */
   use(plugin: JuiceToastPlugin): void
   addType(type: ToastType, defaults?: Partial<ToastOptions>): void
-  defineTheme(name: string, theme: {
-    bg?: string
-    color?: string
-    border?: string
-  }): void
+  defineTheme(
+    name: string,
+    theme: {
+      bg?: string
+      color?: string
+      border?: string
+    }
+  ): void
   setTheme(name: string): void
+
+  /* dynamic toast functions (success, error, custom, dll) */
+  [key: string]: any
 }
 
 declare const juiceToast: JuiceToast
