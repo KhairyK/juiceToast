@@ -1,0 +1,81 @@
+# ========================
+# Dependencies & vendors
+# ========================
+node_modules/
+
+# ========================
+# Build outputs
+# ========================
+dist/
+build/
+coverage/
+out/
+.tmp/
+
+# ========================
+# Minified / generated files
+# ========================
+*.min.js
+*.min.css
+*.map
+config.min.js
+
+# ========================
+# Lock files
+# ========================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========================
+# Assets (binary / large)
+# ========================
+assets/
+public/
+static/
+
+# ========================
+# Logs
+# ========================
+*.log
+log/
+
+# ========================
+# Tests & fixtures
+# ========================
+test/
+tests/
+__tests__/
+fixtures/
+
+# ========================
+# Config files (no need formatting)
+# ========================
+.prettierrc
+prettier.config.js
+tsconfig.json
+.npmrc
+.editorconfig
+
+# ========================
+# VCS & editor
+# ========================
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+
+# ========================
+# Docs & meta
+# ========================
+*.md
+LICENSE
+
+# ========================
+# Ignore ignore-files
+# ========================
+.prettierignore
+.npmignore
+.gitignore
+.eslintignore

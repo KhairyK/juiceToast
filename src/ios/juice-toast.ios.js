@@ -4,28 +4,33 @@
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
-  typeof window !== "undefined" &&
-  typeof document !== "undefined";
+  typeof window !== 'undefined' && typeof document !== 'undefined';
 
 const reduceMotion =
-  isBrowser &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // iOS / touch helpers
 const isTouch =
   isBrowser &&
-  ("ontouchstart" in window || (navigator && navigator.maxTouchPoints > 0));
-const isIOS =
-  isBrowser && /iPad|iPhone|iPod/.test(navigator.userAgent || "");
+  ('ontouchstart' in window || (navigator && navigator.maxTouchPoints > 0));
+const isIOS = isBrowser && /iPad|iPhone|iPod/.test(navigator.userAgent || '');
 const isIOSStandalone =
-  isBrowser && (window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+  isBrowser &&
+  (window.navigator.standalone === true ||
+    (window.matchMedia &&
+      window.matchMedia('(display-mode: standalone)').matches));
+
+const raf =
+  window.requestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  ((fn) => setTimeout(fn, 16));
 
 const TYPE_ANIMATION = {
-  success: "bounce",
-  error: "shake",
-  warning: "wiggle",
-  info: "pulse",
-  loading: "spin"
+  success: 'bounce',
+  error: 'shake',
+  warning: 'wiggle',
+  info: 'pulse',
+  loading: 'spin',
 };
 
 /* ================= CSS INJECT ================= */
@@ -118,6 +123,16 @@ const BASE_CSS = `
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
+
+  scroll-behavior: contains;
+  -webkit-overflow-scrolling: touch;
+
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  touch-action: pan-y;
+
 }
 
 /* visible */
@@ -346,8 +361,8 @@ const BASE_CSS = `
 function injectCSS(css) {
   if (!isBrowser || __cssInjected) return;
 
-  const style = document.createElement("style");
-  style.id = "juice-toast-style";
+  const style = document.createElement('style');
+  style.id = 'juice-toast-style';
   style.textContent = css;
 
   document.head.appendChild(style);
@@ -358,21 +373,21 @@ function injectCSS(css) {
 
 const themes = {
   light: {
-    bg: "#ffffff",
-    color: "#111",
-    border: "1px solid #e5e7eb"
+    bg: '#ffffff',
+    color: '#111',
+    border: '1px solid #e5e7eb',
   },
   dark: {
-    bg: "#1f2937",
-    color: "#fff",
-    border: "1px solid rgba(255,255,255,.08)"
-  }
+    bg: '#1f2937',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.08)',
+  },
 };
 
 const sizePreset = {
-  sm: { width: "260px", padding: "10px" },
-  md: { width: "320px", padding: "14px" },
-  lg: { width: "420px", padding: "18px" }
+  sm: { width: '260px', padding: '10px' },
+  md: { width: '320px', padding: '14px' },
+  lg: { width: '420px', padding: '18px' },
 };
 
 /* ================= CORE ================= */
@@ -381,7 +396,7 @@ const juiceToast = {
   _config: {},
   _queue: [],
   _showing: false,
-  _theme: "dark",
+  _theme: 'dark',
   _plugins: [],
 
   /* ===== PUBLIC API ===== */
@@ -393,7 +408,10 @@ const juiceToast = {
 
     // If iOS, apply some sensible default overrides
     if (isIOS) {
-      this._defaults.swipeThreshold = Math.min(this._defaults.swipeThreshold || 60, 50);
+      this._defaults.swipeThreshold = Math.min(
+        this._defaults.swipeThreshold || 60,
+        50
+      );
       this._defaults.glassUI = this._defaults.glassUI || 60;
       this._defaults.duration = this._defaults.duration ?? 2200;
     }
@@ -402,7 +420,7 @@ const juiceToast = {
   },
 
   use(plugin) {
-    if (typeof plugin === "function") {
+    if (typeof plugin === 'function') {
       this._plugins.push(plugin);
     }
   },
@@ -431,15 +449,15 @@ const juiceToast = {
     this.clear();
     if (!isBrowser) return;
     const nodes = document.querySelectorAll('[id^="juice-toast-root-"]');
-    nodes.forEach(n => n.remove());
+    nodes.forEach((n) => n.remove());
   },
 
   /* ===== INTERNAL ===== */
 
   _registerTypes() {
-    Object.keys(this._config).forEach(type => {
-      if (typeof this[type] === "function" && !this[type].__auto) return;
-      const fn = payload => this._enqueue(type, payload);
+    Object.keys(this._config).forEach((type) => {
+      if (typeof this[type] === 'function' && !this[type].__auto) return;
+      const fn = (payload) => this._enqueue(type, payload);
       fn.__auto = true;
       this[type] = fn;
     });
@@ -461,11 +479,11 @@ const juiceToast = {
   },
 
   _runPlugins(ctx) {
-    this._plugins.forEach(fn => {
+    this._plugins.forEach((fn) => {
       try {
         fn(ctx);
       } catch (e) {
-        this._warn("Plugin error: " + (e && e.message ? e.message : String(e)));
+        this._warn('Plugin error: ' + (e && e.message ? e.message : String(e)));
       }
     });
   },
@@ -475,65 +493,63 @@ const juiceToast = {
     if (value === false || value == null) return 0;
 
     const n = Number(value);
-    return Number.isFinite(n) ?
-      Math.max(0, Math.min(100, n)) :
-      0;
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
   },
 
-  _getRoot(position = "bottom-right") {
+  _getRoot(position = 'bottom-right') {
     if (!isBrowser) return null;
     let root = document.getElementById(`juice-toast-root-${position}`);
     if (!root) {
-      root = document.createElement("div");
+      root = document.createElement('div');
       root.id = `juice-toast-root-${position}`;
       root.dataset.position = position;
       root.dataset.theme = this._theme;
 
-      root.style.position = "fixed";
+      root.style.position = 'fixed';
       root.style.zIndex = 9999;
-      root.style.display = "flex";
-      root.style.flexDirection = "column";
-      root.style.gap = "8px";
-      root.style.pointerEvents = "none";
+      root.style.display = 'flex';
+      root.style.flexDirection = 'column';
+      root.style.gap = '8px';
+      root.style.pointerEvents = 'none';
 
       // Positioning with safe-area awareness
       switch (position) {
-        case "top-left":
+        case 'top-left':
           root.style.top = `calc(20px + env(safe-area-inset-top))`;
-          root.style.left = "20px";
-          root.style.alignItems = "flex-start";
+          root.style.left = '20px';
+          root.style.alignItems = 'flex-start';
           break;
-        case "top-right":
+        case 'top-right':
           root.style.top = `calc(20px + env(safe-area-inset-top))`;
-          root.style.right = "20px";
-          root.style.alignItems = "flex-end";
+          root.style.right = '20px';
+          root.style.alignItems = 'flex-end';
           break;
-        case "bottom-left":
+        case 'bottom-left':
           root.style.bottom = `calc(20px + env(safe-area-inset-bottom))`;
-          root.style.left = "20px";
-          root.style.alignItems = "flex-start";
+          root.style.left = '20px';
+          root.style.alignItems = 'flex-start';
           break;
-        case "bottom-right":
+        case 'bottom-right':
           root.style.bottom = `calc(20px + env(safe-area-inset-bottom))`;
-          root.style.right = "20px";
-          root.style.alignItems = "flex-end";
+          root.style.right = '20px';
+          root.style.alignItems = 'flex-end';
           break;
-        case "top-center":
+        case 'top-center':
           root.style.top = `calc(20px + env(safe-area-inset-top))`;
-          root.style.left = "50%";
-          root.style.transform = "translateX(-50%)";
-          root.style.alignItems = "center";
+          root.style.left = '50%';
+          root.style.transform = 'translateX(-50%)';
+          root.style.alignItems = 'center';
           break;
-        case "bottom-center":
+        case 'bottom-center':
           root.style.bottom = `calc(20px + env(safe-area-inset-bottom))`;
-          root.style.left = "50%";
-          root.style.transform = "translateX(-50%)";
-          root.style.alignItems = "center";
+          root.style.left = '50%';
+          root.style.transform = 'translateX(-50%)';
+          root.style.alignItems = 'center';
           break;
         default:
           // support "center" or other names by centering
           root.style.bottom = `calc(20px + env(safe-area-inset-bottom))`;
-          root.style.right = "20px";
+          root.style.right = '20px';
       }
 
       document.body.appendChild(root);
@@ -550,12 +566,12 @@ const juiceToast = {
     dev: false,
 
     injectCSS: true,
-    css: null
+    css: null,
   },
 
   _warn(msg) {
-    if (this._defaults.dev && typeof console !== "undefined") {
-      console.warn("[JuiceToast]", msg);
+    if (this._defaults.dev && typeof console !== 'undefined') {
+      console.warn('[JuiceToast]', msg);
     }
   },
 
@@ -563,9 +579,7 @@ const juiceToast = {
     if (!isBrowser) return;
 
     const sound =
-      typeof src === "string" && src ?
-        src :
-        this._defaults.playSound;
+      typeof src === 'string' && src ? src : this._defaults.playSound;
 
     if (!sound) return;
 
@@ -575,14 +589,14 @@ const juiceToast = {
 
       const tryPlay = () => {
         audio.play().catch(() => {});
-        window.removeEventListener("touchstart", tryPlay);
-        window.removeEventListener("click", tryPlay);
+        window.removeEventListener('touchstart', tryPlay);
+        window.removeEventListener('click', tryPlay);
       };
 
       audio.play().catch(() => {
         // Safari on iOS often blocks autoplay until user interaction
-        window.addEventListener("touchstart", tryPlay, { once: true });
-        window.addEventListener("click", tryPlay, { once: true });
+        window.addEventListener('touchstart', tryPlay, { once: true });
+        window.addEventListener('click', tryPlay, { once: true });
       });
     } catch (e) {
       // ignore
@@ -598,9 +612,7 @@ const juiceToast = {
 
     const base = this._config[type] || {};
     const data =
-      typeof payload === "object" ?
-        payload :
-        { message: String(payload) };
+      typeof payload === 'object' ? payload : { message: String(payload) };
 
     const cfg = { ...base, ...data };
 
@@ -611,21 +623,21 @@ const juiceToast = {
     cfg.iconAnimate = cfg.iconAnimate ?? cfg.icon_onClick_animate;
     cfg.position = cfg.position ?? cfg.toast;
     cfg.closable = cfg.closable ?? cfg.closeable;
-    cfg.iconPosition = cfg.iconPosition || "left";
+    cfg.iconPosition = cfg.iconPosition || 'left';
     cfg.compact = !!cfg.compact;
 
     const theme = themes[cfg.theme || this._theme] || {};
 
-    const toast = document.createElement("div");
-    toast.className = "juice-toast";
+    const toast = document.createElement('div');
+    toast.className = 'juice-toast';
 
-    const animation = cfg.animation || "slide-in";
+    const animation = cfg.animation || 'slide-in';
     if (!cfg.enterAnimation) {
       toast.style.animation = `${animation} 0.4s ease forwards`;
     }
 
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'polite');
     toast.tabIndex = 0;
 
     /* SIZE PRESET */
@@ -637,27 +649,25 @@ const juiceToast = {
 
     let progressEl = null;
 
-    const duration = (cfg.duration ?? this._defaults.duration);
+    const duration = cfg.duration ?? this._defaults.duration;
     if (cfg.progress && duration > 0) {
-      progressEl = document.createElement("div");
-      progressEl.className = "jt-progress";
+      progressEl = document.createElement('div');
+      progressEl.className = 'jt-progress';
 
       if (cfg.progressColor) {
         progressEl.style.background =
-          cfg.progressColor || "rgba(255,255,255,.7)";
+          cfg.progressColor || 'rgba(255,255,255,.7)';
       }
 
       toast.appendChild(progressEl);
     }
 
     /* GLASS UI */
-    const glass = this._normalizeGlass(
-      cfg.glassUI ?? this._defaults.glassUI
-    );
+    const glass = this._normalizeGlass(cfg.glassUI ?? this._defaults.glassUI);
 
     if (glass > 0) {
-      toast.classList.add("jt-glass");
-      toast.style.setProperty("--jt-glass", glass);
+      toast.classList.add('jt-glass');
+      toast.style.setProperty('--jt-glass', glass);
     }
 
     /* STYLE */
@@ -669,11 +679,11 @@ const juiceToast = {
 
     /* COMPACT */
     if (cfg.compact) {
-      toast.classList.add("jt-compact");
+      toast.classList.add('jt-compact');
     }
 
     if (cfg.glassUI ?? this._defaults.glassUI) {
-      toast.classList.add("jt-glass");
+      toast.classList.add('jt-glass');
     }
 
     /* MANUAL WIDTH / HEIGHT */
@@ -684,20 +694,16 @@ const juiceToast = {
     let icon = null;
 
     if (cfg.icon) {
-      icon = document.createElement("i");
-      icon.className = [
-        "icon",
-        cfg.iconPack || "",
-        cfg.icon
-      ].join(" ").trim();
+      icon = document.createElement('i');
+      icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
 
       if (cfg.iconSize) {
         icon.style.fontSize = cfg.iconSize;
       }
 
       if (cfg.iconLink || cfg.iconAnimate) {
-        icon.classList.add("icon-clickable");
-        icon.onclick = e => {
+        icon.classList.add('icon-clickable');
+        icon.onclick = (e) => {
           e.stopPropagation();
           if (cfg.iconAnimate) {
             icon.classList.remove(cfg.iconAnimate);
@@ -705,19 +711,17 @@ const juiceToast = {
             icon.classList.add(cfg.iconAnimate);
           }
           if (cfg.iconLink) {
-            window.open(cfg.iconLink, "_blank", "noopener");
+            window.open(cfg.iconLink, '_blank', 'noopener');
           }
         };
       }
-      const iconAnim =
-        cfg.iconAnimate ??
-        TYPE_ANIMATION[type];
+      const iconAnim = cfg.iconAnimate ?? TYPE_ANIMATION[type];
 
       if (iconAnim) {
         icon.classList.add(iconAnim);
 
         // restart animation on click
-        icon.addEventListener("click", () => {
+        icon.addEventListener('click', () => {
           icon.classList.remove(iconAnim);
           void icon.offsetWidth;
           icon.classList.add(iconAnim);
@@ -727,20 +731,27 @@ const juiceToast = {
 
     // Respect reduced motion
     if (reduceMotion) {
-      toast.classList.remove("pop", "bounce", "shake", "wiggle", "pulse", "spin");
-      icon?.classList.remove("bounce", "shake", "wiggle", "pulse", "spin");
+      toast.classList.remove(
+        'pop',
+        'bounce',
+        'shake',
+        'wiggle',
+        'pulse',
+        'spin'
+      );
+      icon?.classList.remove('bounce', 'shake', 'wiggle', 'pulse', 'spin');
     }
 
     if (!cfg.message && !cfg.title) {
-      this._warn("Toast created without message or title");
+      this._warn('Toast created without message or title');
     }
 
     if (cfg.icon && !cfg.iconPack) {
-      this._warn("icon provided without iconPack");
+      this._warn('icon provided without iconPack');
     }
 
     if (cfg.duration < 0) {
-      this._warn("duration cannot be negative");
+      this._warn('duration cannot be negative');
     }
 
     // --- SWIPE / TOUCH HANDLING (iOS-friendly) ---
@@ -769,31 +780,36 @@ const juiceToast = {
       isSwiping = false;
 
       if (Math.abs(currentX) > (this._defaults.swipeThreshold || 60)) {
-        toast.style.transition = "transform .25s ease, opacity .2s ease";
+        toast.style.transition = 'transform .25s ease, opacity .2s ease';
         toast.style.transform = `translate3d(${currentX > 0 ? 1000 : -1000}px, 0, 0)`;
         setTimeout(() => {
+          toast.replaceWith();
+          toast.onclick = null;
+          toast.onmousedown = null;
           toast.remove();
           this._next();
         }, 220);
       } else {
         // reset
-        toast.style.transition = "transform .2s ease";
-        toast.style.transform = "";
+        toast.style.transition = 'transform .2s ease';
+        toast.style.transform = '';
       }
       // resume after small delay to avoid immediate auto-dismiss while still finishing transitions
-      setTimeout(() => { toast.__paused = false; }, 60);
+      setTimeout(() => {
+        toast.__paused = false;
+      }, 60);
       startX = currentX = 0;
     };
 
     // Pointer fallback for non-touch
     if (isTouch) {
-      toast.addEventListener("touchstart", onTouchStart, { passive: true });
-      toast.addEventListener("touchmove", onTouchMove, { passive: true });
-      toast.addEventListener("touchend", onTouchEnd);
-      toast.addEventListener("touchcancel", onTouchEnd);
+      toast.addEventListener('touchstart', onTouchStart, { passive: true });
+      toast.addEventListener('touchmove', onTouchMove, { passive: true });
+      toast.addEventListener('touchend', onTouchEnd);
+      toast.addEventListener('touchcancel', onTouchEnd);
     } else {
       // allow mouse drag fallback (desktop)
-      toast.addEventListener("mousedown", (e) => {
+      toast.addEventListener('mousedown', (e) => {
         startX = e.clientX;
         currentX = 0;
         isSwiping = true;
@@ -803,58 +819,56 @@ const juiceToast = {
           toast.style.transform = `translate3d(${currentX}px, 0, 0)`;
         };
         const onUp = () => {
-          document.removeEventListener("mousemove", onMove);
-          document.removeEventListener("mouseup", onUp);
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
           onTouchEnd();
         };
-        document.addEventListener("mousemove", onMove);
-        document.addEventListener("mouseup", onUp);
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
       });
     }
 
     /* CONTENT */
-    const content = document.createElement("div");
-    content.className = "jt-content";
+    const content = document.createElement('div');
+    content.className = 'jt-content';
 
-    const enterAnim = cfg.enterAnimation ?? "pop";
+    const enterAnim = cfg.enterAnimation ?? 'pop';
     if (enterAnim && !reduceMotion) {
       toast.classList.add(enterAnim);
     }
 
     if (cfg.title) {
-      const t = document.createElement("div");
-      t.className = "jt-title";
+      const t = document.createElement('div');
+      t.className = 'jt-title';
       t.textContent = cfg.title;
       content.appendChild(t);
     }
 
-    const msg = document.createElement("div");
-    msg.className = "jt-message";
-    msg.textContent = cfg.message || "";
+    const msg = document.createElement('div');
+    msg.className = 'jt-message';
+    msg.textContent = cfg.message || '';
     content.appendChild(msg);
 
     /* ICON POSITION */
-    if (icon && cfg.iconPosition === "top") {
-      toast.classList.add("jt-icon-top");
+    if (icon && cfg.iconPosition === 'top') {
+      toast.classList.add('jt-icon-top');
       toast.appendChild(icon);
       toast.appendChild(content);
-    }
-    else if (icon && cfg.iconPosition === "right") {
+    } else if (icon && cfg.iconPosition === 'right') {
       toast.appendChild(content);
       toast.appendChild(icon);
-    }
-    else {
+    } else {
       if (icon) toast.appendChild(icon);
       toast.appendChild(content);
     }
 
     if (Array.isArray(cfg.actions) && cfg.actions.length) {
-      const actionWrap = document.createElement("div");
-      actionWrap.className = "jt-actions";
+      const actionWrap = document.createElement('div');
+      actionWrap.className = 'jt-actions';
 
-      cfg.actions.forEach(act => {
-        const btn = document.createElement("button");
-        btn.className = "jt-action";
+      cfg.actions.forEach((act) => {
+        const btn = document.createElement('button');
+        btn.className = 'jt-action';
         btn.textContent = act.label;
 
         btn.onclick = (ev) => {
@@ -862,6 +876,9 @@ const juiceToast = {
           act.onClick?.(ev);
 
           if (act.closeOnClick) {
+            toast.replaceWith();
+            toast.onclick = null;
+            toast.onmousedown = null;
             toast.remove();
             this._next();
           }
@@ -875,10 +892,13 @@ const juiceToast = {
 
     /* CLOSE */
     if (cfg.closable) {
-      const close = document.createElement("span");
-      close.className = "juice-toast-close";
-      close.innerHTML = "×";
+      const close = document.createElement('span');
+      close.className = 'juice-toast-close';
+      close.innerHTML = '×';
       close.onclick = () => {
+        toast.replaceWith();
+        toast.onclick = null;
+        toast.onmousedown = null;
         toast.remove();
         this._next();
       };
@@ -887,7 +907,7 @@ const juiceToast = {
 
     // optional PWA / standalone tweaks
     if (isIOSStandalone) {
-      toast.style.borderRadius = toast.style.borderRadius || "14px";
+      toast.style.borderRadius = toast.style.borderRadius || '14px';
     }
 
     const root = this._getRoot(cfg.position);
@@ -900,13 +920,13 @@ const juiceToast = {
       toast,
       cfg,
       type,
-      root
+      root,
     });
 
     // show
     requestAnimationFrame(() => {
       // ensure we use CSS show class to trigger opacity/transform transition
-      toast.classList.add("show");
+      toast.classList.add('show');
     });
 
     // if duration === 0 => persistent
@@ -915,7 +935,6 @@ const juiceToast = {
     // Timer with pause on hover (desktop) and pause on touch (we handled touch start)
     let start = Date.now();
     let remaining = duration;
-    let raf;
 
     const tick = () => {
       if (!toast.__paused) {
@@ -927,43 +946,52 @@ const juiceToast = {
       }
 
       if (remaining <= 0) {
-        toast.classList.remove("show");
+        toast.classList.remove('show');
         setTimeout(() => {
+          toast.replaceWith();
+          toast.onclick = null;
+          toast.onmousedown = null;
           toast.remove();
           this._next();
         }, 300);
       } else {
-        raf = requestAnimationFrame(tick);
+        raf(tick);
       }
 
       if (progressEl) {
         // clamp 0..1
         const frac = Math.max(0, Math.min(1, remaining / duration));
-        progressEl.style.transform =
-          `scaleX(${frac})`;
+        progressEl.style.transform = `scaleX(${frac})`;
       }
     };
 
     // Desktop hover pause only if not touch device (iOS Safari has no hover)
     if (!isTouch) {
-      toast.addEventListener("mouseenter", () => toast.__paused = true);
-      toast.addEventListener("mouseleave", () => toast.__paused = false);
+      toast.addEventListener('mouseenter', () => (toast.__paused = true));
+      toast.addEventListener('mouseleave', () => (toast.__paused = false));
     }
 
     // Touch pause/unpause already set in onTouchStart/onTouchEnd
     // For safety add simple handlers (no hover on iOS)
-    toast.addEventListener("touchstart", () => { toast.__paused = true; }, { passive: true });
-    toast.addEventListener("touchend", () => { toast.__paused = false; });
+    toast.addEventListener(
+      'touchstart',
+      () => {
+        toast.__paused = true;
+      },
+      { passive: true }
+    );
+    toast.addEventListener('touchend', () => {
+      toast.__paused = false;
+    });
 
     // Start ticking
     start = Date.now();
-    raf = requestAnimationFrame(tick);
-
+    raf(tick);
     // Play sound if configured
     if (cfg.playSound || this._defaults.playSound) {
       this._playSound(cfg.playSound);
     }
-  }
+  },
 };
 
 export default juiceToast;
