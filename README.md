@@ -1,5 +1,20 @@
 # 🍹 JuiceToast
 
+
+  ![npm download wekkly](https://img.shields.io/npm/dw/juice-toast)
+  ![npm download](https://img.shields.io/npm/dt/juice-toast)
+  ![npm version](https://img.shields.io/npm/v/juice-toast)
+  ![license](https://img.shields.io/npm/l/juice-toast)
+  ![stars](https://img.shields.io/github/stars/KhairyK/juiceToast)
+  ![issues](https://img.shields.io/github/issues/KhairyK/juiceToast)
+  ![repo size](https://img.shields.io/github/repo-size/KhairyK/juiceToast)
+  ![browser](https://img.shields.io/badge/browser-all%20modern-brightgreen)
+  ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
+  ![ts](https://img.shields.io/badge/types-TypeScript-blue)
+  ![last commit](https://img.shields.io/github/last-commit/KhairyK/juiceToast)
+  
+---
+
 **JuiceToast** is a lightweight, flexible, and dependency-free toast notification library for modern web applications.  
 Designed with a **clean API**, **extensive customization**, and **strong backward compatibility**, JuiceToast fits both small projects and enterprise-scale systems.
 
