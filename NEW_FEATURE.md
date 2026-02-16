@@ -39,3 +39,16 @@ role="alert"
 aria-live="polite"
 prefers-reduced-motion supported
 ```
+
+# Juice Toast Release v1.3.1
+See [CHANGELOG.md](https://github.com/KhairyK/juiceToast/blob/main/CHANGELOG.md)
+
+# Juice Toast Release v1.3.2
+```js
+juiceToast.setup({
+  bgImage: { "bgImage": "https://cdn.kyrt.my.id/image/ts-logo-128.svg" }
+});
+
+juiceToast.bgImage("Hi");
+juiceToast.success("Hello, World"); // Available since version v1.3.2
+```

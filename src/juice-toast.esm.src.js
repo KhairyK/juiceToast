@@ -1,23 +1,21 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.1
+ * Source Of Juice Toast v1.3.2
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
-  typeof window !== "undefined" &&
-  typeof document !== "undefined";
+  typeof window !== 'undefined' && typeof document !== 'undefined';
 
 const reduceMotion =
-  isBrowser &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const TYPE_ANIMATION = {
-     success: "bounce",
-     error: "shake",
-     warning: "wiggle",
-     info: "pulse",
-     loading: "spin"
-};  
+  success: 'bounce',
+  error: 'shake',
+  warning: 'wiggle',
+  info: 'pulse',
+  loading: 'spin',
+};
 
 /* ================= CSS INJECT ================= */
 let __cssInjected = false;
@@ -108,8 +106,16 @@ const BASE_CSS = `
 /* visible */
 .juice-toast.show {
   opacity: 1;
-  --jt-y: 0px;
+  transform: translate(var(--jt-x), 0px) scale(1);
+  transition: transform 0.35s ease, opacity 0.35s ease;
 }
+
+/* hide */
+.juice-toast.hide {
+  opacity: 0;
+  transform: translate(var(--jt-x), 12px) scale(0.95);
+}
+
 
 /* ================= ICON ================= */
 
@@ -207,9 +213,10 @@ const BASE_CSS = `
 /* ================= COMPACT ================= */
 
 .jt-compact {
-  padding: 8px 10px;
-  gap: 8px;
-  font-size: 0.9em;
+  padding: 6px 8px;
+  font-size: 0.85em;
+  gap: 6px;
+  max-width: 280px;
 }
 
 /* ================= GLASS UI ================= */
@@ -252,10 +259,23 @@ const BASE_CSS = `
   height: 3px;
   width: 100%;
 
-  background: rgba(255,255,255,.7);
+  background: linear-gradient(to right, #FFFFFF, #FAFAFA);
+  height: 4px;
   transform-origin: left;
+  transition: transform linear;
+  border-radius: 2px;
   transform: scaleX(1);
   opacity: .85;
+}
+
+/* ================= BACKGROUND IMAGE ================= */
+
+.juice-toast.bg-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
 /* ================= ANIMATIONS ================= */
@@ -333,8 +353,8 @@ const BASE_CSS = `
 function injectCSS(css) {
   if (!isBrowser || __cssInjected) return;
 
-  const style = document.createElement("style");
-  style.id = "juice-toast-style";
+  const style = document.createElement('style');
+  style.id = 'juice-toast-style';
   style.textContent = css;
 
   document.head.appendChild(style);
@@ -345,90 +365,122 @@ function injectCSS(css) {
 
 const themes = {
   light: {
-    bg: "#ffffff",
-    color: "#111",
-    border: "1px solid #e5e7eb"
+    bg: '#ffffff',
+    color: '#111',
+    border: '1px solid #e5e7eb',
   },
   dark: {
-    bg: "#1f2937",
-    color: "#fff",
-    border: "1px solid rgba(255,255,255,.08)"
-  }
+    bg: '#1f2937',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.08)',
+  },
+  glass: {
+    bg: 'rgba(30,30,30,.35)',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.15)',
+  },
+  midnight: {
+    bg: '#0f172a',
+    color: '#e5e7eb',
+    border: '1px solid rgba(255,255,255,.06)',
+  },
+  soft: {
+    bg: '#f8fafc',
+    color: '#0f172a',
+    border: '1px solid #e2e8f0',
+  },
+  neutral: {
+    bg: '#ffffff',
+    color: '#374151',
+    border: '1px solid #d1d5db',
+  },
+  brand: {
+    bg: '#6366f1',
+    color: '#fff',
+    border: 'none',
+  },
+  gradient: {
+    bg: 'linear-gradient(135deg,#6366f1,#ec4899)',
+    color: '#fff',
+    border: 'none',
+  },
+  outline: {
+    bg: 'transparent',
+    color: '#111',
+    border: '2px solid currentColor',
+  },
 };
 
 const sizePreset = {
-  sm: { width: "260px", padding: "10px" },
-  md: { width: "320px", padding: "14px" },
-  lg: { width: "420px", padding: "18px" }
+  sm: { width: '260px', padding: '10px' },
+  md: { width: '320px', padding: '14px' },
+  lg: { width: '420px', padding: '18px' },
 };
 
 /* ================= CORE ================= */
-
 const juiceToast = {
   _config: {},
   _queue: [],
   _showing: false,
-  _theme: "dark",
+  _theme: 'dark',
   _plugins: [],
 
-  
   /* ===== PUBLIC API ===== */
-  
+
   setup(cfg = {}) {
-   this._config = cfg;
-   this._defaults = { ...this._defaults, ...cfg };
-   this._registerTypes();
+    this._config = cfg;
+    this._defaults = { ...this._defaults, ...cfg };
+    this._registerTypes();
   },
 
-use(plugin) {
-  if (typeof plugin === "function") {
-    this._plugins.push(plugin);
-  }
-},
+  use(plugin) {
+    if (typeof plugin === 'function') {
+      this._plugins.push(plugin);
+    }
+  },
 
-  
   addType(name, cfg = {}) {
     this._config[name] = cfg;
     this._registerTypes();
   },
-  
+
   defineTheme(name, styles = {}) {
     themes[name] = { ...(themes[name] || {}), ...styles };
   },
-  
+
   setTheme(name) {
     this._theme = name;
     if (!isBrowser) return;
-    const root = document.getElementById("juice-toast-root");
+    const root = document.getElementById('juice-toast-root');
     if (root) root.dataset.theme = name;
   },
-  
+
   clear() {
     this._queue.length = 0;
   },
-  
+
   destroy() {
     this.clear();
     if (!isBrowser) return;
-    document.getElementById("juice-toast-root")?.remove();
+    document.getElementById('juice-toast-root')?.remove();
   },
-  
+
   /* ===== INTERNAL ===== */
-  
+
   _registerTypes() {
-    Object.keys(this._config).forEach(type => {
-      if (typeof this[type] === "function" && !this[type].__auto) return;
-      const fn = payload => this._enqueue(type, payload);
+    Object.keys(this._config).forEach((type) => {
+      if (typeof this[type] === 'function' && !this[type].__auto) return;
+      const fn = (payload) => this._enqueue(type, payload);
       fn.__auto = true;
       this[type] = fn;
     });
   },
-  
+
   _enqueue(type, payload) {
     this._queue.push({ type, payload });
     if (!this._showing) this._next();
   },
-  
+
   _next() {
     if (!this._queue.length) {
       this._showing = false;
@@ -440,107 +492,113 @@ use(plugin) {
   },
 
   _runPlugins(ctx) {
-  this._plugins.forEach(fn => {
-    try {
-      fn(ctx);
-    } catch (e) {
-      this._warn("Plugin error: " + e.message);
-    }
-  });
-},
+    this._plugins.forEach((fn) => {
+      try {
+        fn(ctx);
+      } catch (e) {
+        this._warn('Plugin error: ' + e.message);
+      }
+    });
+  },
 
-  
   _normalizeGlass(value) {
-  if (value === true) return 60;
-  if (value === false || value == null) return 0;
-  
-  const n = Number(value);
-  return Number.isFinite(n) ?
-    Math.max(0, Math.min(100, n)) :
-    0;
-},
-  
-  _getRoot(position = "bottom-right") {
-  if (!isBrowser) return null;
-  let root = document.getElementById(`juice-toast-root-${position}`);
-  if (!root) {
-    root = document.createElement("div");
-    root.id = `juice-toast-root-${position}`;
-    root.dataset.position = position;
-    root.dataset.theme = this._theme;
-    
-    root.style.position = "fixed";
-    root.style.zIndex = 9999;
-    
-    switch(position) {
-      case "top-left":
-        root.style.top = "20px"; root.style.left = "20px"; break;
-      case "top-right":
-        root.style.top = "20px"; root.style.right = "20px"; break;
-      case "bottom-left":
-        root.style.bottom = "20px"; root.style.left = "20px"; break;
-      case "bottom-right":
-        root.style.bottom = "20px"; root.style.right = "20px"; break;
-      case "top-center":
-        root.style.top = "20px"; root.style.left = "50%"; root.style.transform = "translateX(-50%)"; break;
-      case "bottom-center":
-        root.style.bottom = "20px"; root.style.left = "50%"; root.style.transform = "translateX(-50%)"; break;
-    }
+    if (value === true) return 60;
+    if (value === false || value == null) return 0;
 
-    document.body.appendChild(root);
-  }
-  return root;
-},
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  },
+
+  _getRoot(position = 'bottom-right') {
+    if (!isBrowser) return null;
+    let root = document.getElementById(`juice-toast-root-${position}`);
+    if (!root) {
+      root = document.createElement('div');
+      root.id = `juice-toast-root-${position}`;
+      root.dataset.position = position;
+      root.dataset.theme = this._theme;
+
+      root.style.position = 'fixed';
+      root.style.zIndex = 9999;
+
+      switch (position) {
+        case 'top-left':
+          root.style.top = '20px';
+          root.style.left = '20px';
+          break;
+        case 'top-right':
+          root.style.top = '20px';
+          root.style.right = '20px';
+          break;
+        case 'bottom-left':
+          root.style.bottom = '20px';
+          root.style.left = '20px';
+          break;
+        case 'bottom-right':
+          root.style.bottom = '20px';
+          root.style.right = '20px';
+          break;
+        case 'top-center':
+          root.style.top = '20px';
+          root.style.left = '50%';
+          root.style.transform = 'translateX(-50%)';
+          break;
+        case 'bottom-center':
+          root.style.bottom = '20px';
+          root.style.left = '50%';
+          root.style.transform = 'translateX(-50%)';
+          break;
+      }
+
+      document.body.appendChild(root);
+    }
+    return root;
+  },
 
   _defaults: {
-  duration: 2500,
-  maxVisible: 3,
-  swipeThreshold: 60,
-  glassUI: 0,
-  playSound: null,
-  dev: false,
+    duration: 2500,
+    maxVisible: 3,
+    swipeThreshold: 60,
+    glassUI: 0,
+    playSound: null,
+    dev: false,
 
-  injectCSS: true,
-  css: null
-},
+    injectCSS: true,
+    css: null,
+  },
 
-_warn(msg) {
-  if (this._defaults.dev && typeof console !== "undefined") {
-    console.warn("[JuiceToast]", msg);
-  }
-},
+  _warn(msg) {
+    if (this._defaults.dev && typeof console !== 'undefined') {
+      console.warn('[JuiceToast]', msg);
+    }
+  },
 
+  _playSound(src) {
+    if (!isBrowser) return;
 
-_playSound(src) {
-  if (!isBrowser) return;
-  
-  const sound =
-    typeof src === "string" && src ?
-    src :
-    this._defaults.playSound;
-  
-  if (!sound) return;
-  
-  try {
-    const audio = new Audio(sound);
-    audio.volume = 0.6;
-    audio.play().catch(() => {});
-  } catch {}
-},
-  
+    const sound =
+      typeof src === 'string' && src ? src : this._defaults.playSound;
+
+    if (!sound) return;
+
+    try {
+      const audio = new Audio(sound);
+      audio.volume = 0.6;
+      audio.play().catch(() => {});
+    } catch {}
+  },
+
   _showToast(type, payload) {
     if (!isBrowser) return;
 
     if (this._defaults.injectCSS !== false) {
       injectCSS(this._defaults.css || BASE_CSS);
     }
-    
+
     const base = this._config[type] || {};
     const data =
-      typeof payload === "object" ?
-      payload :
-      { message: String(payload) };
-    
+      typeof payload === 'object' ? payload : { message: String(payload) };
+
     const cfg = { ...base, ...data };
 
     /* BACKWARD COMPAT */
@@ -550,23 +608,33 @@ _playSound(src) {
     cfg.iconAnimate = cfg.iconAnimate ?? cfg.icon_onClick_animate;
     cfg.position = cfg.position ?? cfg.toast;
     cfg.closable = cfg.closable ?? cfg.closeable;
-    cfg.iconPosition = cfg.iconPosition || "left";
+    cfg.iconPosition = cfg.iconPosition || 'left';
     cfg.compact = !!cfg.compact;
-    
-    const theme = themes[cfg.theme || this._theme] || {};
-    
-    const toast = document.createElement("div");
-    toast.className = "juice-toast";
 
-    const animation = cfg.animation || "slide-in";
+    const theme = themes[cfg.theme || this._theme] || {};
+
+    const toast = document.createElement('div');
+    toast.className = 'juice-toast';
+
+    const animation = cfg.animation || 'slide-in';
     if (!cfg.enterAnimation) {
-     toast.style.animation = `${animation} 0.4s ease forwards`;
+      toast.style.animation = `${animation} 0.4s ease forwards`;
     }
 
-
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    toast.setAttribute('aria-atomic', 'true');
     toast.tabIndex = 0;
+
+    if (cfg.closable) {
+      close.tabIndex = 0;
+      close.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toast.remove();
+          this._next();
+        }
+      });
+    }
 
     /* SIZE PRESET */
     if (cfg.size && sizePreset[cfg.size]) {
@@ -577,267 +645,321 @@ _playSound(src) {
 
     let progressEl = null;
 
-if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
-  progressEl = document.createElement("div");
-  progressEl.className = "jt-progress";
-  
-  if (cfg.progressColor) {
-   progressEl.style.background =
-    cfg.progressColor || "rgba(255,255,255,.7)";
-  }
+    if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
+      progressEl = document.createElement('div');
+      progressEl.className = 'jt-progress';
 
-  toast.appendChild(progressEl);
-}
+      if (cfg.progressColor) {
+        progressEl.style.background =
+          cfg.progressColor || 'rgba(255,255,255,.7)';
+      }
 
+      toast.appendChild(progressEl);
+    }
+
+    /* TTS (Text To Spech) */
+    if (cfg.tts && 'speechSynthesis' in window) {
+      try {
+        const utter = new SpeechSynthesisUtterance(
+          cfg.message || cfg.title || ''
+        );
+        utter.lang = cfg.ttsLang || 'en-US';
+        utter.rate = cfg.ttsRate ?? 1;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        this._warn('TTS failed: ' + e.message);
+      }
+    }
 
     /* GLASS UI */
-const glass = this._normalizeGlass(
-  cfg.glassUI ?? this._defaults.glassUI
-);
+    const glass = this._normalizeGlass(cfg.glassUI ?? this._defaults.glassUI);
 
-if (glass > 0) {
-  toast.classList.add("jt-glass");
-  toast.style.setProperty("--jt-glass", glass);
-}
+    if (glass > 0) {
+      toast.style.setProperty('--jt-glass', cfg.glassUI ?? 50);
+      toast.classList.add('jt-glass');
+    }
 
-/* STYLE */
-if (!glass) {
-  toast.style.background = cfg.bg || theme.bg;
-}
-toast.style.color = cfg.color || theme.color;
-toast.style.border = cfg.border || theme.border;
-    
+    /* STYLE */
+    if (!glass) {
+      toast.style.background = cfg.bg || theme.bg;
+    }
+    toast.style.color = cfg.color || theme.color;
+    toast.style.border = cfg.border || theme.border;
+
     /* COMPACT */
     if (cfg.compact) {
-     toast.classList.add("jt-compact");
+      toast.classList.add('jt-compact');
     }
-    
+
     if (cfg.glassUI ?? this._defaults.glassUI) {
-     toast.classList.add("jt-glass");
+      toast.classList.add('jt-glass');
     }
 
     /* MANUAL WIDTH / HEIGHT */
     if (cfg.width) toast.style.width = cfg.width;
     if (cfg.height) toast.style.height = cfg.height;
-    
-/* ICON */
-let icon = null;
 
-if (cfg.icon) {
-  icon = document.createElement("i");
-  icon.className = [
-    "icon",
-    cfg.iconPack || "",
-    cfg.icon
-  ].join(" ").trim();
-  
-  if (cfg.iconSize) {
-    icon.style.fontSize = cfg.iconSize;
-  }
-  
-  if (cfg.iconLink || cfg.iconAnimate) {
-    icon.classList.add("icon-clickable");
-    icon.onclick = e => {
-      e.stopPropagation();
-      if (cfg.iconAnimate) {
-        icon.classList.remove(cfg.iconAnimate);
-        void icon.offsetWidth;
-        icon.classList.add(cfg.iconAnimate);
+    /* BACKGROUND IMAGE */
+    if (cfg.bgImage) {
+      toast.style.backgroundImage = `url(${cfg.bgImage})`;
+      toast.classList.add('bg-image');
+    }
+
+    /* ICON */
+    let icon = null;
+
+    if (cfg.icon) {
+      icon = document.createElement('i');
+      icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
+
+      if (cfg.iconSize) {
+        icon.style.fontSize = cfg.iconSize;
       }
-      if (cfg.iconLink) {
-        window.open(cfg.iconLink, "_blank", "noopener");
+
+      if (cfg.iconLink || cfg.iconAnimate) {
+        icon.classList.add('icon-clickable');
+        icon.onclick = (e) => {
+          e.stopPropagation();
+          if (cfg.iconAnimate) {
+            icon.classList.remove(cfg.iconAnimate);
+            void icon.offsetWidth;
+            icon.classList.add(cfg.iconAnimate);
+          }
+          if (cfg.iconLink) {
+            window.open(cfg.iconLink, '_blank', 'noopener');
+          }
+        };
       }
-    };
-  }
-const iconAnim =
-  cfg.iconAnimate ??
-  TYPE_ANIMATION[type];
+      const iconAnim = cfg.iconAnimate ?? TYPE_ANIMATION[type];
 
-if (iconAnim) {
-  icon.classList.add(iconAnim);
+      if (iconAnim) {
+        icon.classList.add(iconAnim);
 
-  // restart animation on click
-  icon.addEventListener("click", () => {
-    icon.classList.remove(iconAnim);
-    void icon.offsetWidth;
-    icon.classList.add(iconAnim);
-   });
- }
-}
-
- if (reduceMotion) {
-     toast.classList.remove("pop", "bounce", "shake", "wiggle", "pulse", "spin");
-     icon?.classList.remove("bounce", "shake", "wiggle", "pulse", "spin");
-  }
-
-if (!cfg.message && !cfg.title) {
-  this._warn("Toast created without message or title");
-}
-
-if (cfg.icon && !cfg.iconPack) {
-  this._warn("icon provided without iconPack");
-}
-
-if (cfg.duration < 0) {
-  this._warn("duration cannot be negative");
-}
-
-
-let startX = 0;
-let currentX = 0;
-
-toast.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-
-toast.addEventListener("touchmove", e => {
-  currentX = e.touches[0].clientX - startX;
-  toast.style.transform = `translateX(${currentX}px)`;
-});
-
-toast.addEventListener("touchend", () => {
-  if (Math.abs(currentX) > this._defaults.swipeThreshold) {
-    toast.style.transform = `translateX(${currentX > 0 ? 1000 : -1000}px)`;
-    setTimeout(() => {
-      toast.remove();
-      this._next();
-    }, 200);
-  } else {
-    toast.style.transform = "";
-  }
-  startX = currentX = 0;
-});
-
-/* CONTENT */
-const content = document.createElement("div");
-content.className = "jt-content";
-
-const enterAnim = cfg.enterAnimation ?? "pop";
-if (enterAnim && !reduceMotion) {
-  toast.classList.add(enterAnim);
-}
-
-if (cfg.title) {
-  const t = document.createElement("div");
-  t.className = "jt-title";
-  t.textContent = cfg.title;
-  content.appendChild(t);
-}
-
-const msg = document.createElement("div");
-msg.className = "jt-message";
-msg.textContent = cfg.message || "";
-content.appendChild(msg);
-
-/* ICON POSITION */
-if (icon && cfg.iconPosition === "top") {
-  toast.classList.add("jt-icon-top");
-  toast.appendChild(icon);
-  toast.appendChild(content);
-}
-else if (icon && cfg.iconPosition === "right") {
-  toast.appendChild(content);
-  toast.appendChild(icon);
-}
-else {
-  if (icon) toast.appendChild(icon);
-  toast.appendChild(content);
-}
-
-if (Array.isArray(cfg.actions) && cfg.actions.length) {
-  const actionWrap = document.createElement("div");
-  actionWrap.className = "jt-actions";
-  
-  cfg.actions.forEach(act => {
-    const btn = document.createElement("button");
-    btn.className = "jt-action";
-    btn.textContent = act.label;
-    
-    btn.onclick = (ev) => {
-      ev.stopPropagation();
-      act.onClick?.(ev);
-      
-      if (act.closeOnClick) {
-        toast.remove();
-        this._next();
+        // restart animation on click
+        icon.addEventListener('click', () => {
+          icon.classList.remove(iconAnim);
+          void icon.offsetWidth;
+          icon.classList.add(iconAnim);
+        });
       }
-    };
-    
-    actionWrap.appendChild(btn);
-  });
-  
-  content.appendChild(actionWrap);
-}
-    
+    }
+
+    if (reduceMotion) {
+      toast.classList.remove(
+        'pop',
+        'bounce',
+        'shake',
+        'wiggle',
+        'pulse',
+        'spin'
+      );
+      icon?.classList.remove('bounce', 'shake', 'wiggle', 'pulse', 'spin');
+    }
+
+    if (!cfg.message && !cfg.title) {
+      this._warn('Toast created without message or title');
+    }
+
+    if (cfg.icon && !cfg.iconPack) {
+      this._warn('icon provided without iconPack');
+    }
+
+    if (cfg.duration < 0) {
+      this._warn('duration cannot be negative');
+    }
+
+    let startX = 0;
+    let currentX = 0;
+
+    toast.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    toast.addEventListener('touchmove', (e) => {
+      currentX = e.touches[0].clientX - startX;
+      toast.style.transform = `translateX(${currentX}px)`;
+    });
+
+    toast.addEventListener('touchend', () => {
+      if (Math.abs(currentX) > this._defaults.swipeThreshold) {
+        toast.style.transform = `translateX(${currentX > 0 ? 1000 : -1000}px)`;
+        setTimeout(() => {
+          toast.remove();
+          this._next();
+        }, 200);
+      } else {
+        toast.style.transform = '';
+      }
+      startX = currentX = 0;
+    });
+
+    /* CONTENT */
+    const content = document.createElement('div');
+    content.className = 'jt-content';
+
+    const enterAnim = cfg.enterAnimation ?? 'pop';
+    if (enterAnim && !reduceMotion) {
+      toast.classList.add(enterAnim);
+    }
+
+    if (cfg.title) {
+      const t = document.createElement('div');
+      t.className = 'jt-title';
+      t.textContent = cfg.title;
+      content.appendChild(t);
+    }
+
+    const msg = document.createElement('div');
+    msg.className = 'jt-message';
+    msg.textContent = cfg.message || '';
+    content.appendChild(msg);
+
+    /* ICON POSITION */
+    if (icon && cfg.iconPosition === 'top') {
+      toast.classList.add('jt-icon-top');
+      toast.appendChild(icon);
+      toast.appendChild(content);
+    } else if (icon && cfg.iconPosition === 'right') {
+      toast.appendChild(content);
+      toast.appendChild(icon);
+    } else {
+      if (icon) toast.appendChild(icon);
+      toast.appendChild(content);
+    }
+
+    if (Array.isArray(cfg.actions) && cfg.actions.length) {
+      const actionWrap = document.createElement('div');
+      actionWrap.className = 'jt-actions';
+
+      cfg.actions.forEach((act) => {
+        const btn = document.createElement('button');
+        btn.className = 'jt-action';
+        btn.textContent = act.label;
+
+        btn.onclick = (ev) => {
+          ev.stopPropagation();
+          act.onClick?.(ev);
+
+          if (act.closeOnClick) {
+            toast.remove();
+            this._next();
+          }
+        };
+
+        actionWrap.appendChild(btn);
+      });
+
+      content.appendChild(actionWrap);
+    }
+
     /* CLOSE */
     if (cfg.closable) {
-      const close = document.createElement("span");
-      close.className = "juice-toast-close";
-      close.innerHTML = "×";
+      const close = document.createElement('span');
+      close.className = 'juice-toast-close';
+      close.innerHTML = '×';
       close.onclick = () => {
         toast.remove();
         this._next();
       };
       toast.appendChild(close);
     }
-    
+
     const root = this._getRoot(cfg.position);
     const max = this._defaults.maxVisible;
     if (max && root.children.length >= max) {
-     root.firstChild.remove();
+      root.firstChild.remove();
     }
     root.appendChild(toast);
     this._runPlugins({
-     toast,
-     cfg,
-     type,
-     root
+      toast,
+      cfg,
+      type,
+      root,
     });
 
-    
-    requestAnimationFrame(() => toast.classList.add("show"));
-    
+    requestAnimationFrame(() => toast.classList.add('show'));
+
     const duration = cfg.duration ?? 2500;
     if (duration === 0) return;
-    
+
     let start = Date.now();
-let remaining = cfg.duration ?? this._defaults.duration;
-let raf;
+    let remaining = cfg.duration ?? this._defaults.duration;
+    let raf;
 
-const tick = () => {
-  if (!toast.__paused) {
-    const now = Date.now();
-    remaining -= now - start;
-    start = now;
-  } else {
-    start = Date.now();
-  }
-  
-  if (remaining <= 0) {
-    toast.classList.remove("show");
-    setTimeout(() => {
-      toast.remove();
-      this._next();
-    }, 300);
-  } else {
-    raf = requestAnimationFrame(tick);
-  }
+    const tick = () => {
+      if (!toast.__paused) {
+        const now = Date.now();
+        remaining -= now - start;
+        start = now;
+      } else {
+        start = Date.now();
+      }
 
-  if (progressEl) {
-    progressEl.style.transform =
-    `scaleX(${Math.max(0, remaining / duration)})`;
-  }
+      if (remaining <= 0) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+          this._next();
+        }, 300);
+      } else {
+        raf = requestAnimationFrame(tick);
+      }
+
+      if (progressEl) {
+        progressEl.style.transform = `scaleX(${Math.max(0, remaining / duration)})`;
+      }
+    };
+
+    toast.addEventListener('mouseenter', () => (toast.__paused = true));
+    toast.addEventListener('mouseleave', () => (toast.__paused = false));
+
+    toast.addEventListener('touchstart', () => (toast.__paused = true));
+    toast.addEventListener('touchend', () => (toast.__paused = false));
+
+    requestAnimationFrame(tick);
+  },
 };
 
-toast.addEventListener("mouseenter", () => toast.__paused = true);
-toast.addEventListener("mouseleave", () => toast.__paused = false);
+juiceToast.setup({
+  success: {
+    icon: 'fa-check',
+    iconPack: 'fas',
+    bg: '#16a34a',
+    progress: true,
+    duration: 3000,
+  },
 
-toast.addEventListener("touchstart", () => toast.__paused = true);
-toast.addEventListener("touchend", () => toast.__paused = false);
+  error: {
+    icon: 'fa-xmark',
+    iconPack: 'fas',
+    bg: '#dc2626',
+    progress: true,
+    duration: 4000,
+  },
 
-requestAnimationFrame(tick);
-  }
-};
+  info: {
+    icon: 'fa-circle-info',
+    iconPack: 'fas',
+    bg: '#2563eb',
+    progress: true,
+  },
+
+  warning: {
+    icon: 'fa-triangle-exclamation',
+    iconPack: 'fas',
+    bg: '#f59e0b',
+    progress: true,
+  },
+
+  loading: {
+    icon: 'fa-spinner',
+    iconPack: 'fas',
+    iconAnimate: 'spin',
+    duration: 0,
+    progress: false,
+    closable: false,
+  },
+});
 
 export default juiceToast;
 export { juiceToast };

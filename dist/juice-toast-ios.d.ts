@@ -1,15 +1,9 @@
-/* JuiceToast v1.3.1 (iOS Enhanced)
+/* JuiceToast v1.3.2 (iOS User)
  * (C) 2026 OpenDN Foundation
  * Type Definitions
  */
 
-export type ToastType =
-  | "success"
-  | "error"
-  | "warning"
-  | "info"
-  | "loading"
-  | string
+/* ================= CORE ================= */
 
 export type ToastPosition =
   | "top-left"
@@ -18,124 +12,149 @@ export type ToastPosition =
   | "bottom-right"
   | "top-center"
   | "bottom-center"
+  | string;
 
-export type ToastSize = "sm" | "md" | "lg"
+export type ToastSize = "sm" | "md" | "lg";
 
-export type AnimationType =
+export type ToastAnimation =
   | "spin"
   | "pulse"
   | "shake"
   | "bounce"
   | "wiggle"
   | "pop"
-  | string
+  | string;
+
+/* ================= ACTIONS ================= */
 
 export interface ToastAction {
-  label: string
-  onClick?: (event: MouseEvent) => void
-  closeOnClick?: boolean
+  label: string;
+  onClick?: (ev: MouseEvent) => void;
+  closeOnClick?: boolean;
 }
+
+/* ================= OPTIONS ================= */
 
 export interface ToastOptions {
-  /* content */
-  title?: string
-  message?: string
+  title?: string;
+  message?: string;
 
-  /* icon */
-  icon?: string
-  iconPack?: string
-  iconSize?: string | number
-  iconPosition?: "left" | "right" | "top"
-  iconLink?: string
-  iconAnimate?: AnimationType
+  theme?: string;
+  position?: ToastPosition;
 
-  /* layout */
-  position?: ToastPosition
-  size?: ToastSize
-  width?: string
-  height?: string
-  compact?: boolean
+  duration?: number;
+  progress?: boolean;
+  progressColor?: string;
 
-  /* behavior */
-  duration?: number
-  closable?: boolean
-  progress?: boolean
-  progressColor?: string
-  swipeThreshold?: number
+  icon?: string;
+  iconPack?: string;
+  iconSize?: string;
+  iconPosition?: "left" | "right" | "top";
 
-  /* style */
-  theme?: string
-  bg?: string
-  color?: string
-  border?: string
-  glassUI?: boolean | number
+  iconLink?: string;
+  iconAnimate?: ToastAnimation;
 
-  /* animation */
-  animation?: AnimationType
-  enterAnimation?: AnimationType
+  closable?: boolean;
 
-  /* actions */
-  actions?: ToastAction[]
+  bg?: string;
+  color?: string;
+  border?: string;
 
-  /* sound */
-  playSound?: string | null
+  width?: string;
+  height?: string;
 
-  /* legacy / alias (still supported internally) */
-  toast?: ToastPosition
-  closeable?: boolean
-  icon_left_top?: string
-  icon_config?: string
-  icon_onClick_url?: string
-  icon_onClick_animate?: AnimationType
+  size?: ToastSize;
+  compact?: boolean;
+
+  glassUI?: number | boolean;
+
+  bgImage?: string;
+
+  enterAnimation?: ToastAnimation;
+  animation?: string;
+
+  actions?: ToastAction[];
+
+  /* AUDIO */
+  playSound?: string;
+
+  /* TTS */
+  tts?: boolean;
+  ttsLang?: string;
+  ttsRate?: number;
 }
 
-export interface JuiceToastConfig {
-  duration?: number
-  maxVisible?: number
-  swipeThreshold?: number
-  glassUI?: number | boolean
-  playSound?: string | null
-  dev?: boolean
-  injectCSS?: boolean
-  css?: string
+/* ================= INTERNAL DEFAULTS ================= */
 
-  /* custom toast type defaults */
-  [type: string]: any
+export interface JuiceToastDefaults {
+  duration: number;
+  maxVisible: number;
+  swipeThreshold: number;
+  glassUI: number;
+  playSound: string | null;
+  dev: boolean;
+  injectCSS: boolean;
+  css: string | null;
 }
 
-export interface ToastPluginContext {
-  toast: HTMLElement
-  cfg: ToastOptions
-  type: ToastType
-  root: HTMLElement
+/* ================= PLUGIN ================= */
+
+export interface JuiceToastPluginContext<T extends string = string> {
+  toast: HTMLElement;
+  cfg: ToastOptions;
+  type: T;
+  root: HTMLElement;
 }
 
-export type JuiceToastPlugin = (ctx: ToastPluginContext) => void
+export type JuiceToastPlugin<T extends string = string> = (
+  ctx: JuiceToastPluginContext<T>
+) => void;
 
-export interface JuiceToast {
-  /* lifecycle */
-  setup(config?: JuiceToastConfig): void
-  clear(): void
-  destroy(): void
+/* ================= CONFIG ================= */
 
-  /* extension */
-  use(plugin: JuiceToastPlugin): void
-  addType(type: ToastType, defaults?: Partial<ToastOptions>): void
-  defineTheme(
-    name: string,
-    theme: {
-      bg?: string
-      color?: string
-      border?: string
-    }
-  ): void
-  setTheme(name: string): void
+export type ToastTypeConfig = Record<string, Partial<ToastOptions>>;
 
-  /* dynamic toast functions (success, error, custom, dll) */
-  [key: string]: any
+/* ================= DYNAMIC METHODS ================= */
+
+type DynamicToastMethods<T extends string> = {
+  [K in T]: (payload?: string | ToastOptions) => void;
+};
+
+/* ================= CORE INSTANCE ================= */
+
+export interface JuiceToastBase<T extends string = string> {
+  _config: ToastTypeConfig;
+  _queue: any[];
+  _showing: boolean;
+  _theme: string;
+  _plugins: JuiceToastPlugin<T>[];
+  _defaults: JuiceToastDefaults;
+
+  /* ===== PUBLIC API ===== */
+
+  setup<C extends ToastTypeConfig>(
+    config: C
+  ): JuiceToastBase<keyof C & string> &
+    DynamicToastMethods<keyof C & string>;
+
+  use(plugin: JuiceToastPlugin<T>): void;
+
+  addType(name: string, cfg?: Partial<ToastOptions>): void;
+
+  defineTheme(name: string, styles: Record<string, string>): void;
+
+  setTheme(name: string): void;
+
+  clear(): void;
+  destroy(): void;
 }
 
-declare const juiceToast: JuiceToast
+/* ================= FINAL TYPE ================= */
 
-export default juiceToast
-export { juiceToast }
+export type JuiceToast<T extends string = string> =
+  JuiceToastBase<T> & DynamicToastMethods<T>;
+
+declare const juiceToast: JuiceToast;
+
+export default juiceToast;
+export { juiceToast };

@@ -41,7 +41,7 @@ It supports **ESM**, **dynamic toast types**, **theme management**, **queue hand
 
 ### ESM
 ```js
-import juiceToast from "https://npdn.kyrt.my.id/npm/juice-toast@1.3.0/dist/juice-toast.esm.js";
+import juiceToast from "https://npdn.kyrt.my.id/npm/juice-toast@1.3.2dist/juice-toast.esm.js";
 ```
 
 ---
@@ -237,9 +237,6 @@ dark: {
 - Browser-only (DOM required)
 - Root element is automatically created: `#juice-toast-root`
 - Suitable for frameworks, custom runtimes, etc.
-- For JuiceToast ^v1.3.0, You don't need import `style.css` manually.
-- UMD Are deprecated for maintain reason
-- Need Improvment for Handphone user or WebKit user
 
 ---
 

@@ -1,5 +1,10 @@
+## v1.3.2
+- Improved A11Y
+- Adding **Background Image**
+- Adding more Theme
+- Adding default toast (juiceToast.success|error|info|warning|loading)
 
-## v1.3.1
+v1.3.1
 - Improved iOS / Safari (WebKit) compatibility
 - Smoother swipe-to-dismiss on mobile
 - Better pause-on-touch behavior

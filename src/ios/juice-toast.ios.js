@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.1 (NEW: For iOS user)
+ * Source Of Juice Toast v1.3.2 (iOS user)
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
@@ -19,6 +19,29 @@ const isIOSStandalone =
   (window.navigator.standalone === true ||
     (window.matchMedia &&
       window.matchMedia('(display-mode: standalone)').matches));
+
+function speakTTS(message, lang = 'en-US', rate = 1) {
+  if (!('speechSynthesis' in window)) return;
+
+  const utter = new SpeechSynthesisUtterance(message);
+  utter.lang = lang;
+  utter.rate = rate;
+
+  const speakNow = () => {
+    window.speechSynthesis.speak(utter);
+    document.body.removeEventListener('touchstart', speakNow);
+    document.body.removeEventListener('click', speakNow);
+  };
+
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && window.speechSynthesis.speaking === false) {
+    document.body.addEventListener('touchstart', speakNow, { once: true });
+    document.body.addEventListener('click', speakNow, { once: true });
+  } else {
+    speakNow();
+  }
+}
 
 const raf =
   window.requestAnimationFrame ||
@@ -282,10 +305,21 @@ const BASE_CSS = `
   height: 3px;
   width: 100%;
 
-  background: rgba(255,255,255,.7);
+  background: linear-gradient(to right, #FFFFFF, #FAFAFA);
+  height: 4px;
   transform-origin: left;
+  transition: transform linear;
+  border-radius: 2px;
   transform: scaleX(1);
   opacity: .85;
+}
+
+.juice-toast.bg-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
 /* ================= ANIMATIONS ================= */
@@ -381,6 +415,41 @@ const themes = {
     bg: '#1f2937',
     color: '#fff',
     border: '1px solid rgba(255,255,255,.08)',
+  },
+  glass: {
+    bg: 'rgba(30,30,30,.35)',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.15)',
+  },
+  midnight: {
+    bg: '#0f172a',
+    color: '#e5e7eb',
+    border: '1px solid rgba(255,255,255,.06)',
+  },
+  soft: {
+    bg: '#f8fafc',
+    color: '#0f172a',
+    border: '1px solid #e2e8f0',
+  },
+  neutral: {
+    bg: '#ffffff',
+    color: '#374151',
+    border: '1px solid #d1d5db',
+  },
+  brand: {
+    bg: '#6366f1',
+    color: '#fff',
+    border: 'none',
+  },
+  gradient: {
+    bg: 'linear-gradient(135deg,#6366f1,#ec4899)',
+    color: '#fff',
+    border: 'none',
+  },
+  outline: {
+    bg: 'transparent',
+    color: '#111',
+    border: '2px solid currentColor',
   },
 };
 
@@ -637,8 +706,19 @@ const juiceToast = {
     }
 
     toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'polite');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    toast.setAttribute('aria-atomic', 'true');
     toast.tabIndex = 0;
+
+    if (cfg.closable) {
+      close.tabIndex = 0;
+      close.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toast.remove();
+          this._next();
+        }
+      });
+    }
 
     /* SIZE PRESET */
     if (cfg.size && sizePreset[cfg.size]) {
@@ -662,12 +742,17 @@ const juiceToast = {
       toast.appendChild(progressEl);
     }
 
+    /* TTS (Text To Spech) */
+    if (cfg.tts && cfg.message) {
+      speakTTS(cfg.message, cfg.ttsLang ?? 'en-US', cfg.ttsRate ?? 1);
+    }
+
     /* GLASS UI */
     const glass = this._normalizeGlass(cfg.glassUI ?? this._defaults.glassUI);
 
     if (glass > 0) {
+      toast.style.setProperty('--jt-glass', cfg.glassUI ?? 50);
       toast.classList.add('jt-glass');
-      toast.style.setProperty('--jt-glass', glass);
     }
 
     /* STYLE */
@@ -689,6 +774,12 @@ const juiceToast = {
     /* MANUAL WIDTH / HEIGHT */
     if (cfg.width) toast.style.width = cfg.width;
     if (cfg.height) toast.style.height = cfg.height;
+
+    /* BACKGROUND IMAGE */
+    if (cfg.bgImage) {
+      toast.style.backgroundImage = `url(${cfg.bgImage})`;
+      toast.classList.add('bg-image');
+    }
 
     /* ICON */
     let icon = null;
@@ -993,6 +1084,47 @@ const juiceToast = {
     }
   },
 };
+
+juiceToast.setup({
+  success: {
+    icon: 'fa-check',
+    iconPack: 'fa-solid',
+    bg: '#16a34a',
+    progress: true,
+    duration: 3000,
+  },
+
+  error: {
+    icon: 'fa-xmark',
+    iconPack: 'fa-solid',
+    bg: '#dc2626',
+    progress: true,
+    duration: 4000,
+  },
+
+  info: {
+    icon: 'fa-circle-info',
+    iconPack: 'fa-solid',
+    bg: '#2563eb',
+    progress: true,
+  },
+
+  warning: {
+    icon: 'fa-triangle-exclamation',
+    iconPack: 'fa-solid',
+    bg: '#f59e0b',
+    progress: true,
+  },
+
+  loading: {
+    icon: 'fa-spinner',
+    iconPack: 'fa-solid',
+    iconAnimate: 'spin',
+    duration: 0,
+    progress: false,
+    closable: false,
+  },
+});
 
 export default juiceToast;
 export { juiceToast };
