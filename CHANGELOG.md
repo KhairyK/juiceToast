@@ -1,6 +1,9 @@
-## v1.3.2
+## v1.3.3
+- Bug Fixes on Closeable Toast & Logic
+
+v1.3.2
 - Improved A11Y
-- Adding **Background Image**
+- Adding Background Image
 - Adding more Theme
 - Adding default toast (juiceToast.success|error|info|warning|loading)
 
