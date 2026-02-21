@@ -1,0 +1,206 @@
+<h1>🍹 JuiceToast</h1>
+<p>  <img src="https://img.shields.io/npm/dw/juice-toast" alt="npm download wekkly">
+  <img src="https://img.shields.io/npm/dt/juice-toast" alt="npm download">
+  <img src="https://img.shields.io/npm/v/juice-toast" alt="npm version">
+  <img src="https://img.shields.io/npm/l/juice-toast" alt="license">
+  <img src="https://img.shields.io/github/stars/KhairyK/juiceToast" alt="stars">
+  <img src="https://img.shields.io/github/issues/KhairyK/juiceToast" alt="issues">
+  <img src="https://img.shields.io/github/repo-size/KhairyK/juiceToast" alt="repo size">
+  <img src="https://img.shields.io/badge/browser-all%20modern-brightgreen" alt="browser">
+  <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="deps">
+  <img src="https://img.shields.io/badge/types-TypeScript-blue" alt="ts">
+  <img src="https://img.shields.io/github/last-commit/KhairyK/juiceToast" alt="last commit"></p>
+<hr>
+<p><strong>JuiceToast</strong> is a lightweight, flexible, and dependency-free toast notification library for modern web applications.<br>Designed with a <strong>clean API</strong>, <strong>extensive customization</strong>, and <strong>strong backward compatibility</strong>, JuiceToast fits both small projects and enterprise-scale systems.</p>
+<p>It supports <strong>ESM</strong>, <strong>dynamic toast types</strong>, <strong>theme management</strong>, <strong>queue handling</strong>, and <strong>legacy API compatibility</strong> out of the box.</p>
+<hr>
+<h2>✨ Key Features</h2>
+<ul>
+<li>🚀 Zero dependencies</li>
+<li>📦 Supports <strong>ESM</strong></li>
+<li>🔁 Built-in queue system (one toast displayed at a time)</li>
+<li>🎨 Theme system (light, dark, and custom themes)</li>
+<li>🧩 Dynamic toast types (<code>success</code>, <code>error</code>, etc.)</li>
+<li>⏳ Auto-dismiss &amp; sticky toasts</li>
+<li>❌ Closable toasts</li>
+<li>⭐ Icon support (position, animation, link)</li>
+<li>📐 Size presets and manual sizing</li>
+<li>🧱 Full backward compatibility with legacy APIs</li>
+</ul>
+<hr>
+<h2>📦 Installation</h2>
+<h3>ESM</h3>
+<pre><code class="language-js">import juiceToast from &quot;https://npdn.kyrt.my.id/npm/juice-toast@1.3.2dist/juice-toast.esm.js&quot;;
+</code></pre>
+<hr>
+<h2>🚀 Quick Start</h2>
+<pre><code class="language-js">juiceToast.setup({
+  success: {
+    icon: &quot;check&quot;,
+    theme: &quot;light&quot;,
+    duration: 2000
+  },
+  error: {
+    icon: &quot;x&quot;,
+    bg: &quot;#7f1d1d&quot;,
+    color: &quot;#fff&quot;,
+    closable: true
+  }
+});
+
+juiceToast.success(&quot;Operation completed successfully.&quot;);
+juiceToast.error({
+  title: &quot;Error&quot;,
+  message: &quot;An unexpected error occurred.&quot;
+});
+</code></pre>
+<hr>
+<h2>🧠 Core Concepts</h2>
+<h3>Toast Types</h3>
+<p>Toasts are triggered based on <strong>types</strong> registered using <code>setup()</code> or <code>addType()</code>.</p>
+<pre><code class="language-js">juiceToast.info(&quot;Information message&quot;);
+juiceToast.warning({
+  message: &quot;Proceed with caution&quot;,
+  duration: 4000
+});
+</code></pre>
+<p>This approach allows a clear separation between <strong>toast configuration</strong> and <strong>runtime usage</strong>.</p>
+<hr>
+<h2>⚙️ API Reference</h2>
+<h3><code>setup(config)</code></h3>
+<p>Registers all toast types and their default configuration.</p>
+<pre><code class="language-js">juiceToast.setup({
+  success: { bg: &quot;green&quot; },
+  error: { bg: &quot;red&quot; }
+});
+</code></pre>
+<hr>
+<h3><code>addType(name, config)</code></h3>
+<p>Adds a new toast type dynamically at runtime.</p>
+<pre><code class="language-js">juiceToast.addType(&quot;warning&quot;, {
+  bg: &quot;#facc15&quot;,
+  color: &quot;#111&quot;
+});
+</code></pre>
+<hr>
+<h3><code>defineTheme(name, styles)</code></h3>
+<p>Creates or overrides a theme.</p>
+<pre><code class="language-js">juiceToast.defineTheme(&quot;ocean&quot;, {
+  bg: &quot;#0ea5e9&quot;,
+  color: &quot;#ffffff&quot;,
+  border: &quot;1px solid #0284c7&quot;
+});
+</code></pre>
+<hr>
+<h3><code>setTheme(name)</code></h3>
+<p>Sets the global theme.</p>
+<pre><code class="language-js">juiceToast.setTheme(&quot;dark&quot;);
+</code></pre>
+<hr>
+<h3><code>clear()</code></h3>
+<p>Clears all pending toast queues.</p>
+<pre><code class="language-js">juiceToast.clear();
+</code></pre>
+<hr>
+<h3><code>destroy()</code></h3>
+<p>Removes all queues and the root DOM element.</p>
+<pre><code class="language-js">juiceToast.destroy();
+</code></pre>
+<hr>
+<h2>🧾 Toast Payload Interface</h2>
+<pre><code class="language-ts">interface ToastPayload {
+  message?: string;
+  title?: string;
+
+  bg?: string;
+  color?: string;
+  border?: string;
+  theme?: string;
+
+  duration?: number; // milliseconds, 0 = sticky
+  position?: &quot;top&quot; | &quot;center&quot; | &quot;bottom&quot;;
+  toast?: &quot;top&quot; | &quot;center&quot; | &quot;bottom&quot;; // legacy support
+
+  closable?: boolean;
+  closeable?: boolean; // legacy support
+
+  icon?: string;
+  iconPack?: string;
+  iconLink?: string;
+  iconAnimate?: string;
+  iconPosition?: &quot;left&quot; | &quot;right&quot; | &quot;top&quot;;
+
+  size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot;;
+  width?: string;
+  height?: string;
+
+  animation?: string;
+
+  actions?: {
+    label: string;
+    onClick?: (event: MouseEvent) =&gt; void;
+    closeOnClick?: boolean;
+  }[];
+
+  [key: string]: any;
+}
+</code></pre>
+<hr>
+<h2>🔄 Backward Compatibility</h2>
+<p>JuiceToast automatically maps legacy options to the modern API.</p>
+<table>
+<thead>
+<tr>
+<th>Legacy Option</th>
+<th>Current Option</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>toast</code></td>
+<td><code>position</code></td>
+</tr>
+<tr>
+<td><code>closeable</code></td>
+<td><code>closable</code></td>
+</tr>
+<tr>
+<td><code>icon_left_top</code></td>
+<td><code>icon</code></td>
+</tr>
+<tr>
+<td><code>icon_config</code></td>
+<td><code>iconPack</code></td>
+</tr>
+<tr>
+<td><code>icon_onClick_url</code></td>
+<td><code>iconLink</code></td>
+</tr>
+<tr>
+<td><code>icon_onClick_animate</code></td>
+<td><code>iconAnimate</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>🎨 Default Themes</h2>
+<pre><code class="language-js">light: {
+  bg: &quot;#ffffff&quot;,
+  color: &quot;#111&quot;,
+  border: &quot;1px solid #e5e7eb&quot;
+}
+
+dark: {
+  bg: &quot;#1f2937&quot;,
+  color: &quot;#ffffff&quot;,
+  border: &quot;1px solid rgba(255,255,255,.08)&quot;
+}
+</code></pre>
+<hr>
+<h2>📌 Notes</h2>
+<ul>
+<li>Browser-only (DOM required)</li>
+<li>Root element is automatically created: <code>#juice-toast-root</code></li>
+<li>Suitable for frameworks, custom runtimes, etc.</li>
+</ul>
+<hr>
+<h2>📄 License</h2>
+<p>MIT License © OpenDN Foundation</p>
