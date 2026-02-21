@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.2
+ * Source Of Juice Toast v1.3.3
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
@@ -27,15 +27,6 @@ const BASE_CSS = `
   display: flex;
   gap: 10px;
   pointer-events: none;
-}
-
-/* bottom (default) */
-#juice-toast-root[data-position="bottom"] {
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-direction: column;
-  align-items: center;
 }
 
 /* top */
@@ -315,6 +306,11 @@ const BASE_CSS = `
   100% { transform: scale(1); }
 }
 
+@keyframes jt-slide {
+  from { transform: translateY(20 px);opacity: 0; }
+  to { transform: translateY(0);opacity: 1; }
+}
+
 /* ================= CLASSES ================= */
 
 .spin   { animation: jt-spin .6s linear; }
@@ -323,6 +319,7 @@ const BASE_CSS = `
 .bounce { animation: jt-bounce .45s ease; }
 .wiggle { animation: jt-wiggle .5s ease; }
 .pop    { animation: jt-pop .35s ease-out; }
+.slide-in { animation: jt-slide .55s ease; }
 
 /* ================= ICON INTERACTION ================= */
 
@@ -428,10 +425,13 @@ const juiceToast = {
   /* ===== PUBLIC API ===== */
 
   setup(cfg = {}) {
-    this._config = cfg;
-    this._defaults = { ...this._defaults, ...cfg };
+    const { duration, maxVisible, ...types } = cfg;
+  
+    this._defaults = { ...this._defaults, duration, maxVisible };
+    this._config = types;
+  
     this._registerTypes();
-  },
+  }, 
 
   use(plugin) {
     if (typeof plugin === 'function') {
@@ -627,7 +627,10 @@ const juiceToast = {
     toast.tabIndex = 0;
 
     if (cfg.closable) {
+      const close = document.createElement('span');
       close.tabIndex = 0;
+      close.className = 'juice-toast-close';
+      close.textContent = '×';
       close.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           toast.remove();
@@ -689,10 +692,6 @@ const juiceToast = {
     /* COMPACT */
     if (cfg.compact) {
       toast.classList.add('jt-compact');
-    }
-
-    if (cfg.glassUI ?? this._defaults.glassUI) {
-      toast.classList.add('jt-glass');
     }
 
     /* MANUAL WIDTH / HEIGHT */
@@ -856,7 +855,7 @@ const juiceToast = {
     if (cfg.closable) {
       const close = document.createElement('span');
       close.className = 'juice-toast-close';
-      close.innerHTML = '×';
+      close.textContent = '×';
       close.onclick = () => {
         toast.remove();
         this._next();
@@ -879,7 +878,7 @@ const juiceToast = {
 
     requestAnimationFrame(() => toast.classList.add('show'));
 
-    const duration = cfg.duration ?? 2500;
+    const duration = cfg.duration ?? this._defaults.duration;
     if (duration === 0) return;
 
     let start = Date.now();

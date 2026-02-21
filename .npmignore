@@ -6,5 +6,11 @@ npm.publish.auto
 .editorconfig
 log/
 output-ts/
-node_modules
+node_modules/
 eol/
+.prettierignore
+.prettierrc
+prettier.config.jd
+index.html
+package-lock.json
+tsconfig.json

@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
@@ -23,7 +23,7 @@
   },
   "funding": "https://patreon.com/Khairy47",
   "engines": {
-    "node": ">=18"
+    "node": ">=19"
   },
   "scripts": {
     "format": "npx prettier --write src/"

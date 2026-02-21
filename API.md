@@ -251,10 +251,10 @@ juiceToast.custom("Hello World");
 ## Background image
 ```js
 juiceToast.setup({
-  bgImage: { "bgImage": "https://cdn.kyrt.my.id/image/ts-logo-128.svg" }
+  image: { bgImage: "https://cdn.kyrt.my.id/image/ts-logo-128.svg" }
 });
 
-juiceToast.bgImage("Hi");
+juiceToast.image("Hi");
 ```
 
 ---

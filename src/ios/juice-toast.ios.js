@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.2 (iOS user)
+ * Source Of Juice Toast v1.3.3 (iOS user)
  * Read CONTRIBUTE.md To Contribute
  */
 const isBrowser =
@@ -71,15 +71,6 @@ const BASE_CSS = `
   display: flex;
   gap: 10px;
   pointer-events: none;
-}
-
-/* bottom (default) */
-#juice-toast-root[data-position="bottom"] {
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-direction: column;
-  align-items: center;
 }
 
 /* top */
@@ -471,9 +462,11 @@ const juiceToast = {
   /* ===== PUBLIC API ===== */
 
   setup(cfg = {}) {
+    const { duration, maxVisible, ...types } = cfg;
+    
     // Merge defaults + optional iOS preset tweaks
-    this._config = cfg;
-    this._defaults = { ...this._defaults, ...cfg };
+    this._defaults = { ...this._defaults, duration, maxVisible };
+    this._config = types;
 
     // If iOS, apply some sensible default overrides
     if (isIOS) {
@@ -711,6 +704,10 @@ const juiceToast = {
     toast.tabIndex = 0;
 
     if (cfg.closable) {
+      const close = document.createElement('span');
+      close.className = 'juice-toast-close';
+      close.textContent = '×';
+      
       close.tabIndex = 0;
       close.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -765,10 +762,6 @@ const juiceToast = {
     /* COMPACT */
     if (cfg.compact) {
       toast.classList.add('jt-compact');
-    }
-
-    if (cfg.glassUI ?? this._defaults.glassUI) {
-      toast.classList.add('jt-glass');
     }
 
     /* MANUAL WIDTH / HEIGHT */
@@ -985,7 +978,7 @@ const juiceToast = {
     if (cfg.closable) {
       const close = document.createElement('span');
       close.className = 'juice-toast-close';
-      close.innerHTML = '×';
+      close.textContent = '×';
       close.onclick = () => {
         toast.replaceWith();
         toast.onclick = null;

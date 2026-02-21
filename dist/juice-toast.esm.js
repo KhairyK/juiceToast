@@ -1,6 +1,331 @@
 /**
  * 2026 (C) OpenDN Foundation
- * v1.3.2 (STABLE)
+ * v1.3.3 (STABLE & BUG FIX)
  * ESM (ECMAScript Module)
  */
-const isBrowser="undefined"!=typeof window&&"undefined"!=typeof document,reduceMotion=isBrowser&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,TYPE_ANIMATION={success:"bounce",error:"shake",warning:"wiggle",info:"pulse",loading:"spin"};let __cssInjected=!1;const BASE_CSS='\n#juice-toast-root {\n  position: fixed;\n  z-index: 9999;\n  display: flex;\n  gap: 10px;\n  pointer-events: none;\n}\n\n/* bottom (default) */\n#juice-toast-root[data-position="bottom"] {\n  bottom: 20px;\n  left: 50%;\n  transform: translateX(-50%);\n  flex-direction: column;\n  align-items: center;\n}\n\n/* top */\n#juice-toast-root[data-position="top"] {\n  top: 20px;\n  left: 50%;\n  transform: translateX(-50%);\n  flex-direction: column;\n  align-items: center;\n}\n\n/* center */\n#juice-toast-root[data-position="center"] {\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  flex-direction: column;\n  align-items: center;\n}\n\n[id^="juice-toast-root-"] {\n  position: fixed;\n  z-index: 9999;\n  display: flex;\n  gap: 10px;\n  pointer-events: none;\n}\n\n\n/* ================= TOAST ================= */\n\n.juice-toast {\n  /* animation vars (safe for swipe) */\n  --jt-x: 0px;\n  --jt-y: 12px;\n\n  pointer-events: auto;\n  display: flex;\n  gap: 12px;\n  align-items: flex-start;\n\n  min-width: 220px;\n  max-width: 420px;\n  padding: 12px 16px;\n  margin: 6px 0;\n\n  border-radius: 8px;\n  background: #333;\n  color: #fff;\n\n  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;\n  font-size: 14px;\n\n  opacity: 0;\n  transform: translate(var(--jt-x), var(--jt-y));\n  transition:\n    opacity .25s ease,\n    transform .25s ease,\n    background .25s ease,\n    color .25s ease,\n    box-shadow .25s ease;\n\n  position: relative;\n  box-sizing: border-box;\n  overflow: hidden;\n}\n\n/* visible */\n.juice-toast.show {\n  opacity: 1;\n  transform: translate(var(--jt-x), 0px) scale(1);\n  transition: transform 0.35s ease, opacity 0.35s ease;\n}\n\n/* hide */\n.juice-toast.hide {\n  opacity: 0;\n  transform: translate(var(--jt-x), 12px) scale(0.95);\n}\n\n\n/* ================= ICON ================= */\n\n.juice-toast .icon {\n  width: 28px;\n  height: 28px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 16px;\n  line-height: 1;\n  flex: 0 0 28px;\n}\n\n/* clickable icon */\n.icon-clickable {\n  opacity: 0.85;\n  cursor: pointer;\n}\n\n.icon-clickable:hover {\n  opacity: 1;\n}\n\n/* ================= CONTENT ================= */\n\n.juice-toast .jt-content {\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n  flex: 1 1 auto;\n}\n\n/* title */\n.juice-toast .jt-title {\n  font-weight: 700;\n  font-size: 13px;\n  line-height: 1.1;\n}\n\n/* message */\n.juice-toast .jt-message {\n  font-size: 13px;\n  line-height: 1.3;\n  opacity: 0.95;\n}\n\n/* ================= ICON POSITION ================= */\n\n.jt-icon-top {\n  flex-direction: column;\n  align-items: flex-start;\n}\n\n.jt-icon-top .icon {\n  align-self: center;\n  margin-bottom: 6px;\n}\n\n/* ================= CLOSE ================= */\n\n.juice-toast-close {\n  position: absolute;\n  top: 6px;\n  right: 8px;\n  cursor: pointer;\n  font-size: 16px;\n  opacity: 0.75;\n  padding: 4px;\n  border-radius: 4px;\n}\n\n.juice-toast-close:hover {\n  opacity: 1;\n  background: rgba(255,255,255,0.06);\n}\n\n/* ================= ACTIONS ================= */\n\n.jt-actions {\n  display: flex;\n  gap: 8px;\n  margin-top: 10px;\n}\n\n.jt-action {\n  background: transparent;\n  border: 1px solid currentColor;\n  padding: 4px 10px;\n  border-radius: 6px;\n  cursor: pointer;\n  font-size: 12px;\n}\n\n/* ================= COMPACT ================= */\n\n.jt-compact {\n  padding: 6px 8px;\n  font-size: 0.85em;\n  gap: 6px;\n  max-width: 280px;\n}\n\n/* ================= GLASS UI ================= */\n\n.jt-glass {\n  --g: calc(var(--jt-glass, 60) / 100);\n\n  background: rgba(30, 30, 30, calc(0.2 + var(--g)));\n  backdrop-filter: blur(calc(6px + (14px * var(--g))))\n                   saturate(calc(1 + (0.4 * var(--g))));\n  -webkit-backdrop-filter: blur(calc(6px + (14px * var(--g))))\n                           saturate(calc(1 + (0.4 * var(--g))));\n}\n\n/* light theme support */\n[data-theme="light"] .jt-glass {\n  background:\n    linear-gradient(\n      rgba(255,255,255, calc(0.6 * var(--g))),\n      rgba(255,255,255, calc(0.35 * var(--g)))\n    ),\n    rgba(255,255,255, calc(0.55 - (0.25 * var(--g))));\n\n  color: #111;\n\n  border:\n    1px solid rgba(0,0,0, calc(0.05 + 0.12 * var(--g)));\n\n  box-shadow:\n    0 10px 30px rgba(0,0,0, calc(0.08 + 0.18 * var(--g))),\n    inset 0 1px 0 rgba(255,255,255, calc(0.4 * var(--g)));\n}\n\n/* ================= PROGRESS BAR ================= */\n.jt-progress {\n  position: absolute;\n  left: 0;\n  bottom: 0;\n\n  height: 3px;\n  width: 100%;\n\n  background: linear-gradient(to right, #FFFFFF, #FAFAFA);\n  height: 4px;\n  transform-origin: left;\n  transition: transform linear;\n  border-radius: 2px;\n  transform: scaleX(1);\n  opacity: .85;\n}\n\n/* ================= BACKGROUND IMAGE ================= */\n\n.juice-toast.bg-image {\n  background-size: cover;\n  background-position: center;\n  background-repeat: no-repeat;\n  color: #fff;\n  text-shadow: 0 1px 2px rgba(0,0,0,0.6);\n}\n\n/* ================= ANIMATIONS ================= */\n\n@keyframes jt-spin {\n  to { transform: rotate(360deg); }\n}\n\n@keyframes jt-pulse {\n  50% { transform: scale(1.15); }\n}\n\n@keyframes jt-shake {\n  25% { transform: translateX(-3px); }\n  50% { transform: translateX(3px); }\n  75% { transform: translateX(-3px); }\n}\n\n@keyframes jt-bounce {\n  0%   { transform: scale(1); }\n  30%  { transform: scale(1.25); }\n  60%  { transform: scale(.95); }\n  100% { transform: scale(1); }\n}\n\n@keyframes jt-wiggle {\n  0%   { transform: rotate(0); }\n  25%  { transform: rotate(-10deg); }\n  50%  { transform: rotate(10deg); }\n  75%  { transform: rotate(-6deg); }\n  100% { transform: rotate(0); }\n}\n\n@keyframes jt-pop {\n  0%   { transform: scale(.7); opacity: 0; }\n  70%  { transform: scale(1.05); opacity: 1; }\n  100% { transform: scale(1); }\n}\n\n/* ================= CLASSES ================= */\n\n.spin   { animation: jt-spin .6s linear; }\n.pulse  { animation: jt-pulse .4s ease; }\n.shake  { animation: jt-shake .4s ease; }\n.bounce { animation: jt-bounce .45s ease; }\n.wiggle { animation: jt-wiggle .5s ease; }\n.pop    { animation: jt-pop .35s ease-out; }\n\n/* ================= ICON INTERACTION ================= */\n\n.icon-clickable {\n  cursor: pointer;\n  transition: transform .15s ease, opacity .15s ease;\n}\n\n.icon-clickable:hover {\n  transform: scale(1.1);\n  opacity: .85;\n}\n\n/* ================= ACCESSIBILITY ================= */\n\n@media (prefers-reduced-motion: reduce) {\n  .spin,\n  .pulse,\n  .shake,\n  .bounce,\n  .wiggle,\n  .pop {\n    animation: none !important;\n  }\n}\n';function injectCSS(n){if(!isBrowser||__cssInjected)return;const e=document.createElement("style");e.id="juice-toast-style",e.textContent=n,document.head.appendChild(e),__cssInjected=!0}const themes={light:{bg:"#ffffff",color:"#111",border:"1px solid #e5e7eb"},dark:{bg:"#1f2937",color:"#fff",border:"1px solid rgba(255,255,255,.08)"},glass:{bg:"rgba(30,30,30,.35)",color:"#fff",border:"1px solid rgba(255,255,255,.15)"},midnight:{bg:"#0f172a",color:"#e5e7eb",border:"1px solid rgba(255,255,255,.06)"},soft:{bg:"#f8fafc",color:"#0f172a",border:"1px solid #e2e8f0"},neutral:{bg:"#ffffff",color:"#374151",border:"1px solid #d1d5db"},brand:{bg:"#6366f1",color:"#fff",border:"none"},gradient:{bg:"linear-gradient(135deg,#6366f1,#ec4899)",color:"#fff",border:"none"},outline:{bg:"transparent",color:"#111",border:"2px solid currentColor"}},sizePreset={sm:{width:"260px",padding:"10px"},md:{width:"320px",padding:"14px"},lg:{width:"420px",padding:"18px"}},juiceToast={_config:{},_queue:[],_showing:!1,_theme:"dark",_plugins:[],setup(n={}){this._config=n,this._defaults={...this._defaults,...n},this._registerTypes()},use(n){"function"==typeof n&&this._plugins.push(n)},addType(n,e={}){this._config[n]=e,this._registerTypes()},defineTheme(n,e={}){themes[n]={...themes[n]||{},...e}},setTheme(n){if(this._theme=n,!isBrowser)return;const e=document.getElementById("juice-toast-root");e&&(e.dataset.theme=n)},clear(){this._queue.length=0},destroy(){this.clear(),isBrowser&&document.getElementById("juice-toast-root")?.remove()},_registerTypes(){Object.keys(this._config).forEach((n=>{if("function"==typeof this[n]&&!this[n].__auto)return;const e=e=>this._enqueue(n,e);e.__auto=!0,this[n]=e}))},_enqueue(n,e){this._queue.push({type:n,payload:e}),this._showing||this._next()},_next(){if(!this._queue.length)return void(this._showing=!1);this._showing=!0;const n=this._queue.shift();this._showToast(n.type,n.payload)},_runPlugins(n){this._plugins.forEach((e=>{try{e(n)}catch(n){this._warn("Plugin error: "+n.message)}}))},_normalizeGlass(n){if(!0===n)return 60;if(!1===n||null==n)return 0;const e=Number(n);return Number.isFinite(e)?Math.max(0,Math.min(100,e)):0},_getRoot(n="bottom-right"){if(!isBrowser)return null;let e=document.getElementById(`juice-toast-root-${n}`);if(!e){switch(e=document.createElement("div"),e.id=`juice-toast-root-${n}`,e.dataset.position=n,e.dataset.theme=this._theme,e.style.position="fixed",e.style.zIndex=9999,n){case"top-left":e.style.top="20px",e.style.left="20px";break;case"top-right":e.style.top="20px",e.style.right="20px";break;case"bottom-left":e.style.bottom="20px",e.style.left="20px";break;case"bottom-right":e.style.bottom="20px",e.style.right="20px";break;case"top-center":e.style.top="20px",e.style.left="50%",e.style.transform="translateX(-50%)";break;case"bottom-center":e.style.bottom="20px",e.style.left="50%",e.style.transform="translateX(-50%)"}document.body.appendChild(e)}return e},_defaults:{duration:2500,maxVisible:3,swipeThreshold:60,glassUI:0,playSound:null,dev:!1,injectCSS:!0,css:null},_warn(n){this._defaults.dev&&"undefined"!=typeof console&&console.warn("[JuiceToast]",n)},_playSound(n){if(!isBrowser)return;const e="string"==typeof n&&n?n:this._defaults.playSound;if(e)try{const n=new Audio(e);n.volume=.6,n.play().catch((()=>{}))}catch{}},_showToast(n,e){if(!isBrowser)return;!1!==this._defaults.injectCSS&&injectCSS(this._defaults.css||BASE_CSS);const t={...this._config[n]||{},..."object"==typeof e?e:{message:String(e)}};t.icon=t.icon??t.icon_left_top,t.iconPack=t.iconPack??t.icon_config,t.iconLink=t.iconLink??t.icon_onClick_url,t.iconAnimate=t.iconAnimate??t.icon_onClick_animate,t.position=t.position??t.toast,t.closable=t.closable??t.closeable,t.iconPosition=t.iconPosition||"left",t.compact=!!t.compact;const s=themes[t.theme||this._theme]||{},o=document.createElement("div");o.className="juice-toast";const i=t.animation||"slide-in";if(t.enterAnimation||(o.style.animation=`${i} 0.4s ease forwards`),o.setAttribute("role","alert"),o.setAttribute("aria-live","error"===n?"assertive":"polite"),o.setAttribute("aria-atomic","true"),o.tabIndex=0,t.closable&&(close.tabIndex=0,close.addEventListener("keydown",(n=>{"Enter"!==n.key&&" "!==n.key||(o.remove(),this._next())}))),t.size&&sizePreset[t.size]){const n=sizePreset[t.size];n.width&&(o.style.width=n.width),n.padding&&(o.style.padding=n.padding)}let a=null;if(t.progress&&(t.duration??this._defaults.duration)>0&&(a=document.createElement("div"),a.className="jt-progress",t.progressColor&&(a.style.background=t.progressColor||"rgba(255,255,255,.7)"),o.appendChild(a)),t.tts&&"speechSynthesis"in window)try{const n=new SpeechSynthesisUtterance(t.message||t.title||"");n.lang=t.ttsLang||"en-US",n.rate=t.ttsRate??1,window.speechSynthesis.speak(n)}catch(n){this._warn("TTS failed: "+n.message)}const r=this._normalizeGlass(t.glassUI??this._defaults.glassUI);r>0&&(o.style.setProperty("--jt-glass",t.glassUI??50),o.classList.add("jt-glass")),r||(o.style.background=t.bg||s.bg),o.style.color=t.color||s.color,o.style.border=t.border||s.border,t.compact&&o.classList.add("jt-compact"),(t.glassUI??this._defaults.glassUI)&&o.classList.add("jt-glass"),t.width&&(o.style.width=t.width),t.height&&(o.style.height=t.height),t.bgImage&&(o.style.backgroundImage=`url(${t.bgImage})`,o.classList.add("bg-image"));let c=null;if(t.icon){c=document.createElement("i"),c.className=["icon",t.iconPack||"",t.icon].join(" ").trim(),t.iconSize&&(c.style.fontSize=t.iconSize),(t.iconLink||t.iconAnimate)&&(c.classList.add("icon-clickable"),c.onclick=n=>{n.stopPropagation(),t.iconAnimate&&(c.classList.remove(t.iconAnimate),c.offsetWidth,c.classList.add(t.iconAnimate)),t.iconLink&&window.open(t.iconLink,"_blank","noopener")});const e=t.iconAnimate??TYPE_ANIMATION[n];e&&(c.classList.add(e),c.addEventListener("click",(()=>{c.classList.remove(e),c.offsetWidth,c.classList.add(e)})))}reduceMotion&&(o.classList.remove("pop","bounce","shake","wiggle","pulse","spin"),c?.classList.remove("bounce","shake","wiggle","pulse","spin")),t.message||t.title||this._warn("Toast created without message or title"),t.icon&&!t.iconPack&&this._warn("icon provided without iconPack"),t.duration<0&&this._warn("duration cannot be negative");let l=0,d=0;o.addEventListener("touchstart",(n=>{l=n.touches[0].clientX})),o.addEventListener("touchmove",(n=>{d=n.touches[0].clientX-l,o.style.transform=`translateX(${d}px)`})),o.addEventListener("touchend",(()=>{Math.abs(d)>this._defaults.swipeThreshold?(o.style.transform=`translateX(${d>0?1e3:-1e3}px)`,setTimeout((()=>{o.remove(),this._next()}),200)):o.style.transform="",l=d=0}));const p=document.createElement("div");p.className="jt-content";const u=t.enterAnimation??"pop";if(u&&!reduceMotion&&o.classList.add(u),t.title){const n=document.createElement("div");n.className="jt-title",n.textContent=t.title,p.appendChild(n)}const m=document.createElement("div");if(m.className="jt-message",m.textContent=t.message||"",p.appendChild(m),c&&"top"===t.iconPosition?(o.classList.add("jt-icon-top"),o.appendChild(c),o.appendChild(p)):c&&"right"===t.iconPosition?(o.appendChild(p),o.appendChild(c)):(c&&o.appendChild(c),o.appendChild(p)),Array.isArray(t.actions)&&t.actions.length){const n=document.createElement("div");n.className="jt-actions",t.actions.forEach((e=>{const t=document.createElement("button");t.className="jt-action",t.textContent=e.label,t.onclick=n=>{n.stopPropagation(),e.onClick?.(n),e.closeOnClick&&(o.remove(),this._next())},n.appendChild(t)})),p.appendChild(n)}if(t.closable){const n=document.createElement("span");n.className="juice-toast-close",n.innerHTML="×",n.onclick=()=>{o.remove(),this._next()},o.appendChild(n)}const f=this._getRoot(t.position),g=this._defaults.maxVisible;g&&f.children.length>=g&&f.firstChild.remove(),f.appendChild(o),this._runPlugins({toast:o,cfg:t,type:n,root:f}),requestAnimationFrame((()=>o.classList.add("show")));const h=t.duration??2500;if(0===h)return;let b,x=Date.now(),y=t.duration??this._defaults.duration;const _=()=>{if(o.__paused)x=Date.now();else{const n=Date.now();y-=n-x,x=n}y<=0?(o.classList.remove("show"),setTimeout((()=>{o.remove(),this._next()}),300)):b=requestAnimationFrame(_),a&&(a.style.transform=`scaleX(${Math.max(0,y/h)})`)};o.addEventListener("mouseenter",(()=>o.__paused=!0)),o.addEventListener("mouseleave",(()=>o.__paused=!1)),o.addEventListener("touchstart",(()=>o.__paused=!0)),o.addEventListener("touchend",(()=>o.__paused=!1)),requestAnimationFrame(_)}};juiceToast.setup({success:{icon:"fa-check",iconPack:"fas",bg:"#16a34a",progress:!0,duration:3e3},error:{icon:"fa-xmark",iconPack:"fas",bg:"#dc2626",progress:!0,duration:4e3},info:{icon:"fa-circle-info",iconPack:"fas",bg:"#2563eb",progress:!0},warning:{icon:"fa-triangle-exclamation",iconPack:"fas",bg:"#f59e0b",progress:!0},loading:{icon:"fa-spinner",iconPack:"fas",iconAnimate:"spin",duration:0,progress:!1,closable:!1}});export default juiceToast;export{juiceToast};
+let isBrowser="undefined"!=typeof window&&"undefined"!=typeof document,reduceMotion=isBrowser&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,TYPE_ANIMATION={success:"bounce",error:"shake",warning:"wiggle",info:"pulse",loading:"spin"},__cssInjected=!1,BASE_CSS=`
+#juice-toast-root {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+
+/* top */
+#juice-toast-root[data-position="top"] {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column;
+  align-items: center;
+}
+
+/* center */
+#juice-toast-root[data-position="center"] {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  align-items: center;
+}
+
+[id^="juice-toast-root-"] {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+
+
+/* ================= TOAST ================= */
+
+.juice-toast {
+  /* animation vars (safe for swipe) */
+  --jt-x: 0px;
+  --jt-y: 12px;
+
+  pointer-events: auto;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  min-width: 220px;
+  max-width: 420px;
+  padding: 12px 16px;
+  margin: 6px 0;
+
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-size: 14px;
+
+  opacity: 0;
+  transform: translate(var(--jt-x), var(--jt-y));
+  transition:
+    opacity .25s ease,
+    transform .25s ease,
+    background .25s ease,
+    color .25s ease,
+    box-shadow .25s ease;
+
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* visible */
+.juice-toast.show {
+  opacity: 1;
+  transform: translate(var(--jt-x), 0px) scale(1);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+/* hide */
+.juice-toast.hide {
+  opacity: 0;
+  transform: translate(var(--jt-x), 12px) scale(0.95);
+}
+
+
+/* ================= ICON ================= */
+
+.juice-toast .icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  flex: 0 0 28px;
+}
+
+/* clickable icon */
+.icon-clickable {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+.icon-clickable:hover {
+  opacity: 1;
+}
+
+/* ================= CONTENT ================= */
+
+.juice-toast .jt-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+/* title */
+.juice-toast .jt-title {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+/* message */
+.juice-toast .jt-message {
+  font-size: 13px;
+  line-height: 1.3;
+  opacity: 0.95;
+}
+
+/* ================= ICON POSITION ================= */
+
+.jt-icon-top {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.jt-icon-top .icon {
+  align-self: center;
+  margin-bottom: 6px;
+}
+
+/* ================= CLOSE ================= */
+
+.juice-toast-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.75;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.juice-toast-close:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ================= ACTIONS ================= */
+
+.jt-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.jt-action {
+  background: transparent;
+  border: 1px solid currentColor;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ================= COMPACT ================= */
+
+.jt-compact {
+  padding: 6px 8px;
+  font-size: 0.85em;
+  gap: 6px;
+  max-width: 280px;
+}
+
+/* ================= GLASS UI ================= */
+
+.jt-glass {
+  --g: calc(var(--jt-glass, 60) / 100);
+
+  background: rgba(30, 30, 30, calc(0.2 + var(--g)));
+  backdrop-filter: blur(calc(6px + (14px * var(--g))))
+                   saturate(calc(1 + (0.4 * var(--g))));
+  -webkit-backdrop-filter: blur(calc(6px + (14px * var(--g))))
+                           saturate(calc(1 + (0.4 * var(--g))));
+}
+
+/* light theme support */
+[data-theme="light"] .jt-glass {
+  background:
+    linear-gradient(
+      rgba(255,255,255, calc(0.6 * var(--g))),
+      rgba(255,255,255, calc(0.35 * var(--g)))
+    ),
+    rgba(255,255,255, calc(0.55 - (0.25 * var(--g))));
+
+  color: #111;
+
+  border:
+    1px solid rgba(0,0,0, calc(0.05 + 0.12 * var(--g)));
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0, calc(0.08 + 0.18 * var(--g))),
+    inset 0 1px 0 rgba(255,255,255, calc(0.4 * var(--g)));
+}
+
+/* ================= PROGRESS BAR ================= */
+.jt-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+
+  height: 3px;
+  width: 100%;
+
+  background: linear-gradient(to right, #FFFFFF, #FAFAFA);
+  height: 4px;
+  transform-origin: left;
+  transition: transform linear;
+  border-radius: 2px;
+  transform: scaleX(1);
+  opacity: .85;
+}
+
+/* ================= BACKGROUND IMAGE ================= */
+
+.juice-toast.bg-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes jt-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes jt-pulse {
+  50% { transform: scale(1.15); }
+}
+
+@keyframes jt-shake {
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+}
+
+@keyframes jt-bounce {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.25); }
+  60%  { transform: scale(.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes jt-wiggle {
+  0%   { transform: rotate(0); }
+  25%  { transform: rotate(-10deg); }
+  50%  { transform: rotate(10deg); }
+  75%  { transform: rotate(-6deg); }
+  100% { transform: rotate(0); }
+}
+
+@keyframes jt-pop {
+  0%   { transform: scale(.7); opacity: 0; }
+  70%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes jt-slide {
+  from { transform: translateY(20 px);opacity: 0; }
+  to { transform: translateY(0);opacity: 1; }
+}
+
+/* ================= CLASSES ================= */
+
+.spin   { animation: jt-spin .6s linear; }
+.pulse  { animation: jt-pulse .4s ease; }
+.shake  { animation: jt-shake .4s ease; }
+.bounce { animation: jt-bounce .45s ease; }
+.wiggle { animation: jt-wiggle .5s ease; }
+.pop    { animation: jt-pop .35s ease-out; }
+.slide-in { animation: jt-slide .55s ease; }
+
+/* ================= ICON INTERACTION ================= */
+
+.icon-clickable {
+  cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+.icon-clickable:hover {
+  transform: scale(1.1);
+  opacity: .85;
+}
+
+/* ================= ACCESSIBILITY ================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .pulse,
+  .shake,
+  .bounce,
+  .wiggle,
+  .pop {
+    animation: none !important;
+  }
+}
+`;function injectCSS(e){if(!isBrowser||__cssInjected)return;let t=document.createElement("style");t.id="juice-toast-style",t.textContent=e,document.head.appendChild(t),__cssInjected=!0}let themes={light:{bg:"#ffffff",color:"#111",border:"1px solid #e5e7eb"},dark:{bg:"#1f2937",color:"#fff",border:"1px solid rgba(255,255,255,.08)"},glass:{bg:"rgba(30,30,30,.35)",color:"#fff",border:"1px solid rgba(255,255,255,.15)"},midnight:{bg:"#0f172a",color:"#e5e7eb",border:"1px solid rgba(255,255,255,.06)"},soft:{bg:"#f8fafc",color:"#0f172a",border:"1px solid #e2e8f0"},neutral:{bg:"#ffffff",color:"#374151",border:"1px solid #d1d5db"},brand:{bg:"#6366f1",color:"#fff",border:"none"},gradient:{bg:"linear-gradient(135deg,#6366f1,#ec4899)",color:"#fff",border:"none"},outline:{bg:"transparent",color:"#111",border:"2px solid currentColor"}},sizePreset={sm:{width:"260px",padding:"10px"},md:{width:"320px",padding:"14px"},lg:{width:"420px",padding:"18px"}},juiceToast={_config:{},_queue:[],_showing:!1,_theme:"dark",_plugins:[],setup(e={}){let{duration:t,maxVisible:s,...a}=e;this._defaults={...this._defaults,duration:t,maxVisible:s},this._config=a,this._registerTypes()},use(e){"function"==typeof e&&this._plugins.push(e)},addType(e,t={}){this._config[e]=t,this._registerTypes()},defineTheme(e,t={}){themes[e]={...themes[e]||{},...t}},setTheme(e){if(this._theme=e,!isBrowser)return;let t=document.getElementById("juice-toast-root");t&&(t.dataset.theme=e)},clear(){this._queue.length=0},destroy(){this.clear(),isBrowser&&document.getElementById("juice-toast-root")?.remove()},_registerTypes(){Object.keys(this._config).forEach(e=>{if("function"==typeof this[e]&&!this[e].__auto)return;let t=t=>this._enqueue(e,t);t.__auto=!0,this[e]=t})},_enqueue(e,t){this._queue.push({type:e,payload:t}),this._showing||this._next()},_next(){if(!this._queue.length){this._showing=!1;return}this._showing=!0;let e=this._queue.shift();this._showToast(e.type,e.payload)},_runPlugins(e){this._plugins.forEach(t=>{try{t(e)}catch(s){this._warn("Plugin error: "+s.message)}})},_normalizeGlass(e){if(!0===e)return 60;if(!1===e||null==e)return 0;let t=Number(e);return Number.isFinite(t)?Math.max(0,Math.min(100,t)):0},_getRoot(e="bottom-right"){if(!isBrowser)return null;let t=document.getElementById(`juice-toast-root-${e}`);if(!t){switch((t=document.createElement("div")).id=`juice-toast-root-${e}`,t.dataset.position=e,t.dataset.theme=this._theme,t.style.position="fixed",t.style.zIndex=9999,e){case"top-left":t.style.top="20px",t.style.left="20px";break;case"top-right":t.style.top="20px",t.style.right="20px";break;case"bottom-left":t.style.bottom="20px",t.style.left="20px";break;case"bottom-right":t.style.bottom="20px",t.style.right="20px";break;case"top-center":t.style.top="20px",t.style.left="50%",t.style.transform="translateX(-50%)";break;case"bottom-center":t.style.bottom="20px",t.style.left="50%",t.style.transform="translateX(-50%)"}document.body.appendChild(t)}return t},_defaults:{duration:2500,maxVisible:3,swipeThreshold:60,glassUI:0,playSound:null,dev:!1,injectCSS:!0,css:null},_warn(e){this._defaults.dev&&"undefined"!=typeof console&&console.warn("[JuiceToast]",e)},_playSound(e){if(!isBrowser)return;let t="string"==typeof e&&e?e:this._defaults.playSound;if(t)try{let s=new Audio(t);s.volume=.6,s.play().catch(()=>{})}catch{}},_showToast(e,t){if(!isBrowser)return;!1!==this._defaults.injectCSS&&injectCSS(this._defaults.css||BASE_CSS);let s=this._config[e]||{},a="object"==typeof t?t:{message:String(t)},i={...s,...a};i.icon=i.icon??i.icon_left_top,i.iconPack=i.iconPack??i.icon_config,i.iconLink=i.iconLink??i.icon_onClick_url,i.iconAnimate=i.iconAnimate??i.icon_onClick_animate,i.position=i.position??i.toast,i.closable=i.closable??i.closeable,i.iconPosition=i.iconPosition||"left",i.compact=!!i.compact;let o=themes[i.theme||this._theme]||{},n=document.createElement("div");n.className="juice-toast";let r=i.animation||"slide-in";if(i.enterAnimation||(n.style.animation=`${r} 0.4s ease forwards`),n.setAttribute("role","alert"),n.setAttribute("aria-live","error"===e?"assertive":"polite"),n.setAttribute("aria-atomic","true"),n.tabIndex=0,i.closable){let l=document.createElement("span");l.tabIndex=0,l.className="juice-toast-close",l.textContent="\xd7",l.addEventListener("keydown",e=>{("Enter"===e.key||" "===e.key)&&(n.remove(),this._next())})}if(i.size&&sizePreset[i.size]){let c=sizePreset[i.size];c.width&&(n.style.width=c.width),c.padding&&(n.style.padding=c.padding)}let d=null;if(i.progress&&(i.duration??this._defaults.duration)>0&&((d=document.createElement("div")).className="jt-progress",i.progressColor&&(d.style.background=i.progressColor||"rgba(255,255,255,.7)"),n.appendChild(d)),i.tts&&"speechSynthesis"in window)try{let p=new SpeechSynthesisUtterance(i.message||i.title||"");p.lang=i.ttsLang||"en-US",p.rate=i.ttsRate??1,window.speechSynthesis.speak(p)}catch(f){this._warn("TTS failed: "+f.message)}let g=this._normalizeGlass(i.glassUI??this._defaults.glassUI);g>0&&(n.style.setProperty("--jt-glass",i.glassUI??50),n.classList.add("jt-glass")),g||(n.style.background=i.bg||o.bg),n.style.color=i.color||o.color,n.style.border=i.border||o.border,i.compact&&n.classList.add("jt-compact"),i.width&&(n.style.width=i.width),i.height&&(n.style.height=i.height),i.bgImage&&(n.style.backgroundImage=`url(${i.bgImage})`,n.classList.add("bg-image"));let u=null;if(i.icon){(u=document.createElement("i")).className=["icon",i.iconPack||"",i.icon].join(" ").trim(),i.iconSize&&(u.style.fontSize=i.iconSize),(i.iconLink||i.iconAnimate)&&(u.classList.add("icon-clickable"),u.onclick=e=>{e.stopPropagation(),i.iconAnimate&&(u.classList.remove(i.iconAnimate),u.offsetWidth,u.classList.add(i.iconAnimate)),i.iconLink&&window.open(i.iconLink,"_blank","noopener")});let m=i.iconAnimate??TYPE_ANIMATION[e];m&&(u.classList.add(m),u.addEventListener("click",()=>{u.classList.remove(m),u.offsetWidth,u.classList.add(m)}))}reduceMotion&&(n.classList.remove("pop","bounce","shake","wiggle","pulse","spin"),u?.classList.remove("bounce","shake","wiggle","pulse","spin")),i.message||i.title||this._warn("Toast created without message or title"),i.icon&&!i.iconPack&&this._warn("icon provided without iconPack"),i.duration<0&&this._warn("duration cannot be negative");let h=0,$=0;n.addEventListener("touchstart",e=>{h=e.touches[0].clientX}),n.addEventListener("touchmove",e=>{$=e.touches[0].clientX-h,n.style.transform=`translateX(${$}px)`}),n.addEventListener("touchend",()=>{Math.abs($)>this._defaults.swipeThreshold?(n.style.transform=`translateX(${$>0?1e3:-1e3}px)`,setTimeout(()=>{n.remove(),this._next()},200)):n.style.transform="",h=$=0});let x=document.createElement("div");x.className="jt-content";let b=i.enterAnimation??"pop";if(b&&!reduceMotion&&n.classList.add(b),i.title){let y=document.createElement("div");y.className="jt-title",y.textContent=i.title,x.appendChild(y)}let _=document.createElement("div");if(_.className="jt-message",_.textContent=i.message||"",x.appendChild(_),u&&"top"===i.iconPosition?(n.classList.add("jt-icon-top"),n.appendChild(u),n.appendChild(x)):u&&"right"===i.iconPosition?(n.appendChild(x),n.appendChild(u)):(u&&n.appendChild(u),n.appendChild(x)),Array.isArray(i.actions)&&i.actions.length){let j=document.createElement("div");j.className="jt-actions",i.actions.forEach(e=>{let t=document.createElement("button");t.className="jt-action",t.textContent=e.label,t.onclick=t=>{t.stopPropagation(),e.onClick?.(t),e.closeOnClick&&(n.remove(),this._next())},j.appendChild(t)}),x.appendChild(j)}if(i.closable){let k=document.createElement("span");k.className="juice-toast-close",k.textContent="\xd7",k.onclick=()=>{n.remove(),this._next()},n.appendChild(k)}let w=this._getRoot(i.position),v=this._defaults.maxVisible;v&&w.children.length>=v&&w.firstChild.remove(),w.appendChild(n),this._runPlugins({toast:n,cfg:i,type:e,root:w}),requestAnimationFrame(()=>n.classList.add("show"));let C=i.duration??this._defaults.duration;if(0===C)return;let E=Date.now(),S=i.duration??this._defaults.duration,A,I=()=>{if(n.__paused)E=Date.now();else{let e=Date.now();S-=e-E,E=e}S<=0?(n.classList.remove("show"),setTimeout(()=>{n.remove(),this._next()},300)):A=requestAnimationFrame(I),d&&(d.style.transform=`scaleX(${Math.max(0,S/C)})`)};n.addEventListener("mouseenter",()=>n.__paused=!0),n.addEventListener("mouseleave",()=>n.__paused=!1),n.addEventListener("touchstart",()=>n.__paused=!0),n.addEventListener("touchend",()=>n.__paused=!1),requestAnimationFrame(I)}};juiceToast.setup({success:{icon:"fa-check",iconPack:"fas",bg:"#16a34a",progress:!0,duration:3e3},error:{icon:"fa-xmark",iconPack:"fas",bg:"#dc2626",progress:!0,duration:4e3},info:{icon:"fa-circle-info",iconPack:"fas",bg:"#2563eb",progress:!0},warning:{icon:"fa-triangle-exclamation",iconPack:"fas",bg:"#f59e0b",progress:!0},loading:{icon:"fa-spinner",iconPack:"fas",iconAnimate:"spin",duration:0,progress:!1,closable:!1}});export default juiceToast;export{juiceToast};

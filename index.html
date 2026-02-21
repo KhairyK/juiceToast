@@ -1,206 +1,321 @@
-<h1>🍹 JuiceToast</h1>
-<p>  <img src="https://img.shields.io/npm/dw/juice-toast" alt="npm download wekkly">
-  <img src="https://img.shields.io/npm/dt/juice-toast" alt="npm download">
-  <img src="https://img.shields.io/npm/v/juice-toast" alt="npm version">
-  <img src="https://img.shields.io/npm/l/juice-toast" alt="license">
-  <img src="https://img.shields.io/github/stars/KhairyK/juiceToast" alt="stars">
-  <img src="https://img.shields.io/github/issues/KhairyK/juiceToast" alt="issues">
-  <img src="https://img.shields.io/github/repo-size/KhairyK/juiceToast" alt="repo size">
-  <img src="https://img.shields.io/badge/browser-all%20modern-brightgreen" alt="browser">
-  <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="deps">
-  <img src="https://img.shields.io/badge/types-TypeScript-blue" alt="ts">
-  <img src="https://img.shields.io/github/last-commit/KhairyK/juiceToast" alt="last commit"></p>
-<hr>
-<p><strong>JuiceToast</strong> is a lightweight, flexible, and dependency-free toast notification library for modern web applications.<br>Designed with a <strong>clean API</strong>, <strong>extensive customization</strong>, and <strong>strong backward compatibility</strong>, JuiceToast fits both small projects and enterprise-scale systems.</p>
-<p>It supports <strong>ESM</strong>, <strong>dynamic toast types</strong>, <strong>theme management</strong>, <strong>queue handling</strong>, and <strong>legacy API compatibility</strong> out of the box.</p>
-<hr>
-<h2>✨ Key Features</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JuiceToast Docs</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+<style>
+body { background:#f8fafc; }
+
+.hero {
+  padding:80px 0;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+}
+
+.sidebar {
+  position:sticky;
+  top:20px;
+}
+
+.code-box { position:relative; }
+
+.copy-btn {
+  position:absolute;
+  top:10px;
+  right:10px;
+}
+
+.demo-card {
+  cursor:pointer;
+  transition:.2s;
+}
+.demo-card:hover { transform:translateY(-4px); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero text-center">
+<div class="container">
+<h1 class="display-4 fw-bold">🍹 JuiceToast</h1>
+<p class="lead">Lightweight • Dependency-free • Fully customizable</p>
+</div>
+</section>
+
+<div class="container mt-5">
+<div class="row">
+
+<!-- SIDEBAR -->
+<div class="col-md-3">
+<div class="sidebar">
+
+<div class="list-group">
+<a href="#features" class="list-group-item">Features</a>
+<a href="#install" class="list-group-item">Installation</a>
+<a href="#quick" class="list-group-item">Quick Start</a>
+<a href="#demo" class="list-group-item">Live Demo</a>
+<a href="#setup" class="list-group-item">Setup Options</a>
+<a href="#payload" class="list-group-item">Payload</a>
+<a href="#animation" class="list-group-item">Animation</a>
+<a href="#theme" class="list-group-item">Themes</a>
+<a href="#plugins" class="list-group-item">Plugins</a>
+<a href="#utils" class="list-group-item">Utilities</a>
+<a href="#bgImage" class="list-group-item">Background Image</a>
+</div>
+
+</div>
+</div>
+
+<!-- CONTENT -->
+<div class="col-md-9">
+
+<!-- FEATURES -->
+<section id="features" class="mb-5">
+<h3>✨ Features</h3>
+
 <ul>
-<li>🚀 Zero dependencies</li>
-<li>📦 Supports <strong>ESM</strong></li>
-<li>🔁 Built-in queue system (one toast displayed at a time)</li>
-<li>🎨 Theme system (light, dark, and custom themes)</li>
-<li>🧩 Dynamic toast types (<code>success</code>, <code>error</code>, etc.)</li>
-<li>⏳ Auto-dismiss &amp; sticky toasts</li>
-<li>❌ Closable toasts</li>
-<li>⭐ Icon support (position, animation, link)</li>
-<li>📐 Size presets and manual sizing</li>
-<li>🧱 Full backward compatibility with legacy APIs</li>
+<li>Zero dependencies</li>
+<li>Queue system</li>
+<li>Theme support</li>
+<li>Glass UI</li>
+<li>Animations</li>
+<li>Accessibility ready</li>
+<li>Plugin system</li>
+<li>Custom toast types</li>
 </ul>
-<hr>
-<h2>📦 Installation</h2>
-<h3>ESM</h3>
-<pre><code class="language-js">import juiceToast from &quot;https://npdn.kyrt.my.id/npm/juice-toast@1.3.2dist/juice-toast.esm.js&quot;;
-</code></pre>
-<hr>
-<h2>🚀 Quick Start</h2>
-<pre><code class="language-js">juiceToast.setup({
+</section>
+
+<!-- INSTALL -->
+<section id="install" class="mb-5">
+<h3>📦 Installation</h3>
+
+<div class="card mt-3 code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('code')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="code">import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast@1.3.2/dist/juice-toast.esm.js";</pre>
+</div>
+</section>
+
+<!-- QUICK START -->
+<section id="quick" class="mb-5">
+<h3>🚀 Quick Start</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('quickCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="quickCode">
+juiceToast.setup({
+  duration: 5000,
+  maxVisible: 3,
+  glassUI: true
+});
+
+juiceToast.success({
+  title: "Success",
+  message: "Saved successfully", 
+  size: "lg", 
+  width: "360px"
+});
+</pre>
+</div>
+</section>
+
+<!-- LIVE DEMO -->
+<section id="demo" class="mb-5">
+<h3>🎮 Live Demo</h3>
+
+<div class="row g-3 text-center">
+
+<div class="col-md-4">
+<div class="card p-3 demo-card" onclick="demoSuccess()">Success Toast</div>
+</div>
+
+<div class="col-md-4">
+<div class="card p-3 demo-card" onclick="demoError()">Error Toast</div>
+</div>
+
+<div class="col-md-4">
+<div class="card p-3 demo-card" onclick="demoCustom()">Custom Toast</div>
+</div>
+
+</div>
+</section>
+
+<!-- SETUP -->
+<section id="setup" class="mb-5">
+<h3>⚙️ Setup Options</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('setupCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="setupCode">
+juiceToast.setup({
+ duration: 2500,
+ maxVisible: 3,
+ glassUI: true,
+ swipeThreshold: 60
+});
+</pre>
+</div>
+</section>
+
+<!-- PAYLOAD -->
+<section id="payload" class="mb-5">
+<h3>📝 Payload Example</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('payloadCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="payloadCode">
+juiceToast.success({
+ title: "Success",
+ message: "Hello world",
+ progress: true,
+ closable: true, 
+ size: "lg", 
+ width: "380px"
+});
+</pre>
+</div>
+</section>
+
+<!-- ANIMATION -->
+<section id="animation" class="mb-5">
+<h3>🎬 Animation</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('animCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="animCode">
+juiceToast.success({
+ animation: "slide-in",
+ enterAnimation: "bounce"
+});
+</pre>
+</div>
+</section>
+
+<!-- THEMES -->
+<section id="theme" class="mb-5">
+<h3>🎨 Themes</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('themeCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="themeCode">
+juiceToast.defineTheme("ocean",{
+ bg: "#0ea5e9",
+ color: "#fff"
+});
+</pre>
+</div>
+</section>
+
+<!-- PLUGINS -->
+<section id="plugins" class="mb-5">
+<h3>🔌 Plugin System</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('pluginCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="pluginCode">
+juiceToast.use(ctx => {
+ console.log(ctx.type);
+});
+</pre>
+</div>
+</section>
+
+<!-- UTILITIES -->
+<section id="utils" class="mb-5">
+<h3>🧹 Utilities</h3>
+
+<div class="card code-box">
+<button class="btn btn-sm btn-dark copy-btn" onclick="copy('utilCode')">Copy</button>
+<pre class="m-0 p-3 bg-dark text-light" id="utilCode">
+juiceToast.clear();
+juiceToast.destroy();
+</pre>
+</div>
+</section>
+
+<section id="image" class="mb-5">
+  <h3>✨ Background Image</h3>
+  
+  <div class="card code-box">
+    <button class="btn btn-sm btn-dark copy-btn" onclick="copy('bgImage')">Copy</button>
+    <pre class="m-0 p-3 bg-dark text-light" id="bgImage">
+juiceToast.success({
+  width: "400px", 
+  size: "lg", 
+  bgImage: "https://cdn.kyrt.my.id/image/ts-logo-128.svg"
+});
+</pre>
+  </div>
+</section>
+
+</div>
+</div>
+</div>
+
+<footer class="py-4 text-center bg-light mt-5">
+MIT License © 2026 OpenDN Foundation
+</footer>
+
+<script type="module">
+import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast@1.3.2/dist/juice-toast.esm.js";
+
+juiceToast.setup({
+  custom: {}, 
   success: {
-    icon: &quot;check&quot;,
-    theme: &quot;light&quot;,
-    duration: 2000
+  icon: 'fa-check',
+  iconPack: 'fas',
+  bg: '#16a34a',
+  progress: true,
+  duration: 3000,
   },
   error: {
-    icon: &quot;x&quot;,
-    bg: &quot;#7f1d1d&quot;,
-    color: &quot;#fff&quot;,
-    closable: true
-  }
+  icon: 'fa-xmark',
+  iconPack: 'fas',
+  bg: '#dc2626',
+  progress: true,
+  duration: 4000,
+},
 });
 
-juiceToast.success(&quot;Operation completed successfully.&quot;);
-juiceToast.error({
-  title: &quot;Error&quot;,
-  message: &quot;An unexpected error occurred.&quot;
-});
-</code></pre>
-<hr>
-<h2>🧠 Core Concepts</h2>
-<h3>Toast Types</h3>
-<p>Toasts are triggered based on <strong>types</strong> registered using <code>setup()</code> or <code>addType()</code>.</p>
-<pre><code class="language-js">juiceToast.info(&quot;Information message&quot;);
-juiceToast.warning({
-  message: &quot;Proceed with caution&quot;,
-  duration: 4000
-});
-</code></pre>
-<p>This approach allows a clear separation between <strong>toast configuration</strong> and <strong>runtime usage</strong>.</p>
-<hr>
-<h2>⚙️ API Reference</h2>
-<h3><code>setup(config)</code></h3>
-<p>Registers all toast types and their default configuration.</p>
-<pre><code class="language-js">juiceToast.setup({
-  success: { bg: &quot;green&quot; },
-  error: { bg: &quot;red&quot; }
-});
-</code></pre>
-<hr>
-<h3><code>addType(name, config)</code></h3>
-<p>Adds a new toast type dynamically at runtime.</p>
-<pre><code class="language-js">juiceToast.addType(&quot;warning&quot;, {
-  bg: &quot;#facc15&quot;,
-  color: &quot;#111&quot;
-});
-</code></pre>
-<hr>
-<h3><code>defineTheme(name, styles)</code></h3>
-<p>Creates or overrides a theme.</p>
-<pre><code class="language-js">juiceToast.defineTheme(&quot;ocean&quot;, {
-  bg: &quot;#0ea5e9&quot;,
-  color: &quot;#ffffff&quot;,
-  border: &quot;1px solid #0284c7&quot;
-});
-</code></pre>
-<hr>
-<h3><code>setTheme(name)</code></h3>
-<p>Sets the global theme.</p>
-<pre><code class="language-js">juiceToast.setTheme(&quot;dark&quot;);
-</code></pre>
-<hr>
-<h3><code>clear()</code></h3>
-<p>Clears all pending toast queues.</p>
-<pre><code class="language-js">juiceToast.clear();
-</code></pre>
-<hr>
-<h3><code>destroy()</code></h3>
-<p>Removes all queues and the root DOM element.</p>
-<pre><code class="language-js">juiceToast.destroy();
-</code></pre>
-<hr>
-<h2>🧾 Toast Payload Interface</h2>
-<pre><code class="language-ts">interface ToastPayload {
-  message?: string;
-  title?: string;
-
-  bg?: string;
-  color?: string;
-  border?: string;
-  theme?: string;
-
-  duration?: number; // milliseconds, 0 = sticky
-  position?: &quot;top&quot; | &quot;center&quot; | &quot;bottom&quot;;
-  toast?: &quot;top&quot; | &quot;center&quot; | &quot;bottom&quot;; // legacy support
-
-  closable?: boolean;
-  closeable?: boolean; // legacy support
-
-  icon?: string;
-  iconPack?: string;
-  iconLink?: string;
-  iconAnimate?: string;
-  iconPosition?: &quot;left&quot; | &quot;right&quot; | &quot;top&quot;;
-
-  size?: &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot;;
-  width?: string;
-  height?: string;
-
-  animation?: string;
-
-  actions?: {
-    label: string;
-    onClick?: (event: MouseEvent) =&gt; void;
-    closeOnClick?: boolean;
-  }[];
-
-  [key: string]: any;
-}
-</code></pre>
-<hr>
-<h2>🔄 Backward Compatibility</h2>
-<p>JuiceToast automatically maps legacy options to the modern API.</p>
-<table>
-<thead>
-<tr>
-<th>Legacy Option</th>
-<th>Current Option</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>toast</code></td>
-<td><code>position</code></td>
-</tr>
-<tr>
-<td><code>closeable</code></td>
-<td><code>closable</code></td>
-</tr>
-<tr>
-<td><code>icon_left_top</code></td>
-<td><code>icon</code></td>
-</tr>
-<tr>
-<td><code>icon_config</code></td>
-<td><code>iconPack</code></td>
-</tr>
-<tr>
-<td><code>icon_onClick_url</code></td>
-<td><code>iconLink</code></td>
-</tr>
-<tr>
-<td><code>icon_onClick_animate</code></td>
-<td><code>iconAnimate</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2>🎨 Default Themes</h2>
-<pre><code class="language-js">light: {
-  bg: &quot;#ffffff&quot;,
-  color: &quot;#111&quot;,
-  border: &quot;1px solid #e5e7eb&quot;
+function copy(id){
+ navigator.clipboard.writeText(document.getElementById(id).innerText);
+ juiceToast.success({
+   title: "Copied!", 
+   message: "Completed to copy the code.", 
+   progress: true, 
+   width: "360px", 
+   size: "lg", 
+ });
 }
 
-dark: {
-  bg: &quot;#1f2937&quot;,
-  color: &quot;#ffffff&quot;,
-  border: &quot;1px solid rgba(255,255,255,.08)&quot;
+function demoSuccess(){
+ juiceToast.success("Operation successful!");
 }
-</code></pre>
-<hr>
-<h2>📌 Notes</h2>
-<ul>
-<li>Browser-only (DOM required)</li>
-<li>Root element is automatically created: <code>#juice-toast-root</code></li>
-<li>Suitable for frameworks, custom runtimes, etc.</li>
-</ul>
-<hr>
-<h2>📄 License</h2>
-<p>MIT License © OpenDN Foundation</p>
+
+function demoError(){
+ juiceToast.error({
+   title: "Error",
+   message: "Something failed"});
+}
+
+function demoCustom(){
+ juiceToast.custom({
+  title: "Custom",
+  message: "Styled toast",
+  bg: "#2563eb",
+  color: "#fff"
+ });
+}
+
+window.copy = copy;
+window.demoSuccess = demoSuccess;
+window.demoError = demoError;
+window.demoCustom = demoCustom;
+</script>
+
+</body>
+</html>
