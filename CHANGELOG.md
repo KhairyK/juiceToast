@@ -1,11 +1,16 @@
-## v1.3.3
+## v1.3.4
+- Bug Fixes
+- Add profile image
+- Add Hook's Plugins
+
+v1.3.3
 - Bug Fixes on Closeable Toast & Logic
 
 v1.3.2
 - Improved A11Y
 - Adding Background Image
 - Adding more Theme
-- Adding default toast (juiceToast.success|error|info|warning|loading)
+- Adding default toast (juiceToast.success|error|info|warning)
 
 v1.3.1
 - Improved iOS / Safari (WebKit) compatibility
@@ -39,6 +44,7 @@ NEXT 120/2026
 - Add Promise-based Toast API
 - Add Stack Grouping
 - Improve TypeScript Definitions
+- !Remove UMD due to maintance reason!
 
 v1.1.0
 - Add Size Preset

@@ -3,6 +3,13 @@
  * Source Of Juice Toast v1.3.3
  * Read CONTRIBUTE.md To Contribute
  */
+console.warn(
+  "%cJuiceToast v1.3.x%c — This version is approaching End of Support on Feb 28th 2026. Use %c^v1.4.x (Gold)%c to remove this message.",
+  "background: #f59e0b; color: #000; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
+  "color: #555; font-weight: normal;",
+  "background: #38bdf8; color: #000; font-weight: bold; padding: 2px 4px; border-radius: 3px;", 
+  "color: #555; font-weight: normal;"
+);
 const isBrowser =
   typeof window !== 'undefined' && typeof document !== 'undefined';
 
@@ -368,6 +375,16 @@ const BASE_CSS = `
   object-fit: cover;
   flex-shrink: 0;
 }
+
+.jt-profile.square {
+  border-radius: 6px;
+  object-fit: cover;
+  margin-right: auto;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
 .juice-toast {
   display: flex;
   align-items: center;
@@ -669,10 +686,15 @@ const juiceToast = {
 
 let profileImg = null;
 
-if(cfg.profile) {
+if (cfg.profile) {
   profileImg = document.createElement('img');
   profileImg.src = cfg.profile;
   profileImg.className = 'jt-profile';
+
+  if (cfg.profileShape === 'square') {
+    profileImg.classList.add('square');
+  }
+
   toast.appendChild(profileImg);
 }
 
@@ -979,7 +1001,7 @@ juiceToast.setup({
     iconPack: 'fas',
     bg: '#16a34a',
     progress: true,
-    duration: 3000,
+    duration: 4000,
   },
 
   error: {
@@ -994,6 +1016,7 @@ juiceToast.setup({
     icon: 'fa-circle-info',
     iconPack: 'fas',
     bg: '#2563eb',
+    duration: 4000,
     progress: true,
   },
 
@@ -1001,16 +1024,8 @@ juiceToast.setup({
     icon: 'fa-triangle-exclamation',
     iconPack: 'fas',
     bg: '#f59e0b',
+    duration: 4000,
     progress: true,
-  },
-
-  loading: {
-    icon: 'fa-spinner',
-    iconPack: 'fas',
-    iconAnimate: 'spin',
-    duration: 0,
-    progress: false,
-    closable: false,
   },
 });
 

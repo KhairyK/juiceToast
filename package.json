@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",

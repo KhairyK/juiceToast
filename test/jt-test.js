@@ -1,4 +1,8 @@
-import juiceToast from 'juice-toast';
+import juiceToast from 'juice-toast/src';
 
-juiceToast.setTheme("midnight");
-juiceToast.success("Success to upload file");
+juiceToast.info({
+  title: "INFORMATION", 
+  message: "User A has been use `alert()`", 
+  profile: "avatars/profile1.png",
+  profileShape: "square", 
+});

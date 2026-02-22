@@ -23,7 +23,6 @@ jobs:
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -41,11 +40,30 @@ jobs:
             echo "publish=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Read version and set NPM tag
+        id: version_tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="latest"
+          
+          if [[ "$VERSION" == *alpha* ]]; then
+            TAG="alpha-release"
+          elif [[ "$VERSION" == *beta* ]]; then
+            TAG="test"
+          elif [[ "$VERSION" == *rc* ]]; then
+            TAG="next"
+          elif [[ "$VERSION" == *fr* ]]; then
+            TAG="final-release"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - run: npm ci
         if: steps.publish_check.outputs.publish == 'true'
 
       - name: Publish to NPM
         if: steps.publish_check.outputs.publish == 'true'
-        run: npm publish --provenance
+        run: npm publish --tag ${{ steps.version_tag.outputs.tag }} --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
