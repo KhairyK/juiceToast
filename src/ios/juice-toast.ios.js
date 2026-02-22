@@ -178,6 +178,15 @@ const BASE_CSS = `
   opacity: 1;
 }
 
+.jt-message code {
+  background: rgba(255,255,255,0.1);
+  color: #facc15; /* kuning */
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
 /* ================= CONTENT ================= */
 
 .juice-toast .jt-content {
@@ -381,6 +390,19 @@ const BASE_CSS = `
     animation: none !important;
   }
 }
+
+.jt-profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.juice-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 `;
 
 function injectCSS(css) {
@@ -463,10 +485,10 @@ const juiceToast = {
 
   setup(cfg = {}) {
     const { duration, maxVisible, ...types } = cfg;
-    
+
     // Merge defaults + optional iOS preset tweaks
     this._defaults = { ...this._defaults, duration, maxVisible };
-    this._config = types;
+    this._config = { ...this._config, ...types };
 
     // If iOS, apply some sensible default overrides
     if (isIOS) {
@@ -707,7 +729,7 @@ const juiceToast = {
       const close = document.createElement('span');
       close.className = 'juice-toast-close';
       close.textContent = '×';
-      
+
       close.tabIndex = 0;
       close.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -723,6 +745,15 @@ const juiceToast = {
       if (p.width) toast.style.width = p.width;
       if (p.padding) toast.style.padding = p.padding;
     }
+
+    let profileImg = null;
+
+if(cfg.profile) {
+  profileImg = document.createElement('img');
+  profileImg.src = cfg.profile;
+  profileImg.className = 'jt-profile';
+  toast.appendChild(profileImg);
+}
 
     let progressEl = null;
 
@@ -929,9 +960,26 @@ const juiceToast = {
     }
 
     const msg = document.createElement('div');
-    msg.className = 'jt-message';
-    msg.textContent = cfg.message || '';
-    content.appendChild(msg);
+msg.className = 'jt-message';
+
+if (typeof cfg.message === 'string') {
+  // regex untuk inline `code`
+  const parts = cfg.message.split(/(`[^`]+`)/g);
+
+  parts.forEach(part => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      // code block, hapus backtick
+      const codeEl = document.createElement('code');
+      codeEl.textContent = part.slice(1, -1); // aman, textContent
+      msg.appendChild(codeEl);
+    } else {
+      // teks biasa
+      msg.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
+content.appendChild(msg);
 
     /* ICON POSITION */
     if (icon && cfg.iconPosition === 'top') {

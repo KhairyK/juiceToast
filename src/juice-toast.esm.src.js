@@ -201,6 +201,15 @@ const BASE_CSS = `
   font-size: 12px;
 }
 
+.jt-message code {
+  background: rgba(255,255,255,0.1);
+  color: #facc15; /* kuning */
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
 /* ================= COMPACT ================= */
 
 .jt-compact {
@@ -307,13 +316,13 @@ const BASE_CSS = `
 }
 
 @keyframes jt-slide {
-  from { 
-    transform: translateY(20px); 
-    opacity: 0; 
+  from {
+    transform: translateY(20px);
+    opacity: 0;
   }
-  to { 
-    transform: translateY(0); 
-    opacity: 1; 
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -350,6 +359,19 @@ const BASE_CSS = `
   .pop {
     animation: none !important;
   }
+}
+
+.jt-profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.juice-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 `;
 
@@ -432,12 +454,12 @@ const juiceToast = {
 
   setup(cfg = {}) {
     const { duration, maxVisible, ...types } = cfg;
-  
+
     this._defaults = { ...this._defaults, duration, maxVisible };
-    this._config = types;
-  
+    this._config = { ...this._config, ...types };
+
     this._registerTypes();
-  }, 
+  },
 
   use(plugin) {
     if (typeof plugin === 'function') {
@@ -645,6 +667,15 @@ const juiceToast = {
       });
     }
 
+let profileImg = null;
+
+if(cfg.profile) {
+  profileImg = document.createElement('img');
+  profileImg.src = cfg.profile;
+  profileImg.className = 'jt-profile';
+  toast.appendChild(profileImg);
+}
+
     /* SIZE PRESET */
     if (cfg.size && sizePreset[cfg.size]) {
       const p = sizePreset[cfg.size];
@@ -815,8 +846,25 @@ const juiceToast = {
     }
 
     const msg = document.createElement('div');
-    msg.className = 'jt-message';
-    msg.textContent = cfg.message || '';
+msg.className = 'jt-message';
+
+if (typeof cfg.message === 'string') {
+  // regex untuk inline `code`
+  const parts = cfg.message.split(/(`[^`]+`)/g);
+
+  parts.forEach(part => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      // code block, hapus backtick
+      const codeEl = document.createElement('code');
+      codeEl.textContent = part.slice(1, -1); // aman, textContent
+      msg.appendChild(codeEl);
+    } else {
+      // teks biasa
+      msg.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
     content.appendChild(msg);
 
     /* ICON POSITION */
