@@ -52,3 +52,6 @@ juiceToast.setup({
 juiceToast.bgImage("Hi");
 juiceToast.success("Hello, World"); // Available since version v1.3.2
 ```
+
+# Juice Toast Release v1.3.3
+See [CHANGELOG.md](https://github.com/KhairyK/juiceToast/blob/main/CHANGELOG.md)

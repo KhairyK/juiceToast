@@ -261,25 +261,7 @@ MIT License © 2026 OpenDN Foundation
 </footer>
 
 <script type="module">
-import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast@1.3.2/dist/juice-toast.esm.js";
-
-juiceToast.setup({
-  custom: {}, 
-  success: {
-  icon: 'fa-check',
-  iconPack: 'fas',
-  bg: '#16a34a',
-  progress: true,
-  duration: 3000,
-  },
-  error: {
-  icon: 'fa-xmark',
-  iconPack: 'fas',
-  bg: '#dc2626',
-  progress: true,
-  duration: 4000,
-},
-});
+import juiceToast from "../dist/juice-toast.esm.js";
 
 function copy(id){
  navigator.clipboard.writeText(document.getElementById(id).innerText);

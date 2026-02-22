@@ -11,3 +11,11 @@
 - Adding default toast (juiceToast.success|error|info|warning|loading)
 
 # JuiceToast v1.3.3
+
+- Bug Fixed
+
+# Juicetoast v1.3.4
+
+- Adding profile Toast
+- Bug fixed
+- Bring UMD back
