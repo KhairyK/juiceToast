@@ -1,160 +1,34 @@
-/* JuiceToast v1.3.2 (iOS User)
- * (C) 2026 OpenDN Foundation
- * Type Definitions
- */
-
-/* ================= CORE ================= */
-
-export type ToastPosition =
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right"
-  | "top-center"
-  | "bottom-center"
-  | string;
-
-export type ToastSize = "sm" | "md" | "lg";
-
-export type ToastAnimation =
-  | "spin"
-  | "pulse"
-  | "shake"
-  | "bounce"
-  | "wiggle"
-  | "pop"
-  | string;
-
-/* ================= ACTIONS ================= */
-
-export interface ToastAction {
-  label: string;
-  onClick?: (ev: MouseEvent) => void;
-  closeOnClick?: boolean;
-}
-
-/* ================= OPTIONS ================= */
-
-export interface ToastOptions {
-  title?: string;
-  message?: string;
-
-  theme?: string;
-  position?: ToastPosition;
-
-  duration?: number;
-  progress?: boolean;
-  progressColor?: string;
-
-  icon?: string;
-  iconPack?: string;
-  iconSize?: string;
-  iconPosition?: "left" | "right" | "top";
-
-  iconLink?: string;
-  iconAnimate?: ToastAnimation;
-
-  closable?: boolean;
-
-  bg?: string;
-  color?: string;
-  border?: string;
-
-  width?: string;
-  height?: string;
-
-  size?: ToastSize;
-  compact?: boolean;
-
-  glassUI?: number | boolean;
-
-  bgImage?: string;
-
-  enterAnimation?: ToastAnimation;
-  animation?: string;
-
-  actions?: ToastAction[];
-
-  /* AUDIO */
-  playSound?: string;
-
-  /* TTS */
-  tts?: boolean;
-  ttsLang?: string;
-  ttsRate?: number;
-}
-
-/* ================= INTERNAL DEFAULTS ================= */
-
-export interface JuiceToastDefaults {
-  duration: number;
-  maxVisible: number;
-  swipeThreshold: number;
-  glassUI: number;
-  playSound: string | null;
-  dev: boolean;
-  injectCSS: boolean;
-  css: string | null;
-}
-
-/* ================= PLUGIN ================= */
-
-export interface JuiceToastPluginContext<T extends string = string> {
-  toast: HTMLElement;
-  cfg: ToastOptions;
-  type: T;
-  root: HTMLElement;
-}
-
-export type JuiceToastPlugin<T extends string = string> = (
-  ctx: JuiceToastPluginContext<T>
-) => void;
-
-/* ================= CONFIG ================= */
-
-export type ToastTypeConfig = Record<string, Partial<ToastOptions>>;
-
-/* ================= DYNAMIC METHODS ================= */
-
-type DynamicToastMethods<T extends string> = {
-  [K in T]: (payload?: string | ToastOptions) => void;
-};
-
-/* ================= CORE INSTANCE ================= */
-
-export interface JuiceToastBase<T extends string = string> {
-  _config: ToastTypeConfig;
-  _queue: any[];
-  _showing: boolean;
-  _theme: string;
-  _plugins: JuiceToastPlugin<T>[];
-  _defaults: JuiceToastDefaults;
-
-  /* ===== PUBLIC API ===== */
-
-  setup<C extends ToastTypeConfig>(
-    config: C
-  ): JuiceToastBase<keyof C & string> &
-    DynamicToastMethods<keyof C & string>;
-
-  use(plugin: JuiceToastPlugin<T>): void;
-
-  addType(name: string, cfg?: Partial<ToastOptions>): void;
-
-  defineTheme(name: string, styles: Record<string, string>): void;
-
-  setTheme(name: string): void;
-
-  clear(): void;
-  destroy(): void;
-}
-
-/* ================= FINAL TYPE ================= */
-
-export type JuiceToast<T extends string = string> =
-  JuiceToastBase<T> & DynamicToastMethods<T>;
-
-declare const juiceToast: JuiceToast;
-
 export default juiceToast;
-export { juiceToast };
+export namespace juiceToast {
+    let _config: {};
+    let _queue: any[];
+    let _showing: boolean;
+    let _theme: string;
+    let _plugins: any[];
+    function setup(e?: {}): void;
+    function use(e: any): void;
+    function addType(e: any, t?: {}): void;
+    function defineTheme(e: any, t?: {}): void;
+    function setTheme(e: any): void;
+    function clear(): void;
+    function destroy(): void;
+    function _registerTypes(): void;
+    function _enqueue(e: any, t: any): void;
+    function _next(): void;
+    function _runPlugins(e: any): void;
+    function _normalizeGlass(e: any): number;
+    function _getRoot(e?: string): HTMLElement;
+    namespace _defaults {
+        let duration: number;
+        let maxVisible: number;
+        let swipeThreshold: number;
+        let glassUI: number;
+        let playSound: any;
+        let dev: boolean;
+        let injectCSS: boolean;
+        let css: any;
+    }
+    function _warn(e: any): void;
+    function _playSound(e: any): void;
+    function _showToast(e: any, t: any): void;
+}
