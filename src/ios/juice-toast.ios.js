@@ -1,6 +1,6 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.3 (iOS user)
+ * Source Of Juice Toast v1.3.4 (iOS user | EoS)
  * Read CONTRIBUTE.md To Contribute
  */
  console.warn(
