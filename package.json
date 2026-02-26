@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.3.4",
+  "version": "1.3.4-alpha.1",
   "description": "Lightweight, dependency-free toast notification library",
   "keywords": [
     "toast",
@@ -60,9 +60,5 @@
   "jsdelivr": "dist/juice-toast.esm.js",
   "devDependencies": {
     "prettier": "^3.8.1"
-  },
-  "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
   }
 }

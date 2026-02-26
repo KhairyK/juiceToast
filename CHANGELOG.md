@@ -1,7 +1,13 @@
-## v1.3.4
+## v1.4.0
+- Add Smart Queue
+- Bugs fixed & Logic fixes
+- Add Promise 
+- Add Universal Module Definition (UMD) Back
+- !**Removing `.d.ts`**! (Will be added on 5 March)
+
+v1.3.4
 - Bug Fixes
 - Add profile image
-- Add Hook's Plugins
 
 v1.3.3
 - Bug Fixes on Closeable Toast & Logic

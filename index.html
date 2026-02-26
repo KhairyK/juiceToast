@@ -1,112 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JuiceToast Docs</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JuiceToast — OpenDN Foundation Docs</title>
+  <meta name="description" content="JuiceToast — lightweight, dependency-free toast notifications. Docs, examples, themes, and plugins." />
+  <meta name="keywords" content="JuiceToast, toast, notifications, javascript, plugin, themes" />
+  <meta name="author" content="OpenDN Foundation" />
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+  <meta property="og:title" content="JuiceToast — Docs" />
+  <meta property="og:description" content="Lightweight, dependency-free toast notifications. Docs & examples." />
+  <meta property="og:image" content="https://cdn.kyrt.my.id/image/brand-jt.png" />
+  <meta property="og:type" content="website" />
 
-<style>
-body { background:#f8fafc; }
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JuiceToast — Docs" />
+  <meta name="twitter:description" content="Lightweight, dependency-free toast notifications. Docs & examples." />
+  <meta name="twitter:image" content="https://cdn.kyrt.my.id/image/brand-jt.png" />
 
-.hero {
-  padding:80px 0;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:white;
-}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/aos@3.0.0-beta.6/dist/aos.css" rel="stylesheet" />
 
-.sidebar {
-  position:sticky;
-  top:20px;
-}
+  <style>
+    /* Basic System */
+    :root{
+      --accent: #22c55e;
+      --muted: #64748b;
+      --glass-bg: rgba(255,255,255,0.7);
+      --card-radius: 14px;
+      --max-width: 1100px;
+    }
+    html,body{ height:100%; }
+    body{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #f8fafc 0%, #fbfdff 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      scroll-behavior: smooth;
+      padding-bottom: 64px;
+    }
 
-.code-box { position:relative; }
+    /* HERO Cinematic */
+    .hero{
+      height:520px;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      overflow:hidden;
+    }
+    .hero-bg{
+      position:absolute; inset:0;
+      background-image: url('https://cdn.kyrt.my.id/image/brand-jt.png');
+      background-size:cover;
+      background-position:center;
+      filter: blur(10px) brightness(0.54);
+      transform-origin:center;
+      transition: transform 0.6s ease;
+    }
+    .hero-bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(34,197,94,0.18), rgba(6,95,70,0.28));
+      mix-blend-mode: overlay;
+    }
+    .hero:hover .hero-bg{ transform: scale(1.06); }
+    .hero-inner{
+      position:relative; z-index:2; max-width:var(--max-width); padding: 36px;
+      color: #ffffff;
+      text-shadow: 0 6px 20px rgba(2,6,23,0.5);
+    }
+    .hero-logo{ width:110px; height:auto; border-radius:10px; box-shadow: 0 10px 30px rgba(2,6,23,0.45); margin-bottom:18px; }
 
-.copy-btn {
-  position:absolute;
-  top:10px;
-  right:10px;
-}
+    h1.display-3{ font-weight:700; letter-spacing:-0.02em; margin-bottom:6px; }
+    .typing { font-size:1.125rem; opacity:0.96; }
 
-.demo-card {
-  cursor:pointer;
-  transition:.2s;
-}
-.demo-card:hover { transform:translateY(-4px); }
-</style>
+    /* Layout */
+    .container-main{ max-width:var(--max-width); margin: -60px auto 0; padding: 0 20px; }
+    .card-doc{ border-radius: var(--card-radius); box-shadow: 0 8px 30px rgba(2,6,23,0.06); }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top:28px; }
+    .list-group .list-group-item{ border-radius:10px; margin-bottom:8px; }
+    .list-group .list-group-item.active{ background: linear-gradient(90deg,var(--accent), #16a34a); color:white; border:none; box-shadow: 0 8px 20px rgba(34,197,94,0.18); }
+
+    /* Code box */
+    .code-box{ position:relative; overflow:hidden; border-radius:10px; }
+    .copy-btn{ position:absolute; top:10px; right:10px; z-index:3; }
+    pre{ margin:0; white-space:pre-wrap; word-break:break-word; font-size:0.9rem; }
+
+    /* demo card */
+    .demo-card{ border-radius:12px; transition:transform .18s ease, box-shadow .18s ease; cursor:pointer; }
+    .demo-card:hover{ transform: translateY(-6px); box-shadow: 0 12px 30px rgba(2,6,23,0.08); }
+
+    /* small helpers */
+    .muted{ color:var(--muted); }
+    footer{ margin-top:40px; }
+
+    /* Fallback toast if juiceToast not found */
+    #__fallback_toast {
+      position: fixed; right:20px; bottom:28px; z-index:99999; display:flex; flex-direction:column; gap:10px;
+    }
+    .fb-toast{
+      background: linear-gradient(90deg,#0f172a,#0b1220);
+      color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 8px 26px rgba(2,6,23,0.3); font-size:0.95rem;
+    }
+
+    @media (max-width: 991px){
+      .hero{ height:420px; }
+      .hero-inner{ padding: 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- HERO -->
-<section class="hero text-center">
-<div class="container">
-<h1 class="display-4 fw-bold">🍹 JuiceToast</h1>
-<p class="lead">Lightweight • Dependency-free • Fully customizable</p>
-</div>
-</section>
+  <!-- HERO -->
+  <header class="hero" role="banner" aria-labelledby="site-title">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner" data-aos="fade-up" data-aos-duration="900">
+      <h1 id="site-title" class="display-3">🍹 JuiceToast</h1>
+      <p class="typing lead typing" id="typingLine" aria-live="polite"></p>
+      <div class="mt-3">
+        <a class="btn btn-sm btn-light me-2" href="#quick">Get Started</a>
+        <a class="btn btn-sm btn-outline-light" href="https://github.com/KhairyK/juiceToast#readme" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </header>
 
-<div class="container mt-5">
-<div class="row">
+  <!-- MAIN -->
+  <main class="container-main">
+    <div class="row g-4">
 
-<!-- SIDEBAR -->
-<div class="col-md-3">
-<div class="sidebar">
+      <!-- SIDEBAR -->
+      <aside class="col-lg-3 d-none d-lg-block">
+        <nav class="sidebar card p-3 card-doc">
+          <div class="list-group" id="sidebarLinks">
+            <a class="list-group-item list-group-item-action" href="#features">Features</a>
+            <a class="list-group-item list-group-item-action" href="#install">Installation</a>
+            <a class="list-group-item list-group-item-action" href="#quick">Quick Start</a>
+            <a class="list-group-item list-group-item-action" href="#demo">Live Demo</a>
+            <a class="list-group-item list-group-item-action" href="#setup">Setup Options</a>
+            <a class="list-group-item list-group-item-action" href="#payload">Payload</a>
+            <a class="list-group-item list-group-item-action" href="#animation">Animation</a>
+            <a class="list-group-item list-group-item-action" href="#theme">Themes</a>
+            <a class="list-group-item list-group-item-action" href="#plugins">Plugins</a>
+            <a class="list-group-item list-group-item-action" href="#utils">Utilities</a>
+            <a class="list-group-item list-group-item-action" href="#image">Background Image</a>
+          </div>
+        </nav>
+      </aside>
 
-<div class="list-group">
-<a href="#features" class="list-group-item">Features</a>
-<a href="#install" class="list-group-item">Installation</a>
-<a href="#quick" class="list-group-item">Quick Start</a>
-<a href="#demo" class="list-group-item">Live Demo</a>
-<a href="#setup" class="list-group-item">Setup Options</a>
-<a href="#payload" class="list-group-item">Payload</a>
-<a href="#animation" class="list-group-item">Animation</a>
-<a href="#theme" class="list-group-item">Themes</a>
-<a href="#plugins" class="list-group-item">Plugins</a>
-<a href="#utils" class="list-group-item">Utilities</a>
-<a href="#bgImage" class="list-group-item">Background Image</a>
-</div>
+      <!-- CONTENT -->
+      <section class="col-lg-9">
 
-</div>
-</div>
+        <!-- Features -->
+        <section id="features" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>✨ Features</h3>
+            <ul class="mt-3">
+              <li>Zero dependencies</li>
+              <li>Queue system</li>
+              <li>Theme support</li>
+              <li>Glass UI</li>
+              <li>Animations</li>
+              <li>Accessibility ready</li>
+              <li>Plugin system</li>
+              <li>Custom toast types</li>
+            </ul>
+          </div>
+        </section>
 
-<!-- CONTENT -->
-<div class="col-md-9">
+        <!-- Installation -->
+        <section id="install" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>📦 Installation</h3>
+            <p class="muted">Use CDN (ESM) or install via npm.</p>
 
-<!-- FEATURES -->
-<section id="features" class="mb-5">
-<h3>✨ Features</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="installCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="installCode" class="p-3 bg-dark text-light rounded">import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast@1.3.2/dist/juice-toast.esm.js";</pre>
+            </div>
 
-<ul>
-<li>Zero dependencies</li>
-<li>Queue system</li>
-<li>Theme support</li>
-<li>Glass UI</li>
-<li>Animations</li>
-<li>Accessibility ready</li>
-<li>Plugin system</li>
-<li>Custom toast types</li>
-</ul>
-</section>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="installNpm"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="installNpm" class="p-3 bg-dark text-light rounded">npm install juice-toast --save</pre>
+            </div>
+          </div>
+        </section>
 
-<!-- INSTALL -->
-<section id="install" class="mb-5">
-<h3>📦 Installation</h3>
+        <!-- Quick Start -->
+        <section id="quick" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🚀 Quick Start</h3>
 
-<div class="card mt-3 code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('code')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="code">import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast@1.3.2/dist/juice-toast.esm.js";</pre>
-</div>
-</section>
-
-<!-- QUICK START -->
-<section id="quick" class="mb-5">
-<h3>🚀 Quick Start</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('quickCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="quickCode">
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="quickCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="quickCode" class="p-3 bg-dark text-light rounded">
 juiceToast.setup({
   duration: 5000,
   maxVisible: 3,
@@ -115,189 +207,331 @@ juiceToast.setup({
 
 juiceToast.success({
   title: "Success",
-  message: "Saved successfully", 
-  size: "lg", 
+  message: "Saved successfully",
+  size: "lg",
   width: "360px"
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
 
-<!-- LIVE DEMO -->
-<section id="demo" class="mb-5">
-<h3>🎮 Live Demo</h3>
+            <p class="mt-3 muted">Call `juiceToast.success`, `.error`, `.custom` to show toasts.</p>
+          </div>
+        </section>
 
-<div class="row g-3 text-center">
+        <!-- Live Demo -->
+        <section id="demo" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🎮 Live Demo</h3>
+            <div class="row g-3 mt-3">
+              <div class="col-md-4">
+                <div class="card p-3 demo-card text-center" role="button" tabindex="0" data-demo="success">Success Toast</div>
+              </div>
+              <div class="col-md-4">
+                <div class="card p-3 demo-card text-center" role="button" tabindex="0" data-demo="error">Error Toast</div>
+              </div>
+              <div class="col-md-4">
+                <div class="card p-3 demo-card text-center" role="button" tabindex="0" data-demo="custom">Custom Toast</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-<div class="col-md-4">
-<div class="card p-3 demo-card" onclick="demoSuccess()">Success Toast</div>
-</div>
-
-<div class="col-md-4">
-<div class="card p-3 demo-card" onclick="demoError()">Error Toast</div>
-</div>
-
-<div class="col-md-4">
-<div class="card p-3 demo-card" onclick="demoCustom()">Custom Toast</div>
-</div>
-
-</div>
-</section>
-
-<!-- SETUP -->
-<section id="setup" class="mb-5">
-<h3>⚙️ Setup Options</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('setupCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="setupCode">
+        <!-- Setup Options -->
+        <section id="setup" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>⚙️ Setup Options</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="setupCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="setupCode" class="p-3 bg-dark text-light rounded">
 juiceToast.setup({
- duration: 2500,
- maxVisible: 3,
- glassUI: true,
- swipeThreshold: 60
+  duration: 2500,
+  maxVisible: 3,
+  glassUI: true,
+  swipeThreshold: 60
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<!-- PAYLOAD -->
-<section id="payload" class="mb-5">
-<h3>📝 Payload Example</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('payloadCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="payloadCode">
+        <!-- Payload -->
+        <section id="payload" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>📝 Payload Example</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="payloadCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="payloadCode" class="p-3 bg-dark text-light rounded">
 juiceToast.success({
- title: "Success",
- message: "Hello world",
- progress: true,
- closable: true, 
- size: "lg", 
- width: "380px"
+  title: "Success",
+  message: "Hello world",
+  progress: true,
+  closable: true,
+  size: "lg",
+  width: "380px"
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<!-- ANIMATION -->
-<section id="animation" class="mb-5">
-<h3>🎬 Animation</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('animCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="animCode">
+        <!-- Animation -->
+        <section id="animation" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🎬 Animation</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="animCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="animCode" class="p-3 bg-dark text-light rounded">
 juiceToast.success({
- animation: "slide-in",
- enterAnimation: "bounce"
+  animation: "slide-in",
+  enterAnimation: "bounce"
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<!-- THEMES -->
-<section id="theme" class="mb-5">
-<h3>🎨 Themes</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('themeCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="themeCode">
+        <!-- Themes -->
+        <section id="theme" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🎨 Themes</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="themeCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="themeCode" class="p-3 bg-dark text-light rounded">
 juiceToast.defineTheme("ocean",{
- bg: "#0ea5e9",
- color: "#fff"
+  bg: "#0ea5e9",
+  color: "#fff"
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<!-- PLUGINS -->
-<section id="plugins" class="mb-5">
-<h3>🔌 Plugin System</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('pluginCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="pluginCode">
+        <!-- Plugins -->
+        <section id="plugins" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🔌 Plugin System</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="pluginCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="pluginCode" class="p-3 bg-dark text-light rounded">
 juiceToast.use(ctx => {
- console.log(ctx.type);
+  console.log(ctx.type);
 });
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<!-- UTILITIES -->
-<section id="utils" class="mb-5">
-<h3>🧹 Utilities</h3>
-
-<div class="card code-box">
-<button class="btn btn-sm btn-dark copy-btn" onclick="copy('utilCode')">Copy</button>
-<pre class="m-0 p-3 bg-dark text-light" id="utilCode">
+        <!-- Utilities -->
+        <section id="utils" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>🧹 Utilities</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="utilCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="utilCode" class="p-3 bg-dark text-light rounded">
 juiceToast.clear();
 juiceToast.destroy();
-</pre>
-</div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-<section id="image" class="mb-5">
-  <h3>✨ Background Image</h3>
-  
-  <div class="card code-box">
-    <button class="btn btn-sm btn-dark copy-btn" onclick="copy('bgImage')">Copy</button>
-    <pre class="m-0 p-3 bg-dark text-light" id="bgImage">
+        <!-- Background Image -->
+        <section id="image" class="mb-5" data-aos="fade-up" data-aos-offset="120" data-aos-duration="700">
+          <div class="card p-4 card-doc">
+            <h3>✨ Background Image</h3>
+            <div class="mt-3 code-box">
+              <button class="btn btn-sm btn-dark copy-btn" data-copy-target="bgImageCode"><i class="fa fa-copy"></i> Copy</button>
+              <pre id="bgImageCode" class="p-3 bg-dark text-light rounded">
 juiceToast.success({
-  width: "400px", 
-  size: "lg", 
+  width: "400px",
+  size: "lg",
   bgImage: "https://cdn.kyrt.my.id/image/ts-logo-128.svg"
 });
-</pre>
-  </div>
-</section>
+              </pre>
+            </div>
+          </div>
+        </section>
 
-</div>
-</div>
-</div>
+      </section>
+    </div>
+  </main>
 
-<footer class="py-4 text-center bg-light mt-5">
-MIT License © 2026 OpenDN Foundation
-</footer>
+  <footer class="container-main text-center muted">
+    <small>MIT License © 2026 OpenDN Foundation</small>
+  </footer>
 
-<script type="module">
-import juiceToast from "../dist/juice-toast.esm.js";
+  <!-- Fallback toast container -->
+  <div id="__fallback_toast" aria-hidden="true"></div>
 
-function copy(id){
- navigator.clipboard.writeText(document.getElementById(id).innerText);
- juiceToast.success({
-   title: "Copied!", 
-   message: "Completed to copy the code.", 
-   progress: true, 
-   width: "360px", 
-   size: "lg", 
- });
-}
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"SoftwareApplication",
+    "name":"JuiceToast",
+    "operatingSystem":"Web",
+    "applicationCategory":"WebApplication",
+    "description":"JuiceToast is a lightweight, dependency-free, fully customizable toast notification library.",
+    "url":"https://juicetoast.opendnf.cloud/juice-toast-docs",
+    "image":"https://cdn.kyrt.my.id/image/brand-jt.png",
+    "author":{"@type":"Organization","name":"OpenDN Foundation"}
+  }
+  </script>
 
-function demoSuccess(){
- juiceToast.success("Operation successful!");
-}
+  <!-- Scripts -->
+  <script type="module">
+    let juiceToast = undefined;
+    (async () => {
+      try {
+        const mod = await import('../dist/juice-toast.esm.js');
+        juiceToast = mod.default ?? mod;
+      } catch (err) {
+        console.warn('juiceToast import failed, using fallback', err);
+      }
+    })();
 
-function demoError(){
- juiceToast.error({
-   title: "Error",
-   message: "Something failed"});
-}
+    // helper fallback toast (simple)
+    function showFallbackToast(text){
+      const wrap = document.getElementById('__fallback_toast');
+      const el = document.createElement('div');
+      el.className = 'fb-toast';
+      el.textContent = text;
+      wrap.appendChild(el);
+      setTimeout(()=> {
+        el.style.transition = 'opacity .3s ease';
+        el.style.opacity = '0';
+        setTimeout(()=> el.remove(), 350);
+      }, 1800);
+    }
 
-function demoCustom(){
- juiceToast.custom({
-  title: "Custom",
-  message: "Styled toast",
-  bg: "#2563eb",
-  color: "#fff"
- });
-}
+    // safe API to show success toasts
+    function safeSuccess(opts){
+      try {
+        if(juiceToast && typeof juiceToast.success === 'function'){
+          if(typeof opts === 'string') juiceToast.success(opts);
+          else juiceToast.success(opts);
+        } else {
+          const t = (opts && opts.title) ? `${opts.title} — ${opts.message || ''}` : (typeof opts === 'string' ? opts : (opts && opts.message) || 'Done');
+          showFallbackToast(t);
+        }
+      } catch(e){
+        showFallbackToast('Success');
+      }
+    }
 
-window.copy = copy;
-window.demoSuccess = demoSuccess;
-window.demoError = demoError;
-window.demoCustom = demoCustom;
-</script>
+    // safe api for error/custom
+    function safeError(opts){
+      try {
+        if(juiceToast && typeof juiceToast.error === 'function'){
+          juiceToast.error(opts);
+        } else {
+          showFallbackToast((opts && opts.message) || 'Error');
+        }
+      } catch(e){
+        showFallbackToast('Error');
+      }
+    }
 
+    document.addEventListener('DOMContentLoaded', ()=>{
+
+      const text = "Lightweight • Dependency-free • Fully customizable";
+      const typingEl = document.getElementById('typingLine');
+      let idx = 0;
+      (function type(){
+        if(!typingEl) return;
+        if(idx < text.length){
+          typingEl.textContent += text.charAt(idx++);
+          setTimeout(type, 60);
+        }
+      })();
+
+      if(window.AOS) {
+        window.AOS.init({ duration: 800, once: true, offset: 120 });
+      }
+
+      document.body.addEventListener('click', (e) => {
+        const btn = e.target.closest('.copy-btn');
+        if(!btn) return;
+        const targetId = btn.getAttribute('data-copy-target');
+        if(!targetId) return;
+        const codeEl = document.getElementById(targetId);
+        if(!codeEl) return;
+        const text = codeEl.innerText.trim();
+        navigator.clipboard.writeText(text).then(()=> {
+          safeSuccess({ title: "Copied!", message: "Code copied to clipboard." });
+        }).catch(()=> {
+          // fallback when clipboard not available
+          showFallbackToast('Copied!');
+        });
+      });
+
+      /* Demo toasts (delegation) */
+      document.body.addEventListener('click', (e) => {
+        const demo = e.target.closest('[data-demo]');
+        if(!demo) return;
+        const type = demo.getAttribute('data-demo');
+        if(type === 'success') safeSuccess("Operation successful!");
+        else if(type === 'error') safeError({ title: "Error", message: "Something failed" });
+        else if(type === 'custom') {
+          if(juiceToast && typeof juiceToast.custom === 'function'){
+            juiceToast.custom({ title: "Custom", message: "Styled toast", bg: "#2563eb", color: "#fff" });
+          } else {
+            showFallbackToast('Custom toast');
+          }
+        }
+      });
+
+      /* Keyboard accessible demo cards: Enter/Space triggers click */
+      document.querySelectorAll('.demo-card[tabindex]').forEach(el=>{
+        el.addEventListener('keydown', (ev)=>{
+          if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
+        });
+      });
+
+      /* Sidebar: smooth scroll is native; highlight active section using IntersectionObserver */
+      const sidebarLinks = Array.from(document.querySelectorAll('#sidebarLinks a'));
+      const sections = sidebarLinks.map(a => {
+        try { return document.querySelector(a.getAttribute('href')); } catch(e){ return null; }
+      });
+
+      // Remove pairs that have no section
+      const linkSectionPairs = sidebarLinks.map((a,i)=> ({ link:a, section: sections[i] })).filter(p => p.section);
+
+      if('IntersectionObserver' in window && linkSectionPairs.length){
+        const obsOptions = { root: null, rootMargin: '0px 0px -55% 0px', threshold: 0 };
+        const obs = new IntersectionObserver((entries)=>{
+          entries.forEach(entry => {
+            const matched = linkSectionPairs.find(p => p.section === entry.target);
+            if(matched){
+              if(entry.isIntersecting){
+                sidebarLinks.forEach(l=> l.classList.remove('active'));
+                matched.link.classList.add('active');
+              }
+            }
+          });
+        }, obsOptions);
+        linkSectionPairs.forEach(p => obs.observe(p.section));
+      } else {
+        // simple fallback: add click active toggling
+        sidebarLinks.forEach(l=>{
+          l.addEventListener('click', ()=> {
+            sidebarLinks.forEach(x=> x.classList.remove('active'));
+            l.classList.add('active');
+          });
+        });
+      }
+
+      /* Make sidebar links close on mobile when clicked (UX) */
+      document.querySelectorAll('#sidebarLinks a').forEach(a=>{
+        a.addEventListener('click', (ev)=>{
+          // nothing to collapse here, but could be used when a mobile offcanvas exists
+        });
+      });
+
+    }); // DOMContentLoaded end
+  </script>
+
+  <!-- AOS script -->
+  <script src="https://cdn.jsdelivr.net/npm/aos@3.0.0-beta.6/dist/aos.js"></script>
 </body>
 </html>

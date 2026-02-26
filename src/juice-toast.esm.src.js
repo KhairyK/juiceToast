@@ -1,605 +1,122 @@
-/**
- * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.4 (EoS)
- * Read CONTRIBUTE.md To Contribute
- */
-console.warn(
-  "%cJuiceToast v1.3.x%c — This version is approaching End of Support on Feb 28th 2026. Use %c^v1.4.x (Gold)%c to remove this message.",
-  "background: #f59e0b; color: #000; font-weight: bold; padding: 2px 6px; border-radius: 4px;",
-  "color: #555; font-weight: normal;",
-  "background: #38bdf8; color: #000; font-weight: bold; padding: 2px 4px; border-radius: 3px;", 
-  "color: #555; font-weight: normal;"
-);
-const isBrowser =
-  typeof window !== 'undefined' && typeof document !== 'undefined';
+'use strict';
 
-const reduceMotion =
-  isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+const reduceMotion = isBrowser && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const TYPE_ANIMATION = {
-  success: 'bounce',
-  error: 'shake',
-  warning: 'wiggle',
-  info: 'pulse',
-  loading: 'spin',
-};
+/* ---------------- Priority Queue (max-heap) ---------------- */
+class PriorityQueue {
+  constructor() { this._heap = []; }
+  get size() { return this._heap.length; }
+  _parent(i) { return Math.floor((i - 1) / 2); }
+  _left(i) { return 2 * i + 1; }
+  _right(i) { return 2 * i + 2; }
+  _swap(i, j) { [this._heap[i], this._heap[j]] = [this._heap[j], this._heap[i]]; }
+  push(item, priority = 0) {
+    const node = { item, priority, seq: PriorityQueue._seq = (PriorityQueue._seq || 0) + 1 };
+    this._heap.push(node);
+    this._siftUp(this._heap.length - 1);
+  }
+  pop() {
+    if (!this._heap.length) return null;
+    this._swap(0, this._heap.length - 1);
+    const top = this._heap.pop();
+    this._siftDown(0);
+    return top.item;
+  }
+  peek() { return this._heap[0] ? this._heap[0].item : null; }
+  _siftUp(i) {
+    while (i > 0) {
+      const p = this._parent(i);
+      if (this._compare(i, p) <= 0) break;
+      this._swap(i, p);
+      i = p;
+    }
+  }
+  _siftDown(i) {
+    while (true) {
+      const l = this._left(i), r = this._right(i), n = this._heap.length;
+      let largest = i;
+      if (l < n && this._compare(l, largest) > 0) largest = l;
+      if (r < n && this._compare(r, largest) > 0) largest = r;
+      if (largest === i) break;
+      this._swap(i, largest);
+      i = largest;
+    }
+  }
+  _compare(a, b) {
+    const A = this._heap[a], B = this._heap[b];
+    if (A.priority !== B.priority) return A.priority - B.priority;
+    return B.seq - A.seq; // newer items first when equal priority
+  }
+}
 
-/* ================= CSS INJECT ================= */
+/* ---------------- CSS Injection (kept lean) ---------------- */
 let __cssInjected = false;
-
 const BASE_CSS = `
-#juice-toast-root {
-  position: fixed;
-  z-index: 9999;
-  display: flex;
-  gap: 10px;
-  pointer-events: none;
-}
-
-/* top */
-#juice-toast-root[data-position="top"] {
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-direction: column;
-  align-items: center;
-}
-
-/* center */
-#juice-toast-root[data-position="center"] {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  flex-direction: column;
-  align-items: center;
-}
-
-[id^="juice-toast-root-"] {
-  position: fixed;
-  z-index: 9999;
-  display: flex;
-  gap: 10px;
-  pointer-events: none;
-}
-
-
-/* ================= TOAST ================= */
-
-.juice-toast {
-  /* animation vars (safe for swipe) */
-  --jt-x: 0px;
-  --jt-y: 12px;
-
-  pointer-events: auto;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-
-  min-width: 220px;
-  max-width: 420px;
-  padding: 12px 16px;
-  margin: 6px 0;
-
-  border-radius: 8px;
-  background: #333;
-  color: #fff;
-
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  font-size: 14px;
-
-  opacity: 0;
-  transform: translate(var(--jt-x), var(--jt-y));
-  transition:
-    opacity .25s ease,
-    transform .25s ease,
-    background .25s ease,
-    color .25s ease,
-    box-shadow .25s ease;
-
-  position: relative;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-/* visible */
-.juice-toast.show {
-  opacity: 1;
-  transform: translate(var(--jt-x), 0px) scale(1);
-  transition: transform 0.35s ease, opacity 0.35s ease;
-}
-
-/* hide */
-.juice-toast.hide {
-  opacity: 0;
-  transform: translate(var(--jt-x), 12px) scale(0.95);
-}
-
-
-/* ================= ICON ================= */
-
-.juice-toast .icon {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  line-height: 1;
-  flex: 0 0 28px;
-}
-
-/* clickable icon */
-.icon-clickable {
-  opacity: 0.85;
-  cursor: pointer;
-}
-
-.icon-clickable:hover {
-  opacity: 1;
-}
-
-/* ================= CONTENT ================= */
-
-.juice-toast .jt-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1 1 auto;
-}
-
-/* title */
-.juice-toast .jt-title {
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 1.1;
-}
-
-/* message */
-.juice-toast .jt-message {
-  font-size: 13px;
-  line-height: 1.3;
-  opacity: 0.95;
-}
-
-/* ================= ICON POSITION ================= */
-
-.jt-icon-top {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.jt-icon-top .icon {
-  align-self: center;
-  margin-bottom: 6px;
-}
-
-/* ================= CLOSE ================= */
-
-.juice-toast-close {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  opacity: 0.75;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.juice-toast-close:hover {
-  opacity: 1;
-  background: rgba(255,255,255,0.06);
-}
-
-/* ================= ACTIONS ================= */
-
-.jt-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.jt-action {
-  background: transparent;
-  border: 1px solid currentColor;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.jt-message code {
-  background: rgba(255,255,255,0.1);
-  color: #facc15; /* kuning */
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9em;
-}
-
-/* ================= COMPACT ================= */
-
-.jt-compact {
-  padding: 6px 8px;
-  font-size: 0.85em;
-  gap: 6px;
-  max-width: 280px;
-}
-
-/* ================= GLASS UI ================= */
-
-.jt-glass {
-  --g: calc(var(--jt-glass, 60) / 100);
-
-  background: rgba(30, 30, 30, calc(0.2 + var(--g)));
-  backdrop-filter: blur(calc(6px + (14px * var(--g))))
-                   saturate(calc(1 + (0.4 * var(--g))));
-  -webkit-backdrop-filter: blur(calc(6px + (14px * var(--g))))
-                           saturate(calc(1 + (0.4 * var(--g))));
-}
-
-/* light theme support */
-[data-theme="light"] .jt-glass {
-  background:
-    linear-gradient(
-      rgba(255,255,255, calc(0.6 * var(--g))),
-      rgba(255,255,255, calc(0.35 * var(--g)))
-    ),
-    rgba(255,255,255, calc(0.55 - (0.25 * var(--g))));
-
-  color: #111;
-
-  border:
-    1px solid rgba(0,0,0, calc(0.05 + 0.12 * var(--g)));
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0, calc(0.08 + 0.18 * var(--g))),
-    inset 0 1px 0 rgba(255,255,255, calc(0.4 * var(--g)));
-}
-
-/* ================= PROGRESS BAR ================= */
-.jt-progress {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-
-  height: 3px;
-  width: 100%;
-
-  background: linear-gradient(to right, #FFFFFF, #FAFAFA);
-  height: 4px;
-  transform-origin: left;
-  transition: transform linear;
-  border-radius: 2px;
-  transform: scaleX(1);
-  opacity: .85;
-}
-
-/* ================= BACKGROUND IMAGE ================= */
-
-.juice-toast.bg-image {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
-
-/* ================= ANIMATIONS ================= */
-
-@keyframes jt-spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes jt-pulse {
-  50% { transform: scale(1.15); }
-}
-
-@keyframes jt-shake {
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-}
-
-@keyframes jt-bounce {
-  0%   { transform: scale(1); }
-  30%  { transform: scale(1.25); }
-  60%  { transform: scale(.95); }
-  100% { transform: scale(1); }
-}
-
-@keyframes jt-wiggle {
-  0%   { transform: rotate(0); }
-  25%  { transform: rotate(-10deg); }
-  50%  { transform: rotate(10deg); }
-  75%  { transform: rotate(-6deg); }
-  100% { transform: rotate(0); }
-}
-
-@keyframes jt-pop {
-  0%   { transform: scale(.7); opacity: 0; }
-  70%  { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-@keyframes jt-slide {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* ================= CLASSES ================= */
-
-.spin   { animation: jt-spin .6s linear; }
-.pulse  { animation: jt-pulse .4s ease; }
-.shake  { animation: jt-shake .4s ease; }
-.bounce { animation: jt-bounce .45s ease; }
-.wiggle { animation: jt-wiggle .5s ease; }
-.pop    { animation: jt-pop .35s ease-out; }
-.slide-in { animation: jt-slide .55s ease; }
-
-/* ================= ICON INTERACTION ================= */
-
-.icon-clickable {
-  cursor: pointer;
-  transition: transform .15s ease, opacity .15s ease;
-}
-
-.icon-clickable:hover {
-  transform: scale(1.1);
-  opacity: .85;
-}
-
-/* ================= ACCESSIBILITY ================= */
-
-@media (prefers-reduced-motion: reduce) {
-  .spin,
-  .pulse,
-  .shake,
-  .bounce,
-  .wiggle,
-  .pop {
-    animation: none !important;
-  }
-}
-
-.jt-profile {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.jt-profile.square {
-  border-radius: 6px;
-  object-fit: cover;
-  margin-right: auto;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-}
-
-.juice-toast {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* JuiceToast base (v1.4.0) */
+#juice-toast-root,[id^="juice-toast-root-"]{position:fixed;z-index:9999;display:flex;pointer-events:none;gap:10px}
+#juice-toast-root[data-position="bottom-right"],#juice-toast-root-bottom-right{bottom:20px;right:20px;flex-direction:column-reverse;align-items:flex-end}
+#juice-toast-root[data-position="top-right"]{top:20px;right:20px;flex-direction:column;align-items:flex-end}
+#juice-toast-root[data-position="bottom-left"]{bottom:20px;left:20px;flex-direction:column-reverse;align-items:flex-start}
+#juice-toast-root[data-position="top-left"]{top:20px;left:20px;flex-direction:column;align-items:flex-start}
+#juice-toast-root[data-position="top-center"],#juice-toast-root[data-position="bottom-center"]{left:50%;transform:translateX(-50%)}
+.juice-toast{pointer-events:auto;min-width:220px;max-width:420px;padding:12px 16px;margin:6px 0;border-radius:10px;background:linear-gradient(180deg,rgba(30,30,30,.95),rgba(20,20,20,.95));color:#fff;display:flex;gap:12px;align-items:flex-start;box-sizing:border-box;transition:opacity .28s ease,transform .32s ease}
+@keyframes jt-slide-in{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes jt-slide-out{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(20px) scale(0.95)}}
+.juice-toast.show{animation:jt-slide-in .32s cubic-bezier(0.4,0,0.2,1) forwards;opacity:1;transform:translateY(0)}
+.juice-toast.hide{animation:jt-slide-out .28s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0;transform:translateY(12px);pointer-events:none}
+.juice-toast .icon{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.06)}
+.jt-content{display:flex;flex-direction:column;gap:4px;flex:1}
+.jt-title{font-weight:700;font-size:13px}
+.jt-message{font-size:13px;opacity:.95}
+.jt-actions{display:flex;gap:8px;margin-top:10px}
+.jt-action{border:1px solid currentColor;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;background:transparent}
+.jt-progress{position:absolute;left:0;bottom:0;height:4px;width:100%;border-radius:2px;background:linear-gradient(90deg,#4ade80,#22c55e);transform-origin:left;transform:scaleX(1);transition:transform linear}
 `;
 
-function injectCSS(css) {
+function injectCSS(css = BASE_CSS) {
   if (!isBrowser || __cssInjected) return;
-
-  const style = document.createElement('style');
-  style.id = 'juice-toast-style';
-  style.textContent = css;
-
-  document.head.appendChild(style);
+  const st = document.createElement('style');
+  st.id = 'juice-toast-style';
+  st.textContent = css;
+  document.head.appendChild(st);
   __cssInjected = true;
 }
 
-/* ================= THEME REGISTRY ================= */
+/* ---------------- Utilities ---------------- */
+const uid = (() => { let n = 1; return () => 'jt-' + (n++); })();
+function now() { return Date.now(); }
+function merge(a, b) { return Object.assign({}, a || {}, b || {}); }
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+function sanitizeHTML(input) {
+  if (!input) return '';
+  const t = document.createElement('template');
+  t.innerHTML = input;
+  t.content.querySelectorAll('script, style, [onload], [onerror], [onclick], iframe').forEach(el => el.remove());
+  const allowed = ['b','i','u','strong','em','code','pre','ul','ol','li','br','p','span','img','h1','h2','h3','h4','h5','h6'];
+  (function walk(node){ Array.from(node.childNodes).forEach(ch => {
+    if (ch.nodeType === 1) {
+      if (!allowed.includes(ch.tagName.toLowerCase())) {
+        ch.replaceWith(...Array.from(ch.childNodes));
+      } else walk(ch);
+    }
+  })})(t.content);
+  return t.innerHTML;
+}
 
+/* ---------------- Theme & Presets ---------------- */
 const themes = {
-  light: {
-    bg: '#ffffff',
-    color: '#111',
-    border: '1px solid #e5e7eb',
-  },
-  dark: {
-    bg: '#1f2937',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,.08)',
-  },
-  glass: {
-    bg: 'rgba(30,30,30,.35)',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,.15)',
-  },
-  midnight: {
-    bg: '#0f172a',
-    color: '#e5e7eb',
-    border: '1px solid rgba(255,255,255,.06)',
-  },
-  soft: {
-    bg: '#f8fafc',
-    color: '#0f172a',
-    border: '1px solid #e2e8f0',
-  },
-  neutral: {
-    bg: '#ffffff',
-    color: '#374151',
-    border: '1px solid #d1d5db',
-  },
-  brand: {
-    bg: '#6366f1',
-    color: '#fff',
-    border: 'none',
-  },
-  gradient: {
-    bg: 'linear-gradient(135deg,#6366f1,#ec4899)',
-    color: '#fff',
-    border: 'none',
-  },
-  outline: {
-    bg: 'transparent',
-    color: '#111',
-    border: '2px solid currentColor',
-  },
+  dark: { bg: 'linear-gradient(180deg,#1f2937,#111827)', color: '#fff', border: '1px solid rgba(255,255,255,.06)' },
+  light: { bg: '#fff', color: '#111', border: '1px solid #e5e7eb' },
+  glass: { bg: 'rgba(30,30,30,.35)', color: '#fff', border: '1px solid rgba(255,255,255,.1)' }
 };
+const sizePreset = { sm: { width: '260px', padding: '10px' }, md: { width: '320px', padding: '14px' }, lg: { width: '420px', padding: '18px' } };
 
-const sizePreset = {
-  sm: { width: '260px', padding: '10px' },
-  md: { width: '320px', padding: '14px' },
-  lg: { width: '420px', padding: '18px' },
-};
+/* ---------------- Animations map ---------------- */
+const TYPE_ANIMATION = { success: 'jt-bounce', error: 'jt-shake', warning: 'jt-shake', info: 'jt-pulse', loading: 'jt-spin' };
 
-/* ================= CORE ================= */
+/* ---------------- Core ---------------- */
 const juiceToast = {
-  _config: {},
-  _queue: [],
-  _showing: false,
-  _theme: 'dark',
-  _plugins: [],
-
-  /* ===== PUBLIC API ===== */
-
-  setup(cfg = {}) {
-    const { duration, maxVisible, ...types } = cfg;
-
-    this._defaults = { ...this._defaults, duration, maxVisible };
-    this._config = { ...this._config, ...types };
-
-    this._registerTypes();
-  },
-
-  use(plugin) {
-    if (typeof plugin === 'function') {
-      this._plugins.push(plugin);
-    }
-  },
-
-  addType(name, cfg = {}) {
-    this._config[name] = cfg;
-    this._registerTypes();
-  },
-
-  defineTheme(name, styles = {}) {
-    themes[name] = { ...(themes[name] || {}), ...styles };
-  },
-
-  setTheme(name) {
-    this._theme = name;
-    if (!isBrowser) return;
-    const root = document.getElementById('juice-toast-root');
-    if (root) root.dataset.theme = name;
-  },
-
-  clear() {
-    this._queue.length = 0;
-  },
-
-  destroy() {
-    this.clear();
-    if (!isBrowser) return;
-    document.getElementById('juice-toast-root')?.remove();
-  },
-
-  /* ===== INTERNAL ===== */
-
-  _registerTypes() {
-    Object.keys(this._config).forEach((type) => {
-      if (typeof this[type] === 'function' && !this[type].__auto) return;
-      const fn = (payload) => this._enqueue(type, payload);
-      fn.__auto = true;
-      this[type] = fn;
-    });
-  },
-
-  _enqueue(type, payload) {
-    this._queue.push({ type, payload });
-    if (!this._showing) this._next();
-  },
-
-  _next() {
-    if (!this._queue.length) {
-      this._showing = false;
-      return;
-    }
-    this._showing = true;
-    const item = this._queue.shift();
-    this._showToast(item.type, item.payload);
-  },
-
-  _runPlugins(ctx) {
-    this._plugins.forEach((fn) => {
-      try {
-        fn(ctx);
-      } catch (e) {
-        this._warn('Plugin error: ' + e.message);
-      }
-    });
-  },
-
-  _normalizeGlass(value) {
-    if (value === true) return 60;
-    if (value === false || value == null) return 0;
-
-    const n = Number(value);
-    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
-  },
-
-  _getRoot(position = 'bottom-right') {
-    if (!isBrowser) return null;
-    let root = document.getElementById(`juice-toast-root-${position}`);
-    if (!root) {
-      root = document.createElement('div');
-      root.id = `juice-toast-root-${position}`;
-      root.dataset.position = position;
-      root.dataset.theme = this._theme;
-
-      root.style.position = 'fixed';
-      root.style.zIndex = 9999;
-
-      switch (position) {
-        case 'top-left':
-          root.style.top = '20px';
-          root.style.left = '20px';
-          break;
-        case 'top-right':
-          root.style.top = '20px';
-          root.style.right = '20px';
-          break;
-        case 'bottom-left':
-          root.style.bottom = '20px';
-          root.style.left = '20px';
-          break;
-        case 'bottom-right':
-          root.style.bottom = '20px';
-          root.style.right = '20px';
-          break;
-        case 'top-center':
-          root.style.top = '20px';
-          root.style.left = '50%';
-          root.style.transform = 'translateX(-50%)';
-          break;
-        case 'bottom-center':
-          root.style.bottom = '20px';
-          root.style.left = '50%';
-          root.style.transform = 'translateX(-50%)';
-          break;
-      }
-
-      document.body.appendChild(root);
-    }
-    return root;
-  },
-
   _defaults: {
     duration: 2500,
     maxVisible: 3,
@@ -607,426 +124,371 @@ const juiceToast = {
     glassUI: 0,
     playSound: null,
     dev: false,
-
     injectCSS: true,
     css: null,
   },
+  _config: {},
+  _theme: 'dark',
+  _plugins: [],
+  _queue: new PriorityQueue(),
+  _queueDedupe: new Set(),
+  _activeMap: new Map(),
+  _roots: new Map(),
 
-  _warn(msg) {
-    if (this._defaults.dev && typeof console !== 'undefined') {
-      console.warn('[JuiceToast]', msg);
+  setup(cfg = {}) {
+    const { duration, maxVisible, ...types } = cfg;
+    if (duration) this._defaults.duration = duration;
+    if (maxVisible) this._defaults.maxVisible = maxVisible;
+    this._config = merge(this._config, types);
+    this._registerTypes();
+  },
+
+  use(plugin) { if (typeof plugin === 'function') this._plugins.push(plugin); },
+  addType(name, cfg = {}) { this._config[name] = cfg; this._registerTypes(); },
+  defineTheme(name, styles = {}) { themes[name] = merge(themes[name] || {}, styles); },
+  setTheme(name) { this._theme = name; if (!isBrowser) return; this._roots.forEach(r => r.dataset.theme = name); },
+  clear() { this._queue = new PriorityQueue(); this._queueDedupe.clear(); },
+  destroy() { this.clear(); if (!isBrowser) return; this._roots.forEach(r => r.remove()); this._roots.clear(); },
+
+  promise(promise, states = {}) {
+    if (!promise || typeof promise.then !== 'function') { this._warn('promise expects a Promise'); return; }
+    const ctrl = { id: uid() };
+    const id = ctrl.id;
+    const timeout = states.timeout;
+
+    this._enqueue('loading', { ...normalizeState(states.loading, 'Loading...'), groupId: id, duration: 0 });
+
+    let timer = null;
+    if (timeout) timer = setTimeout(() => {
+      this._enqueue('error', { message: states.timeoutMessage || 'Request timeout', groupId: id });
+      cleanup();
+    }, timeout);
+
+    const cleanup = () => { if (timer) clearTimeout(timer); };
+
+    promise.then(res => {
+      cleanup();
+      this._enqueue('success', { ...resolveState(states.success, res, 'Success'), groupId: id });
+    }).catch(err => {
+      cleanup();
+      this._enqueue('error', { ...resolveState(states.error, err, 'Error'), groupId: id });
+    });
+
+    return { cancel: () => { this._enqueue('info', { message: states.cancelMessage || 'Cancelled', groupId: id }); if (timer) { clearTimeout(timer); } } };
+  },
+
+  _registerTypes() {
+    Object.keys(this._config).forEach(type => {
+      if (typeof this[type] === 'function' && !this[type].__auto) return;
+      const fn = (payload) => this._enqueue(type, payload);
+      fn.__auto = true; this[type] = fn;
+    });
+  },
+
+  _enqueue(type, payload = {}) {
+    const priority = this._priorityMap?.[payload.priority] ?? 2;
+    const dedupeKey = payload.dedupeKey;
+    if (dedupeKey && this._queueDedupe.has(dedupeKey)) {
+      if (this._defaults.dev) console.log('[JuiceToast] deduped', dedupeKey);
+      return;
+    }
+    const item = { id: uid(), type, payload, priority };
+    if (dedupeKey) this._queueDedupe.add(dedupeKey);
+    this._queue.push(item, priority);
+    this._processQueue();
+  },
+
+  _processQueue() {
+    if (!isBrowser) return;
+    const max = this._defaults.maxVisible;
+    while (this._queue.size > 0) {
+      const next = this._queue.pop();
+      if (!next) break;
+      const position = next.payload?.position || 'bottom-right';
+      const root = this._getRoot(position);
+      const showing = Array.from(root.children).length;
+      if (showing >= max) {
+        this._queue.push(next, next.priority - 0.001);
+        break;
+      }
+      this._showToast(next.type, next.payload, next.id);
     }
   },
+
+  _getRoot(position = 'bottom-right') {
+    if (!isBrowser) return null;
+    if (this._roots.has(position)) return this._roots.get(position);
+    const root = document.createElement('div');
+    root.id = `juice-toast-root-${position}`;
+    root.dataset.position = position;
+    root.dataset.theme = this._theme;
+    root.style.pointerEvents = 'none';
+    root.style.display = 'flex';
+    switch (position) {
+      case 'top-left': root.style.top = '20px'; root.style.left = '20px'; break;
+      case 'top-right': root.style.top = '20px'; root.style.right = '20px'; break;
+      case 'bottom-left': root.style.bottom = '20px'; root.style.left = '20px'; break;
+      case 'bottom-right': root.style.bottom = '20px'; root.style.right = '20px'; break;
+      case 'top-center': root.style.top = '20px'; root.style.left = '50%'; root.style.transform = 'translateX(-50%)'; break;
+      case 'bottom-center': root.style.bottom = '20px'; root.style.left = '50%'; root.style.transform = 'translateX(-50%)'; break;
+      default: root.style.bottom = '20px'; root.style.right = '20px';
+    }
+    document.body.appendChild(root);
+    this._roots.set(position, root);
+    return root;
+  },
+
+  _warn(msg) { if (this._defaults.dev && typeof console !== 'undefined') console.warn('[JuiceToast]', msg); },
 
   _playSound(src) {
-    if (!isBrowser) return;
-
-    const sound =
-      typeof src === 'string' && src ? src : this._defaults.playSound;
-
-    if (!sound) return;
-
-    try {
-      const audio = new Audio(sound);
-      audio.volume = 0.6;
-      audio.play().catch(() => {});
-    } catch {}
+    if (!isBrowser) return; const s = typeof src === 'string' && src ? src : this._defaults.playSound; if (!s) return;
+    try { const a = new Audio(s); a.volume = 0.6; a.play().catch(() => {}); } catch (e) {}
   },
 
-  _showToast(type, payload) {
-    if (!isBrowser) return;
+  _updateStackPositionsFor(root) {
+    const children = Array.from(root.children);
+    const isBottom = root.dataset.position && root.dataset.position.includes('bottom');
+    children.forEach((el, i) => {
+      const index = isBottom ? i : i;
+      const offset = index * 12;
+      el.style.setProperty('--jt-stack-y', `-${offset}px`);
+      el.style.setProperty('--jt-stack-scale', 1 - index * 0.04);
+      el.style.setProperty('--jt-stack-opacity', 1 - index * 0.12);
+      el.style.zIndex = 1000 - index;
+    });
+  },
 
-    if (this._defaults.injectCSS !== false) {
-      injectCSS(this._defaults.css || BASE_CSS);
-    }
+  _runPlugins(ctx) { this._plugins.forEach(fn => { try { fn(ctx); } catch (e) { this._warn('Plugin error: ' + e.message); } }); },
+
+  _normalizeGlass(value) { if (value === true) return 60; if (!value) return 0; const n = Number(value); return Number.isFinite(n) ? clamp(n, 0, 100) : 0; },
+
+  _showToast(type, payload = {}, id) {
+    if (!isBrowser) return;
+    if (this._defaults.injectCSS !== false) injectCSS(this._defaults.css || BASE_CSS);
 
     const base = this._config[type] || {};
-    const data =
-      typeof payload === 'object' ? payload : { message: String(payload) };
-
-    const cfg = { ...base, ...data };
-
-    /* BACKWARD COMPAT */
+    const data = (typeof payload === 'object') ? payload : { message: String(payload) };
+    const cfg = merge(base, data);
     cfg.icon = cfg.icon ?? cfg.icon_left_top;
-    cfg.iconPack = cfg.iconPack ?? cfg.icon_config;
-    cfg.iconLink = cfg.iconLink ?? cfg.icon_onClick_url;
-    cfg.iconAnimate = cfg.iconAnimate ?? cfg.icon_onClick_animate;
-    cfg.position = cfg.position ?? cfg.toast;
-    cfg.closable = cfg.closable ?? cfg.closeable;
-    cfg.iconPosition = cfg.iconPosition || 'left';
-    cfg.compact = !!cfg.compact;
+    cfg.position = cfg.position ?? cfg.toast ?? 'bottom-right';
+    cfg.closable = cfg.closable ?? cfg.closeable ?? true;
+    cfg.duration = cfg.duration ?? this._defaults.duration;
 
     const theme = themes[cfg.theme || this._theme] || {};
+    const toastId = id || uid();
 
     const toast = document.createElement('div');
     toast.className = 'juice-toast';
-
-    const animation = cfg.animation || 'slide-in';
-    if (!cfg.enterAnimation) {
-      toast.style.animation = `${animation} 0.4s ease forwards`;
-    }
-
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
-    toast.setAttribute('aria-atomic', 'true');
+    toast.dataset.toastId = toastId;
+    toast.dataset.position = cfg.position;
     toast.tabIndex = 0;
-
-    if (cfg.closable) {
-      const close = document.createElement('span');
-      close.tabIndex = 0;
-      close.className = 'juice-toast-close';
-      close.textContent = '×';
-      close.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          toast.remove();
-          this._next();
-        }
-      });
-    }
-
-let profileImg = null;
-
-if (cfg.profile) {
-  profileImg = document.createElement('img');
-  profileImg.src = cfg.profile;
-  profileImg.className = 'jt-profile';
-
-  if (cfg.profileShape === 'square') {
-    profileImg.classList.add('square');
-  }
-
-  toast.appendChild(profileImg);
-}
-
-    /* SIZE PRESET */
-    if (cfg.size && sizePreset[cfg.size]) {
-      const p = sizePreset[cfg.size];
-      if (p.width) toast.style.width = p.width;
-      if (p.padding) toast.style.padding = p.padding;
-    }
-
-    let progressEl = null;
-
-    if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
-      progressEl = document.createElement('div');
-      progressEl.className = 'jt-progress';
-
-      if (cfg.progressColor) {
-        progressEl.style.background =
-          cfg.progressColor || 'rgba(255,255,255,.7)';
-      }
-
-      toast.appendChild(progressEl);
-    }
-
-    /* TTS (Text To Spech) */
-    if (cfg.tts && 'speechSynthesis' in window) {
-      try {
-        const utter = new SpeechSynthesisUtterance(
-          cfg.message || cfg.title || ''
-        );
-        utter.lang = cfg.ttsLang || 'en-US';
-        utter.rate = cfg.ttsRate ?? 1;
-        window.speechSynthesis.speak(utter);
-      } catch (e) {
-        this._warn('TTS failed: ' + e.message);
-      }
-    }
-
-    /* GLASS UI */
-    const glass = this._normalizeGlass(cfg.glassUI ?? this._defaults.glassUI);
-
-    if (glass > 0) {
-      toast.style.setProperty('--jt-glass', cfg.glassUI ?? 50);
-      toast.classList.add('jt-glass');
-    }
-
-    /* STYLE */
-    if (!glass) {
-      toast.style.background = cfg.bg || theme.bg;
-    }
+    toast.setAttribute('role', 'status');
+    toast.style.position = 'relative';
+    toast.style.pointerEvents = 'auto';
+    toast.style.background = cfg.bg || theme.bg;
     toast.style.color = cfg.color || theme.color;
-    toast.style.border = cfg.border || theme.border;
+    toast.style.border = cfg.border || theme.border || 'none';
 
-    /* COMPACT */
-    if (cfg.compact) {
-      toast.classList.add('jt-compact');
-    }
+    if (cfg.size && sizePreset[cfg.size]) { const p = sizePreset[cfg.size]; if (p.width) toast.style.width = p.width; if (p.padding) toast.style.padding = p.padding; }
 
-    /* MANUAL WIDTH / HEIGHT */
-    if (cfg.width) toast.style.width = cfg.width;
-    if (cfg.height) toast.style.height = cfg.height;
+    const content = document.createElement('div'); content.className = 'jt-content';
+    if (cfg.title) { const t = document.createElement('div'); t.className = 'jt-title'; t.textContent = cfg.title; content.appendChild(t); }
 
-    /* BACKGROUND IMAGE */
-    if (cfg.bgImage) {
-      toast.style.backgroundImage = `url(${cfg.bgImage})`;
-      toast.classList.add('bg-image');
-    }
-
-    /* ICON */
-    let icon = null;
-
-    if (cfg.icon) {
-      icon = document.createElement('i');
-      icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
-
-      if (cfg.iconSize) {
-        icon.style.fontSize = cfg.iconSize;
-      }
-
-      if (cfg.iconLink || cfg.iconAnimate) {
-        icon.classList.add('icon-clickable');
-        icon.onclick = (e) => {
-          e.stopPropagation();
-          if (cfg.iconAnimate) {
-            icon.classList.remove(cfg.iconAnimate);
-            void icon.offsetWidth;
-            icon.classList.add(cfg.iconAnimate);
-          }
-          if (cfg.iconLink) {
-            window.open(cfg.iconLink, '_blank', 'noopener');
-          }
-        };
-      }
-      const iconAnim = cfg.iconAnimate ?? TYPE_ANIMATION[type];
-
-      if (iconAnim) {
-        icon.classList.add(iconAnim);
-
-        // restart animation on click
-        icon.addEventListener('click', () => {
-          icon.classList.remove(iconAnim);
-          void icon.offsetWidth;
-          icon.classList.add(iconAnim);
-        });
-      }
-    }
-
-    if (reduceMotion) {
-      toast.classList.remove(
-        'pop',
-        'bounce',
-        'shake',
-        'wiggle',
-        'pulse',
-        'spin'
-      );
-      icon?.classList.remove('bounce', 'shake', 'wiggle', 'pulse', 'spin');
-    }
-
-    if (!cfg.message && !cfg.title) {
-      this._warn('Toast created without message or title');
-    }
-
-    if (cfg.icon && !cfg.iconPack) {
-      this._warn('icon provided without iconPack');
-    }
-
-    if (cfg.duration < 0) {
-      this._warn('duration cannot be negative');
-    }
-
-    let startX = 0;
-    let currentX = 0;
-
-    toast.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-    });
-
-    toast.addEventListener('touchmove', (e) => {
-      currentX = e.touches[0].clientX - startX;
-      toast.style.transform = `translateX(${currentX}px)`;
-    });
-
-    toast.addEventListener('touchend', () => {
-      if (Math.abs(currentX) > this._defaults.swipeThreshold) {
-        toast.style.transform = `translateX(${currentX > 0 ? 1000 : -1000}px)`;
-        setTimeout(() => {
-          toast.remove();
-          this._next();
-        }, 200);
-      } else {
-        toast.style.transform = '';
-      }
-      startX = currentX = 0;
-    });
-
-    /* CONTENT */
-    const content = document.createElement('div');
-    content.className = 'jt-content';
-
-    const enterAnim = cfg.enterAnimation ?? 'pop';
-    if (enterAnim && !reduceMotion) {
-      toast.classList.add(enterAnim);
-    }
-
-    if (cfg.title) {
-      const t = document.createElement('div');
-      t.className = 'jt-title';
-      t.textContent = cfg.title;
-      content.appendChild(t);
-    }
-
-    const msg = document.createElement('div');
-msg.className = 'jt-message';
-
-if (typeof cfg.message === 'string') {
-  // regex untuk inline `code`
-  const parts = cfg.message.split(/(`[^`]+`)/g);
-
-  parts.forEach(part => {
-    if (part.startsWith('`') && part.endsWith('`')) {
-      // code block, hapus backtick
-      const codeEl = document.createElement('code');
-      codeEl.textContent = part.slice(1, -1); // aman, textContent
-      msg.appendChild(codeEl);
-    } else {
-      // teks biasa
-      msg.appendChild(document.createTextNode(part));
-    }
-  });
-}
+    const msg = document.createElement('div'); msg.className = 'jt-message';
+    if (cfg.html) { msg.innerHTML = sanitizeHTML(cfg.html); }
+    else if (typeof cfg.message === 'string') {
+      const parts = cfg.message.split(/(`[^`]+`)/g);
+      parts.forEach(part => {
+        if (part.startsWith('`') && part.endsWith('`')) { const code = document.createElement('code'); code.textContent = part.slice(1, -1); msg.appendChild(code); }
+        else msg.appendChild(document.createTextNode(part));
+      });
+    } else if (cfg.message) { msg.textContent = String(cfg.message); }
 
     content.appendChild(msg);
 
-    /* ICON POSITION */
-    if (icon && cfg.iconPosition === 'top') {
-      toast.classList.add('jt-icon-top');
-      toast.appendChild(icon);
-      toast.appendChild(content);
-    } else if (icon && cfg.iconPosition === 'right') {
-      toast.appendChild(content);
-      toast.appendChild(icon);
-    } else {
-      if (icon) toast.appendChild(icon);
-      toast.appendChild(content);
-    }
-
     if (Array.isArray(cfg.actions) && cfg.actions.length) {
-      const actionWrap = document.createElement('div');
-      actionWrap.className = 'jt-actions';
-
-      cfg.actions.forEach((act) => {
-        const btn = document.createElement('button');
-        btn.className = 'jt-action';
-        btn.textContent = act.label;
-
-        btn.onclick = (ev) => {
-          ev.stopPropagation();
-          act.onClick?.(ev);
-
-          if (act.closeOnClick) {
-            toast.remove();
-            this._next();
-          }
-        };
-
-        actionWrap.appendChild(btn);
+      const actions = document.createElement('div'); actions.className = 'jt-actions';
+      cfg.actions.forEach(a => {
+        const btn = document.createElement('button'); btn.className = 'jt-action'; btn.textContent = a.label || 'Action';
+        btn.onclick = (ev) => { ev.stopPropagation(); a.onClick?.(ev); if (a.closeOnClick) removeNow(); };
+        actions.appendChild(btn);
       });
-
-      content.appendChild(actionWrap);
+      content.appendChild(actions);
     }
 
-    /* CLOSE */
+    let icon = null;
+    if (cfg.icon) {
+      icon = document.createElement('i'); icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
+      if (cfg.iconSize) icon.style.fontSize = cfg.iconSize;
+      if (!reduceMotion) {
+        const anim = cfg.iconAnim || TYPE_ANIMATION[type]; if (anim) icon.classList.add(anim);
+      }
+      if (cfg.iconLink || cfg.iconAnimate) {
+        icon.classList.add('icon-clickable');
+        icon.addEventListener('click', (e) => { e.stopPropagation(); if (cfg.iconAnimate) { icon.classList.remove(cfg.iconAnimate); void icon.offsetWidth; icon.classList.add(cfg.iconAnimate); } if (cfg.iconLink) window.open(cfg.iconLink, '_blank', 'noopener'); });
+      }
+    }
+
+    if (icon && cfg.iconPosition === 'right') { toast.appendChild(content); toast.appendChild(icon); }
+    else if (icon && cfg.iconPosition === 'top') { toast.classList.add('jt-icon-top'); toast.appendChild(icon); toast.appendChild(content); }
+    else { if (icon) toast.appendChild(icon); toast.appendChild(content); }
+
+    let progressEl = null;
+    if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
+      progressEl = document.createElement('div'); progressEl.className = 'jt-progress';
+      if (cfg.progressColor) progressEl.style.background = cfg.progressColor;
+      toast.appendChild(progressEl);
+    }
+
+    if (cfg.undo) {
+      const undoBtn = document.createElement('button'); undoBtn.className = 'jt-action'; undoBtn.textContent = 'Undo'; undoBtn.onclick = () => { try { cfg.undo(); } catch (e) {} removeNow(); };
+      content.appendChild(undoBtn);
+    }
+
     if (cfg.closable) {
-      const close = document.createElement('span');
-      close.className = 'juice-toast-close';
-      close.textContent = '×';
-      close.onclick = () => {
-        toast.remove();
-        this._next();
-      };
+      const close = document.createElement('span'); close.className = 'juice-toast-close'; close.tabIndex = 0; close.textContent = '×';
+      close.addEventListener('click', (e) => { e.stopPropagation(); removeNow(); });
       toast.appendChild(close);
     }
 
-    const root = this._getRoot(cfg.position);
-    const max = this._defaults.maxVisible;
-    if (max && root.children.length >= max) {
-      root.firstChild.remove();
+    const root = this._getRoot(cfg.position || 'bottom-right');
+    if (!root) return;
+
+    if (cfg.groupId) {
+      const existing = Array.from(root.children).find(n => n.dataset.groupId === cfg.groupId);
+      if (existing) {
+        let countEl = existing.querySelector('.jt-count');
+        if (!countEl) { countEl = document.createElement('span'); countEl.className = 'jt-count'; countEl.style.marginLeft = '6px'; existing.querySelector('.jt-title')?.appendChild(countEl); countEl.textContent = '1'; }
+        countEl.textContent = String((parseInt(countEl.textContent || '1') + 1));
+        return;
+      }
+      toast.dataset.groupId = cfg.groupId;
     }
+
+    const max = this._defaults.maxVisible;
+    if (max && root.children.length >= max) root.removeChild(root.firstElementChild);
     root.appendChild(toast);
-    this._runPlugins({
-      toast,
-      cfg,
-      type,
-      root,
-    });
+
+    const meta = {
+      id: toastId, toast, cfg, createdAt: now(), remaining: cfg.duration ?? this._defaults.duration, raf: null, timer: null, start: now(), paused: false
+    };
+    this._activeMap.set(toastId, meta);
+
+    this._runPlugins({ toast, cfg, type, root });
+    this._updateStackPositionsFor(root);
 
     requestAnimationFrame(() => toast.classList.add('show'));
 
-    const duration = cfg.duration ?? this._defaults.duration;
-    if (duration === 0) return;
-
-    let start = Date.now();
-    let remaining = cfg.duration ?? this._defaults.duration;
-    let raf;
-
-    const tick = () => {
-      if (!toast.__paused) {
-        const now = Date.now();
-        remaining -= now - start;
-        start = now;
+    let startX = 0, startY = 0, curX = 0, curY = 0, dragging = false;
+    const onPointerDown = (e) => {
+      const p = (e.touches ? e.touches[0] : e);
+      startX = p.clientX; startY = p.clientY; dragging = true; meta.paused = true; toast.style.transition = 'none';
+    };
+    const onPointerMove = (e) => {
+      if (!dragging) return;
+      const p = (e.touches ? e.touches[0] : e);
+      curX = p.clientX - startX; curY = p.clientY - startY;
+      if (Math.abs(curX) > Math.abs(curY)) toast.style.transform = `translateX(${curX}px)`;
+      else toast.style.transform = `translateY(${curY}px)`;
+    };
+    const onPointerUp = () => {
+      dragging = false; meta.paused = false; toast.style.transition = '';
+      const swiped = Math.abs(curX) > (this._defaults.swipeThreshold || 60);
+      if (swiped) {
+        toast.style.transform = `translateX(${curX > 0 ? 1000 : -1000}px)`;
+        setTimeout(removeNow, 220);
       } else {
-        start = Date.now();
+        toast.style.transform = '';
       }
-
-      if (remaining <= 0) {
-        toast.classList.remove('show');
-        setTimeout(() => {
-          toast.remove();
-          this._next();
-        }, 300);
-      } else {
-        raf = requestAnimationFrame(tick);
-      }
-
-      if (progressEl) {
-        progressEl.style.transform = `scaleX(${Math.max(0, remaining / duration)})`;
-      }
+      startX = startY = curX = curY = 0;
     };
 
-    toast.addEventListener('mouseenter', () => (toast.__paused = true));
-    toast.addEventListener('mouseleave', () => (toast.__paused = false));
+    toast.addEventListener('touchstart', onPointerDown, { passive: true });
+    toast.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('touchend', onPointerUp);
+    window.addEventListener('mouseup', onPointerUp);
 
-    toast.addEventListener('touchstart', () => (toast.__paused = true));
-    toast.addEventListener('touchend', () => (toast.__paused = false));
+    const onEnter = () => meta.paused = true;
+    const onLeave = () => meta.paused = false;
+    toast.addEventListener('mouseenter', onEnter);
+    toast.addEventListener('mouseleave', onLeave);
+    toast.addEventListener('focusin', onEnter);
+    toast.addEventListener('focusout', onLeave);
 
-    requestAnimationFrame(tick);
+    const duration = cfg.duration ?? this._defaults.duration;
+    if (duration > 0) {
+      meta.start = now(); meta.remaining = duration;
+      const tick = () => {
+        if (!this._activeMap.has(toastId)) return;
+        if (!meta.paused) {
+          const delta = now() - meta.start;
+          meta.remaining -= delta; meta.start = now();
+        } else meta.start = now();
+
+        if (progressEl) {
+          const scale = Math.max(0, meta.remaining / duration);
+          progressEl.style.transform = `scaleX(${scale})`;
+        }
+
+        if (meta.remaining <= 0) {
+          toast.classList.remove('show');
+          setTimeout(removeNow, 280);
+        } else {
+          meta.raf = requestAnimationFrame(tick);
+        }
+      };
+      meta.raf = requestAnimationFrame(tick);
+    }
+
+    function removeNow() {
+      if (!juiceToast._activeMap.has(toastId)) return;
+      toast.classList.add('hide');
+      toast.removeEventListener('touchstart', onPointerDown);
+      toast.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+      window.removeEventListener('mouseup', onPointerUp);
+
+      toast.removeEventListener('mouseenter', onEnter);
+      toast.removeEventListener('mouseleave', onLeave);
+      toast.removeEventListener('focusin', onEnter);
+      toast.removeEventListener('focusout', onLeave);
+
+      const metaLocal = juiceToast._activeMap.get(toastId);
+      if (metaLocal?.raf) cancelAnimationFrame(metaLocal.raf);
+      if (metaLocal?.timer) clearTimeout(metaLocal.timer);
+      juiceToast._activeMap.delete(toastId);
+
+      const parent = toast.parentNode; if (parent) parent.removeChild(toast);
+      if (parent) juiceToast._updateStackPositionsFor(parent);
+    }
+
+    if (cfg.undoTimeout) {
+      meta.timer = setTimeout(removeNow, cfg.undoTimeout);
+    }
+
+    if (cfg.playSound || this._defaults.playSound) this._playSound(cfg.playSound || this._defaults.playSound);
+
+    return toastId;
   },
+
+  _priorityMap: { low: 1, normal: 2, high: 3, urgent: 4 },
 };
 
+/* ---------------- Backwards helpers ---------------- */
+function normalizeState(state, fallback) { if (!state) return { message: fallback }; if (typeof state === 'string') return { message: state }; return state; }
+function resolveState(state, value, fallback) { if (!state) return { message: fallback }; if (typeof state === 'function') return { message: state(value) }; if (typeof state === 'string') return { message: state }; return state; }
+
+/* ---------------- Default types ---------------- */
 juiceToast.setup({
-  success: {
-    icon: 'fa-check',
-    iconPack: 'fas',
-    bg: '#16a34a',
-    progress: true,
-    duration: 4000,
-  },
-
-  error: {
-    icon: 'fa-xmark',
-    iconPack: 'fas',
-    bg: '#dc2626',
-    progress: true,
-    duration: 4000,
-  },
-
-  info: {
-    icon: 'fa-circle-info',
-    iconPack: 'fas',
-    bg: '#2563eb',
-    duration: 4000,
-    progress: true,
-  },
-
-  warning: {
-    icon: 'fa-triangle-exclamation',
-    iconPack: 'fas',
-    bg: '#f59e0b',
-    duration: 4000,
-    progress: true,
-  },
+  success: { icon: 'fa-check', iconPack: 'fas', bg: '#16a34a', progress: true, duration: 4000 },
+  error: { icon: 'fa-xmark', iconPack: 'fas', bg: '#dc2626', progress: true, duration: 4000 },
+  info: { icon: 'fa-circle-info', iconPack: 'fas', bg: '#2563eb', progress: true, duration: 4000 },
+  warning: { icon: 'fa-triangle-exclamation', iconPack: 'fas', bg: '#f59e0b', progress: true, duration: 4000 },
+  loading: { icon: 'spinner', iconPack: 'fas', iconAnim: 'jt-spin', duration: 0, progress: true }
 });
 
 export default juiceToast;

@@ -1,15 +1,12 @@
 /**
  * OpenDN Foundation (C) 2026
- * Source Of Juice Toast v1.3.4 (iOS user | EoS)
+ * Source Of Juice Toast v1.4.0(iOS user)
  * Read CONTRIBUTE.md To Contribute
  */
- console.warn(
-  "%cJuiceToast v1.3.x%c — This version is approaching End of Support on Feb 28th 2026. Use %c^v1.4.x (Gold)%c to remove this message.",
-  "background: #f59e0b; color: #000; font-weight: bold; padding: 2px 6px; border-radius: 4px;", 
-  "color: #555; font-weight: normal;",
-  "background: #38bdf8; color: #000; font-weight: bold; padding: 2px 4px; border-radius: 3px;", 
-  "color: #555; font-weight: normal;"
-);
+let dev = true;
+if(dev) {
+  console.warn("Warning: You are using JuiceToast v1.4.0 for iOS, On v1.4.5 JuiceToast iOS will be removed.")
+}
 const isBrowser =
   typeof window !== 'undefined' && typeof document !== 'undefined';
 
@@ -48,6 +45,26 @@ function speakTTS(message, lang = 'en-US', rate = 1) {
   } else {
     speakNow();
   }
+}
+
+function normalizeState(state, fallback) {
+  if (!state) return { message: fallback };
+  if (typeof state === "string") return { message: state };
+  return state;
+}
+
+function resolveState(state, value, fallback) {
+  if (!state) return { message: fallback };
+  
+  if (typeof state === "function") {
+    return { message: state(value) };
+  }
+  
+  if (typeof state === "string") {
+    return { message: state };
+  }
+  
+  return state;
 }
 
 const raf =
@@ -366,6 +383,15 @@ const BASE_CSS = `
   100% { transform: scale(1); }
 }
 
+@keyframes jt-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ================= CLASSES ================= */
 
 .spin   { animation: jt-spin .6s linear; }
@@ -374,6 +400,9 @@ const BASE_CSS = `
 .bounce { animation: jt-bounce .45s ease; }
 .wiggle { animation: jt-wiggle .5s ease; }
 .pop    { animation: jt-pop .35s ease-out; }
+.spin {
+  animation: jt - spin 1 s linear infinite;
+}
 
 .icon-clickable {
   cursor: pointer;
@@ -426,6 +455,29 @@ function injectCSS(css) {
 
   document.head.appendChild(style);
   __cssInjected = true;
+}
+
+function sanitizeHTML(input) {
+  const template = document.createElement('template');
+  template.innerHTML = input;
+  
+  template.content.querySelectorAll('script, [onload], [onclick], [onerror]').forEach(el => el.remove());
+  
+  const allowedTags = ['b', 'i', 'u', 'strong', 'em', 'code', 'pre', 'ul', 'ol', 'li', 'br', 'p', 'span', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const walk = (node) => {
+    node.childNodes.forEach(child => {
+      if (child.nodeType === 1) {
+        if (!allowedTags.includes(child.tagName.toLowerCase())) {
+          child.replaceWith(...child.childNodes);
+        } else {
+          walk(child);
+        }
+      }
+    });
+  };
+  
+  walk(template.content);
+  return template.innerHTML;
 }
 
 /* ================= THEME REGISTRY ================= */
@@ -492,6 +544,7 @@ const juiceToast = {
   _showing: false,
   _theme: 'dark',
   _plugins: [],
+  _activePromises: new Map(),
 
   /* ===== PUBLIC API ===== */
 
@@ -547,6 +600,89 @@ const juiceToast = {
     const nodes = document.querySelectorAll('[id^="juice-toast-root-"]');
     nodes.forEach((n) => n.remove());
   },
+
+  promise(promise, states = {}) {
+  if (!promise || typeof promise.then !== "function") {
+    this._warn("promise() expects a Promise");
+    return;
+  }
+  
+  const id = "jt-promise-" + Date.now();
+  
+  const entry = {
+    cancelled: false,
+    timer: null
+  };
+  
+  this._activePromises.set(id, entry);
+  
+  /* ---------- LOADING ---------- */
+  this._enqueue("loading", {
+    ...normalizeState(states.loading, "Loading..."),
+    groupId: id,
+    duration: 0
+  });
+  
+  /* ---------- TIMEOUT ---------- */
+  if (states.timeout) {
+    entry.timer = setTimeout(() => {
+      if (entry.cancelled) return;
+      
+      entry.cancelled = true;
+      
+      this._enqueue("error", {
+        message: states.timeoutMessage || "Request timeout",
+        groupId: id
+      });
+      
+      this._activePromises.delete(id);
+    }, states.timeout);
+  }
+  
+  /* ---------- RESOLVE ---------- */
+  promise
+    .then((result) => {
+      if (entry.cancelled) return;
+      
+      clearTimeout(entry.timer);
+      
+      this._enqueue("success", {
+        ...resolveState(states.success, result, "Success"),
+        groupId: id
+      });
+      
+      this._activePromises.delete(id);
+    })
+    .catch((err) => {
+      if (entry.cancelled) return;
+      
+      clearTimeout(entry.timer);
+      
+      this._enqueue("error", {
+        ...resolveState(states.error, err, "Error"),
+        groupId: id
+      });
+      
+      this._activePromises.delete(id);
+    });
+  
+  /* ---------- RETURN CONTROLLER ---------- */
+  return {
+    cancel: () => {
+      if (!this._activePromises.has(id)) return;
+      
+      entry.cancelled = true;
+      clearTimeout(entry.timer);
+      
+      this._enqueue("info", {
+        message: states.cancelMessage || "Cancelled",
+        groupId: id
+      });
+      
+      this._activePromises.delete(id);
+    }
+  };
+}, 
 
   /* ===== INTERNAL ===== */
 
@@ -860,6 +996,25 @@ if (cfg.profile) {
         });
       }
     }
+    const root = this._getRoot(cfg.position);
+if (cfg.groupId) {
+  const existing = Array.from(root.children).find(
+    t => t.dataset.groupId === cfg.groupId
+  );
+  if (existing) {
+    let countEl = existing.querySelector('.jt-count');
+    if (!countEl) {
+      countEl = document.createElement('span');
+      countEl.className = 'jt-count';
+      countEl.style.marginLeft = '6px';
+      existing.querySelector('.jt-title').appendChild(countEl);
+      countEl.textContent = '1';
+    }
+    countEl.textContent = parseInt(countEl.textContent) + 1;
+    return; // jangan buat toast baru
+  }
+  toast.dataset.groupId = cfg.groupId;
+}
 
     // Respect reduced motion
     if (reduceMotion) {
@@ -877,6 +1032,13 @@ if (cfg.profile) {
     if (!cfg.message && !cfg.title) {
       this._warn('Toast created without message or title');
     }
+    
+    if (cfg.html) {
+  const div = document.createElement('div');
+  div.className = 'jt-message';
+  div.innerHTML = sanitizeHTML(cfg.html);
+  content.appendChild(div);
+}
 
     if (cfg.icon && !cfg.iconPack) {
       this._warn('icon provided without iconPack');
@@ -979,6 +1141,24 @@ if (cfg.profile) {
     const msg = document.createElement('div');
 msg.className = 'jt-message';
 
+if (cfg.undo) {
+  const undoBtn = document.createElement('button');
+  undoBtn.className = 'jt-action';
+  undoBtn.textContent = 'Undo';
+  undoBtn.onclick = () => {
+    cfg.undo();
+    toast.remove();
+    this._next();
+  };
+  content.appendChild(undoBtn);
+  
+  if (cfg.undoTimeout) {
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, cfg.undoTimeout);
+  }
+}
+
 if (typeof cfg.message === 'string') {
   // regex untuk inline `code`
   const parts = cfg.message.split(/(`[^`]+`)/g);
@@ -1059,7 +1239,6 @@ content.appendChild(msg);
       toast.style.borderRadius = toast.style.borderRadius || '14px';
     }
 
-    const root = this._getRoot(cfg.position);
     const max = this._defaults.maxVisible;
     if (max && root.children.length >= max) {
       root.firstChild.remove();
@@ -1113,6 +1292,23 @@ content.appendChild(msg);
         progressEl.style.transform = `scaleX(${frac})`;
       }
     };
+
+let dragStartY = 0;
+toast.addEventListener('mousedown', e => {
+  dragStartY = e.clientY;
+  toast.style.transition = 'none';
+});
+
+toast.addEventListener('mousemove', e => {
+  if (dragStartY === 0) return;
+  toast.style.transform = `translateY(${e.clientY - dragStartY}px)`;
+});
+
+toast.addEventListener('mouseup', e => {
+  toast.style.transition = '';
+  toast.style.transform = '';
+  dragStartY = 0;
+});
 
     // Desktop hover pause only if not touch device (iOS Safari has no hover)
     if (!isTouch) {
