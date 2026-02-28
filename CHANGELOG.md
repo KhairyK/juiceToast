@@ -1,9 +1,10 @@
 ## v1.4.0
 - Add Smart Queue
 - Bugs fixed & Logic fixes
+- Fix the toast speed
 - Add Promise 
 - Add Universal Module Definition (UMD) Back
-- !**Removing `.d.ts`**! (Will be added on 5 March)
+- !**Removing iOS Support**!
 
 v1.3.4
 - Bug Fixes
@@ -16,7 +17,7 @@ v1.3.2
 - Improved A11Y
 - Adding Background Image
 - Adding more Theme
-- Adding default toast (juiceToast.success|error|info|warning)
+- Adding default toast (juiceToast.success|error|info|warning|loading)
 
 v1.3.1
 - Improved iOS / Safari (WebKit) compatibility

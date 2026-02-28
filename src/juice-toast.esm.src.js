@@ -50,7 +50,7 @@ class PriorityQueue {
   }
 }
 
-/* ---------------- CSS Injection (kept lean) ---------------- */
+/* ---------------- CSS Injection (kept lean + safe) ---------------- */
 let __cssInjected = false;
 const BASE_CSS = `
 /* JuiceToast base (v1.4.0) */
@@ -72,10 +72,17 @@ const BASE_CSS = `
 .jt-actions{display:flex;gap:8px;margin-top:10px}
 .jt-action{border:1px solid currentColor;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;background:transparent}
 .jt-progress{position:absolute;left:0;bottom:0;height:4px;width:100%;border-radius:2px;background:linear-gradient(90deg,#4ade80,#22c55e);transform-origin:left;transform:scaleX(1);transition:transform linear}
+
+/* avatar specific */
+.jt-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
 `;
 
+/**
+ * injectCSS - improved: checks for existing element id to avoid double-injection
+ */
 function injectCSS(css = BASE_CSS) {
   if (!isBrowser || __cssInjected) return;
+  if (document.getElementById('juice-toast-style')) { __cssInjected = true; return; }
   const st = document.createElement('style');
   st.id = 'juice-toast-style';
   st.textContent = css;
@@ -88,19 +95,42 @@ const uid = (() => { let n = 1; return () => 'jt-' + (n++); })();
 function now() { return Date.now(); }
 function merge(a, b) { return Object.assign({}, a || {}, b || {}); }
 function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+/**
+ * sanitizeHTML - improved: removes dangerous attributes (on*), and javascript: URIs on href/src
+ * still simple (lightweight). For full-proof sanitization use DOMPurify externally.
+ */
 function sanitizeHTML(input) {
   if (!input) return '';
   const t = document.createElement('template');
   t.innerHTML = input;
-  t.content.querySelectorAll('script, style, [onload], [onerror], [onclick], iframe').forEach(el => el.remove());
-  const allowed = ['b','i','u','strong','em','code','pre','ul','ol','li','br','p','span','img','h1','h2','h3','h4','h5','h6'];
-  (function walk(node){ Array.from(node.childNodes).forEach(ch => {
-    if (ch.nodeType === 1) {
-      if (!allowed.includes(ch.tagName.toLowerCase())) {
-        ch.replaceWith(...Array.from(ch.childNodes));
-      } else walk(ch);
-    }
-  })})(t.content);
+  t.content.querySelectorAll('script, style, iframe').forEach(el => el.remove());
+  const allowed = ['b','i','u','strong','em','code','pre','ul','ol','li','br','p','span','img','h1','h2','h3','h4','h5','h6','a'];
+  (function walk(node){
+    Array.from(node.childNodes).forEach(ch => {
+      if (ch.nodeType === 1) {
+        const name = ch.tagName.toLowerCase();
+        if (!allowed.includes(name)) {
+          ch.replaceWith(...Array.from(ch.childNodes));
+        } else {
+          // remove event handler attributes and dangerous URIs
+          Array.from(ch.attributes || []).forEach(attr => {
+            const an = attr.name.toLowerCase();
+            const av = attr.value || '';
+            if (an.startsWith('on')) {
+              ch.removeAttribute(attr.name);
+            } else if ((an === 'href' || an === 'src' || an === 'xlink:href') && av.trim().toLowerCase().startsWith('javascript:')) {
+              ch.removeAttribute(attr.name);
+            } else if (name === 'img' && an === 'srcset') {
+              // remove srcset to avoid complex parsing issues
+              ch.removeAttribute(attr.name);
+            }
+          });
+          walk(ch);
+        }
+      }
+    });
+  })(t.content);
   return t.innerHTML;
 }
 
@@ -329,9 +359,73 @@ const juiceToast = {
       }
     }
 
-    if (icon && cfg.iconPosition === 'right') { toast.appendChild(content); toast.appendChild(icon); }
-    else if (icon && cfg.iconPosition === 'top') { toast.classList.add('jt-icon-top'); toast.appendChild(icon); toast.appendChild(content); }
-    else { if (icon) toast.appendChild(icon); toast.appendChild(content); }
+    // --- Avatar handling (fixed placement + small upgrade)
+    // cfg.avatar can be string (src) or truthy; cfg.avatarPosition: 'left'|'right'|'top' (default 'left')
+    let avatar = null;
+    if (cfg.avatar) {
+      avatar = document.createElement('img');
+      const src = (typeof cfg.avatar === 'string' && cfg.avatar) ? cfg.avatar : (cfg.avatarSrc || '');
+      if (src) avatar.src = src;
+      avatar.alt = cfg.avatarAlt || cfg.title || 'avatar';
+      avatar.className = 'jt-avatar';
+      avatar.loading = cfg.avatarLazy ? 'lazy' : 'eager';
+      // base inline styles (kept lightweight)
+      avatar.style.width = avatar.style.width || '36px';
+      avatar.style.height = avatar.style.height || '36px';
+      avatar.style.borderRadius = avatar.style.borderRadius || '50%';
+      avatar.style.objectFit = avatar.style.objectFit || 'cover';
+      avatar.style.flexShrink = '0';
+      // positioning spacing depending on requested position
+      const aPos = cfg.avatarPosition || 'left';
+      if (aPos === 'left') {
+        avatar.style.marginRight = cfg.avatarSpacing ?? '10px';
+      } else if (aPos === 'right') {
+        avatar.style.marginLeft = cfg.avatarSpacing ?? '10px';
+      } else if (aPos === 'top') {
+        // for top we will append before content and add column layout to toast when necessary
+        avatar.style.marginBottom = cfg.avatarSpacing ?? '8px';
+      }
+    }
+
+    // Append order: avatar (left/top), icon, content — ensures avatar is sibling of content (not inside)
+    // For avatarPosition === 'top', we switch layout to column for the toast
+    const avatarPos = (cfg.avatarPosition || 'left');
+    if (avatar && avatarPos === 'top') {
+      // make toast column for top-avatar layout temporarily
+      toast.classList.add('jt-avatar-top');
+      toast.style.flexDirection = 'column';
+      toast.style.alignItems = 'flex-start';
+      toast.appendChild(avatar);
+      // then icon/content below
+      if (icon && cfg.iconPosition === 'top') { toast.appendChild(icon); toast.appendChild(content); }
+      else if (icon && cfg.iconPosition === 'right') { /* right icon in column layout -> place after content */ toast.appendChild(content); toast.appendChild(icon); }
+      else { if (icon) toast.appendChild(icon); toast.appendChild(content); }
+    } else {
+      // horizontal layout (default)
+      toast.style.flexDirection = 'row';
+      toast.style.alignItems = 'center';
+      if (avatar && avatarPos === 'left') toast.appendChild(avatar);
+
+      if (icon && cfg.iconPosition === 'right') {
+        // content first, then icon
+        toast.appendChild(content);
+        toast.appendChild(icon);
+      } else if (icon && cfg.iconPosition === 'top') {
+        toast.classList.add('jt-icon-top');
+        toast.appendChild(icon);
+        toast.appendChild(content);
+      } else {
+        if (icon) toast.appendChild(icon);
+        toast.appendChild(content);
+      }
+
+      if (avatar && avatarPos === 'right') {
+        // avatar to the far right; margin-left handles spacing
+        // ensure content takes remaining space
+        // content is already flex:1 per CSS (.jt-content), so avatar remains right
+        toast.appendChild(avatar);
+      }
+    }
 
     let progressEl = null;
     if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
@@ -370,20 +464,52 @@ const juiceToast = {
     root.appendChild(toast);
 
     const meta = {
-      id: toastId, toast, cfg, createdAt: now(), remaining: cfg.duration ?? this._defaults.duration, raf: null, timer: null, start: now(), paused: false
+      id: toastId,
+      toast,
+      cfg,
+      createdAt: now(),
+      remaining: cfg.duration ?? this._defaults.duration,
+      raf: null,
+      timer: null,
+      start: now(),
+      paused: false,
+      // bound handlers for robust cleanup
+      _boundMove: null,
+      _boundUp: null
     };
     this._activeMap.set(toastId, meta);
 
     this._runPlugins({ toast, cfg, type, root });
     this._updateStackPositionsFor(root);
 
+    // show animation
     requestAnimationFrame(() => toast.classList.add('show'));
 
+    /* ---------------- Pointer drag handling (optimized)
+       - we DON'T install persistent global listeners.
+       - listeners for move/up are added on pointerdown and removed on pointerup.
+    ---------------- */
     let startX = 0, startY = 0, curX = 0, curY = 0, dragging = false;
+
     const onPointerDown = (e) => {
       const p = (e.touches ? e.touches[0] : e);
-      startX = p.clientX; startY = p.clientY; dragging = true; meta.paused = true; toast.style.transition = 'none';
+      startX = p.clientX; startY = p.clientY; dragging = true;
+      meta.paused = true;
+      // stop RAF while dragging
+      if (meta.raf) { cancelAnimationFrame(meta.raf); meta.raf = null; }
+      toast.style.transition = 'none';
+
+      // bind move/up on document only while dragging
+      meta._boundMove = onPointerMove;
+      meta._boundUp = onPointerUp;
+
+      // touchmove needs passive:true to avoid blocking, but we still want to read coordinates
+      document.addEventListener('touchmove', meta._boundMove, { passive: true });
+      document.addEventListener('mousemove', meta._boundMove);
+      document.addEventListener('touchend', meta._boundUp);
+      document.addEventListener('mouseup', meta._boundUp);
     };
+
     const onPointerMove = (e) => {
       if (!dragging) return;
       const p = (e.touches ? e.touches[0] : e);
@@ -391,8 +517,11 @@ const juiceToast = {
       if (Math.abs(curX) > Math.abs(curY)) toast.style.transform = `translateX(${curX}px)`;
       else toast.style.transform = `translateY(${curY}px)`;
     };
+
     const onPointerUp = () => {
-      dragging = false; meta.paused = false; toast.style.transition = '';
+      dragging = false;
+      meta.paused = false;
+      toast.style.transition = '';
       const swiped = Math.abs(curX) > (this._defaults.swipeThreshold || 60);
       if (swiped) {
         toast.style.transform = `translateX(${curX > 0 ? 1000 : -1000}px)`;
@@ -401,67 +530,127 @@ const juiceToast = {
         toast.style.transform = '';
       }
       startX = startY = curX = curY = 0;
+
+      // remove temporary document listeners
+      if (meta._boundMove) {
+        document.removeEventListener('touchmove', meta._boundMove, { passive: true });
+        document.removeEventListener('mousemove', meta._boundMove);
+        meta._boundMove = null;
+      }
+      if (meta._boundUp) {
+        document.removeEventListener('touchend', meta._boundUp);
+        document.removeEventListener('mouseup', meta._boundUp);
+        meta._boundUp = null;
+      }
+
+      // restart RAF loop if needed
+      startTimerLoop();
     };
 
     toast.addEventListener('touchstart', onPointerDown, { passive: true });
     toast.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('touchmove', onPointerMove, { passive: true });
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('touchend', onPointerUp);
-    window.addEventListener('mouseup', onPointerUp);
 
-    const onEnter = () => meta.paused = true;
-    const onLeave = () => meta.paused = false;
+    /* ---------------- Hover / focus pause handling
+       - we cancel RAF on enter and restart on leave only when needed.
+    ---------------- */
+    const onEnter = () => {
+      meta.paused = true;
+      if (meta.raf) { cancelAnimationFrame(meta.raf); meta.raf = null; }
+    };
+    const onLeave = () => {
+      // unpause and restart the RAF timer loop
+      if (!meta.paused) return;
+      meta.paused = false;
+      // refresh start time and restart tick loop
+      meta.start = now();
+      startTimerLoop();
+    };
     toast.addEventListener('mouseenter', onEnter);
     toast.addEventListener('mouseleave', onLeave);
     toast.addEventListener('focusin', onEnter);
     toast.addEventListener('focusout', onLeave);
 
+    /* ---------------- Timer / RAF loop (optimized)
+       - we avoid a RAF loop while paused
+       - startTimerLoop will ensure only ONE RAF is active per toast
+    ---------------- */
     const duration = cfg.duration ?? this._defaults.duration;
-    if (duration > 0) {
-      meta.start = now(); meta.remaining = duration;
-      const tick = () => {
-        if (!this._activeMap.has(toastId)) return;
-        if (!meta.paused) {
-          const delta = now() - meta.start;
-          meta.remaining -= delta; meta.start = now();
-        } else meta.start = now();
 
-        if (progressEl) {
-          const scale = Math.max(0, meta.remaining / duration);
-          progressEl.style.transform = `scaleX(${scale})`;
-        }
+    function tick() {
+      // if toast already removed, bail out
+      if (!juiceToast._activeMap.has(toastId)) return;
+      // if paused, don't continue RAF loop (will be restarted by onLeave/onPointerUp)
+      if (meta.paused) { meta.raf = null; meta.start = now(); return; }
 
-        if (meta.remaining <= 0) {
-          toast.classList.remove('show');
-          setTimeout(removeNow, 280);
-        } else {
-          meta.raf = requestAnimationFrame(tick);
-        }
-      };
+      const delta = now() - meta.start;
+      meta.remaining -= delta;
+      meta.start = now();
+
+      if (progressEl) {
+        const scale = Math.max(0, meta.remaining / duration);
+        // transform is GPU-accelerated; keep it
+        progressEl.style.transform = `scaleX(${scale})`;
+      }
+
+      if (meta.remaining <= 0) {
+        toast.classList.remove('show');
+        setTimeout(removeNow, 280);
+        meta.raf = null;
+        return;
+      }
+
       meta.raf = requestAnimationFrame(tick);
     }
 
+    function startTimerLoop() {
+      if (duration <= 0) return;
+      if (meta.raf) return; // already running
+      if (meta.paused) return; // don't start while paused
+      meta.start = now();
+      meta.raf = requestAnimationFrame(tick);
+    }
+
+    if (duration > 0) {
+      meta.start = now();
+      meta.remaining = duration;
+      startTimerLoop();
+    }
+
+    /* ---------------- removeNow + robust cleanup ---------------- */
     function removeNow() {
       if (!juiceToast._activeMap.has(toastId)) return;
       toast.classList.add('hide');
+
+      // Remove pointerstart listeners attached to toast
       toast.removeEventListener('touchstart', onPointerDown);
       toast.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('touchmove', onPointerMove);
-      window.removeEventListener('mousemove', onPointerMove);
-      window.removeEventListener('touchend', onPointerUp);
-      window.removeEventListener('mouseup', onPointerUp);
 
+      // Remove any document listeners in case they were left
+      if (meta._boundMove) {
+        document.removeEventListener('touchmove', meta._boundMove, { passive: true });
+        document.removeEventListener('mousemove', meta._boundMove);
+        meta._boundMove = null;
+      }
+      if (meta._boundUp) {
+        document.removeEventListener('touchend', meta._boundUp);
+        document.removeEventListener('mouseup', meta._boundUp);
+        meta._boundUp = null;
+      }
+
+      // Remove hover/focus listeners
       toast.removeEventListener('mouseenter', onEnter);
       toast.removeEventListener('mouseleave', onLeave);
       toast.removeEventListener('focusin', onEnter);
       toast.removeEventListener('focusout', onLeave);
 
+      // cancel RAF & timers
       const metaLocal = juiceToast._activeMap.get(toastId);
-      if (metaLocal?.raf) cancelAnimationFrame(metaLocal.raf);
-      if (metaLocal?.timer) clearTimeout(metaLocal.timer);
+      if (metaLocal?.raf) { cancelAnimationFrame(metaLocal.raf); metaLocal.raf = null; }
+      if (metaLocal?.timer) { clearTimeout(metaLocal.timer); metaLocal.timer = null; }
+
       juiceToast._activeMap.delete(toastId);
 
+      // remove from DOM and update stack
       const parent = toast.parentNode; if (parent) parent.removeChild(toast);
       if (parent) juiceToast._updateStackPositionsFor(parent);
     }
@@ -479,7 +668,7 @@ const juiceToast = {
 };
 
 /* ---------------- Backwards helpers ---------------- */
-function normalizeState(state, fallback) { if (!state) return { message: fallback }; if (typeof state === 'string') return { message: state }; return state; }
+function normalizeState(state, fallback) { if (!state) return { message: fallback }; if (typeof state === 'string') return { message: fallback }; return state; }
 function resolveState(state, value, fallback) { if (!state) return { message: fallback }; if (typeof state === 'function') return { message: state(value) }; if (typeof state === 'string') return { message: state }; return state; }
 
 /* ---------------- Default types ---------------- */

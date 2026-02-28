@@ -1,10 +1,8 @@
 import juiceToast from 'juice-toast/src';
 
-document.addEventListener('DOMContentLoaded', () => {
-  juiceToast.success({
-    title: 'Hello World!',
-    duration: 4000,
-    position: 'bottom-right',
-    glassUI: 100,
-  });
-});
+juiceToast.info({
+  avatar: './avatars/profile1.png', 
+  title: 'Incoming Message!', 
+  message: 'Incoming message from Khairy.', 
+  icon: ''
+})
