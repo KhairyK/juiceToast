@@ -1,7 +1,7 @@
 {
   "name": "juice-toast",
   "version": "1.4.0",
-  "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support", 
+  "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",
     "toast-js",
@@ -16,7 +16,7 @@
     "vanilla-js-toast",
     "frontend-ui",
     "browser-notification"
-  ], 
+  ],
   "license": "MIT",
   "author": "KhairyK",
   "homepage": "https://github.com/KhairyK/juiceToast",
@@ -65,6 +65,9 @@
   "unpkg": "dist/juice-toast.esm.js",
   "jsdelivr": "dist/juice-toast.esm.js",
   "devDependencies": {
-    "prettier": "^3.8.1"
+    "esbuild": "^0.27.3",
+    "prettier": "^3.8.1",
+    "rollup": "^4.59.0",
+    "rollup-plugin-esbuild": "^6.2.1"
   }
 }
