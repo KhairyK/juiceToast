@@ -1,18 +1,38 @@
 'use strict';
 
-const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
-const reduceMotion = isBrowser && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isBrowser =
+  typeof window !== 'undefined' && typeof document !== 'undefined';
+const reduceMotion =
+  isBrowser &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------------- Priority Queue (max-heap) ---------------- */
 class PriorityQueue {
-  constructor() { this._heap = []; }
-  get size() { return this._heap.length; }
-  _parent(i) { return Math.floor((i - 1) / 2); }
-  _left(i) { return 2 * i + 1; }
-  _right(i) { return 2 * i + 2; }
-  _swap(i, j) { [this._heap[i], this._heap[j]] = [this._heap[j], this._heap[i]]; }
+  constructor() {
+    this._heap = [];
+  }
+  get size() {
+    return this._heap.length;
+  }
+  _parent(i) {
+    return Math.floor((i - 1) / 2);
+  }
+  _left(i) {
+    return 2 * i + 1;
+  }
+  _right(i) {
+    return 2 * i + 2;
+  }
+  _swap(i, j) {
+    [this._heap[i], this._heap[j]] = [this._heap[j], this._heap[i]];
+  }
   push(item, priority = 0) {
-    const node = { item, priority, seq: PriorityQueue._seq = (PriorityQueue._seq || 0) + 1 };
+    const node = {
+      item,
+      priority,
+      seq: (PriorityQueue._seq = (PriorityQueue._seq || 0) + 1),
+    };
     this._heap.push(node);
     this._siftUp(this._heap.length - 1);
   }
@@ -23,7 +43,9 @@ class PriorityQueue {
     this._siftDown(0);
     return top.item;
   }
-  peek() { return this._heap[0] ? this._heap[0].item : null; }
+  peek() {
+    return this._heap[0] ? this._heap[0].item : null;
+  }
   _siftUp(i) {
     while (i > 0) {
       const p = this._parent(i);
@@ -34,7 +56,9 @@ class PriorityQueue {
   }
   _siftDown(i) {
     while (true) {
-      const l = this._left(i), r = this._right(i), n = this._heap.length;
+      const l = this._left(i),
+        r = this._right(i),
+        n = this._heap.length;
       let largest = i;
       if (l < n && this._compare(l, largest) > 0) largest = l;
       if (r < n && this._compare(r, largest) > 0) largest = r;
@@ -44,13 +68,14 @@ class PriorityQueue {
     }
   }
   _compare(a, b) {
-    const A = this._heap[a], B = this._heap[b];
+    const A = this._heap[a],
+      B = this._heap[b];
     if (A.priority !== B.priority) return A.priority - B.priority;
     return B.seq - A.seq; // newer items first when equal priority
   }
 }
 
-/* ---------------- CSS Injection (kept lean + safe) ---------------- */
+/* ---------------- CSS Injection ---------------- */
 let __cssInjected = false;
 const BASE_CSS = `
 /* JuiceToast base (v1.4.0) */
@@ -170,7 +195,10 @@ const BASE_CSS = `
  */
 function injectCSS(css = BASE_CSS) {
   if (!isBrowser || __cssInjected) return;
-  if (document.getElementById('juice-toast-style')) { __cssInjected = true; return; }
+  if (document.getElementById('juice-toast-style')) {
+    __cssInjected = true;
+    return;
+  }
   const st = document.createElement('style');
   st.id = 'juice-toast-style';
   st.textContent = css;
@@ -179,35 +207,70 @@ function injectCSS(css = BASE_CSS) {
 }
 
 /* ---------------- Utilities ---------------- */
-const uid = (() => { let n = 1; return () => 'jt-' + (n++); })();
-function now() { return Date.now(); }
-function merge(a, b) { return Object.assign({}, a || {}, b || {}); }
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+const uid = (() => {
+  let n = 1;
+  return () => 'jt-' + n++;
+})();
+function now() {
+  return Date.now();
+}
+function merge(a, b) {
+  return Object.assign({}, a || {}, b || {});
+}
+function clamp(n, a, b) {
+  return Math.max(a, Math.min(b, n));
+}
 
 /**
- * sanitizeHTML - improved: removes dangerous attributes (on*), and javascript: URIs on href/src
- * still simple (lightweight). For full-proof sanitization use DOMPurify externally.
+ * sanitizeHTML
  */
 function sanitizeHTML(input) {
   if (!input) return '';
   const t = document.createElement('template');
   t.innerHTML = input;
-  t.content.querySelectorAll('script, style, iframe').forEach(el => el.remove());
-  const allowed = ['b','i','u','strong','em','code','pre','ul','ol','li','br','p','span','img','h1','h2','h3','h4','h5','h6','a'];
-  (function walk(node){
-    Array.from(node.childNodes).forEach(ch => {
+  t.content
+    .querySelectorAll('script, style, iframe')
+    .forEach((el) => el.remove());
+  const allowed = [
+    'b',
+    'i',
+    'u',
+    'strong',
+    'em',
+    'code',
+    'pre',
+    'ul',
+    'ol',
+    'li',
+    'br',
+    'p',
+    'span',
+    'img',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'a',
+  ];
+  (function walk(node) {
+    Array.from(node.childNodes).forEach((ch) => {
       if (ch.nodeType === 1) {
         const name = ch.tagName.toLowerCase();
         if (!allowed.includes(name)) {
           ch.replaceWith(...Array.from(ch.childNodes));
         } else {
           // remove event handler attributes and dangerous URIs
-          Array.from(ch.attributes || []).forEach(attr => {
+          Array.from(ch.attributes || []).forEach((attr) => {
             const an = attr.name.toLowerCase();
             const av = attr.value || '';
             if (an.startsWith('on')) {
               ch.removeAttribute(attr.name);
-            } else if ((an === 'href' || an === 'src' || an === 'xlink:href') && av.trim().toLowerCase().startsWith('javascript:')) {
+            } else if (
+              (an === 'href' || an === 'src' || an === 'xlink:href') &&
+              av.trim().toLowerCase().startsWith('javascript:')
+            ) {
               ch.removeAttribute(attr.name);
             } else if (name === 'img' && an === 'srcset') {
               // remove srcset to avoid complex parsing issues
@@ -224,14 +287,32 @@ function sanitizeHTML(input) {
 
 /* ---------------- Theme & Presets ---------------- */
 const themes = {
-  dark: { bg: 'linear-gradient(180deg,#1f2937,#111827)', color: '#fff', border: '1px solid rgba(255,255,255,.06)' },
+  dark: {
+    bg: 'linear-gradient(180deg,#1f2937,#111827)',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.06)',
+  },
   light: { bg: '#fff', color: '#111', border: '1px solid #e5e7eb' },
-  glass: { bg: 'rgba(30,30,30,.35)', color: '#fff', border: '1px solid rgba(255,255,255,.1)' }
+  glass: {
+    bg: 'rgba(30,30,30,.35)',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,.1)',
+  },
 };
-const sizePreset = { sm: { width: '260px', padding: '10px' }, md: { width: '320px', padding: '14px' }, lg: { width: '420px', padding: '18px' } };
+const sizePreset = {
+  sm: { width: '260px', padding: '10px' },
+  md: { width: '320px', padding: '14px' },
+  lg: { width: '420px', padding: '18px' },
+};
 
 /* ---------------- Animations map ---------------- */
-const TYPE_ANIMATION = { success: 'jt-bounce', error: 'jt-shake', warning: 'jt-shake', info: 'jt-pulse', loading: 'jt-spin' };
+const TYPE_ANIMATION = {
+  success: 'jt-bounce',
+  error: 'jt-shake',
+  warning: 'jt-shake',
+  info: 'jt-pulse',
+  loading: 'jt-spin',
+};
 
 /* ---------------- Core ---------------- */
 const juiceToast = {
@@ -262,157 +343,212 @@ const juiceToast = {
     this._registerTypes();
   },
 
-  use(plugin) { if (typeof plugin === 'function') this._plugins.push(plugin); },
-  addType(name, cfg = {}) { this._config[name] = cfg; this._registerTypes(); },
-  defineTheme(name, styles = {}) { themes[name] = merge(themes[name] || {}, styles); },
-  setTheme(name) { this._theme = name; if (!isBrowser) return; this._roots.forEach(r => r.dataset.theme = name); },
-  clear() { this._queue = new PriorityQueue(); this._queueDedupe.clear(); },
-  destroy() { this.clear(); if (!isBrowser) return; this._roots.forEach(r => r.remove()); this._roots.clear(); },
+  use(plugin) {
+    if (typeof plugin === 'function') this._plugins.push(plugin);
+  },
+  addType(name, cfg = {}) {
+    this._config[name] = cfg;
+    this._registerTypes();
+  },
+  defineTheme(name, styles = {}) {
+    themes[name] = merge(themes[name] || {}, styles);
+  },
+  setTheme(name) {
+    this._theme = name;
+    if (!isBrowser) return;
+    this._roots.forEach((r) => (r.dataset.theme = name));
+  },
+  clear() {
+    this._queue = new PriorityQueue();
+    this._queueDedupe.clear();
+  },
+  destroy() {
+    this.clear();
+    if (!isBrowser) return;
+    this._roots.forEach((r) => r.remove());
+    this._roots.clear();
+  },
 
   promise(promise, states = {}) {
-    if (!promise || typeof promise.then !== 'function') { this._warn('promise expects a Promise'); return; }
+    if (!promise || typeof promise.then !== 'function') {
+      this._warn('promise expects a Promise');
+      return;
+    }
     const ctrl = { id: uid() };
     const id = ctrl.id;
     const timeout = states.timeout;
 
-    this._enqueue('loading', { ...normalizeState(states.loading, 'Loading...'), groupId: id, duration: 0 });
+    this._enqueue('loading', {
+      ...normalizeState(states.loading, 'Loading...'),
+      groupId: id,
+      duration: 0,
+    });
 
     let timer = null;
-    if (timeout) timer = setTimeout(() => {
-      this._enqueue('error', { message: states.timeoutMessage || 'Request timeout', groupId: id });
-      cleanup();
-    }, timeout);
+    if (timeout)
+      timer = setTimeout(() => {
+        this._enqueue('error', {
+          message: states.timeoutMessage || 'Request timeout',
+          groupId: id,
+        });
+        cleanup();
+      }, timeout);
 
-    const cleanup = () => { if (timer) clearTimeout(timer); };
+    const cleanup = () => {
+      if (timer) clearTimeout(timer);
+    };
 
-    promise.then(res => {
-      cleanup();
-      this._enqueue('success', { ...resolveState(states.success, res, 'Success'), groupId: id });
-    }).catch(err => {
-      cleanup();
-      this._enqueue('error', { ...resolveState(states.error, err, 'Error'), groupId: id });
-    });
+    promise
+      .then((res) => {
+        cleanup();
+        this._enqueue('success', {
+          ...resolveState(states.success, res, 'Success'),
+          groupId: id,
+        });
+      })
+      .catch((err) => {
+        cleanup();
+        this._enqueue('error', {
+          ...resolveState(states.error, err, 'Error'),
+          groupId: id,
+        });
+      });
 
-    return { cancel: () => { this._enqueue('info', { message: states.cancelMessage || 'Cancelled', groupId: id }); if (timer) { clearTimeout(timer); } } };
+    return {
+      cancel: () => {
+        this._enqueue('info', {
+          message: states.cancelMessage || 'Cancelled',
+          groupId: id,
+        });
+        if (timer) {
+          clearTimeout(timer);
+        }
+      },
+    };
   },
 
-modal(options = {}) {
-  if (!isBrowser) return;
+  modal(options = {}) {
+    if (!isBrowser) return;
 
-  if (this._defaults.injectCSS !== false) {
-    injectCSS(this._defaults.css || BASE_CSS);
-  }
-
-  const cfg = merge({
-    title: '',
-    message: '',
-    html: null,
-    block: true, // 🔥 block content
-    blur: true,
-    closeOnOverlay: true,
-    closable: true,
-    animation: 'scale', // scale | slide | fade
-    actions: [],
-    theme: this._theme
-  }, options);
-
-  const theme = themes[cfg.theme] || themes.dark;
-
-  const overlay = document.createElement('div');
-  overlay.className = 'jt-modal-overlay';
-
-  if (cfg.block) {
-    overlay.style.pointerEvents = 'all';
-  } else {
-    overlay.style.pointerEvents = 'none';
-  }
-
-  if (!cfg.blur) {
-    overlay.style.backdropFilter = 'none';
-    overlay.style.webkitBackdropFilter = 'none';
-  }
-
-  const modal = document.createElement('div');
-  modal.className = `jt-modal jt-anim-${cfg.animation}`;
-  modal.style.background = theme.bg;
-  modal.style.color = theme.color;
-  modal.style.border = theme.border || 'none';
-
-  if (cfg.title) {
-    const header = document.createElement('div');
-    header.className = 'jt-modal-header';
-    header.textContent = cfg.title;
-    modal.appendChild(header);
-  }
-
-  const body = document.createElement('div');
-  body.className = 'jt-modal-body';
-  cfg.html ? body.innerHTML = sanitizeHTML(cfg.html)
-           : body.textContent = cfg.message || '';
-  modal.appendChild(body);
-
-  if (cfg.actions?.length) {
-    const actions = document.createElement('div');
-    actions.className = 'jt-modal-actions';
-
-    cfg.actions.forEach(a => {
-      const btn = document.createElement('button');
-      btn.className = 'jt-modal-btn' + (a.primary ? ' primary' : '');
-      btn.textContent = a.label || 'OK';
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        a.onClick?.(e);
-        if (a.closeOnClick !== false) close();
-      };
-      actions.appendChild(btn);
-    });
-
-    modal.appendChild(actions);
-  }
-
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-
-  if (cfg.block) document.body.style.overflow = 'hidden';
-
-  requestAnimationFrame(() => {
-    overlay.classList.add('show');
-    modal.classList.add('show');
-  });
-
-  const close = () => {
-    overlay.classList.remove('show');
-    modal.classList.remove('show');
-    setTimeout(() => {
-      overlay.remove();
-      if (cfg.block) document.body.style.overflow = '';
-    }, 300);
-  };
-
-  if (cfg.closable) {
-    if (cfg.closeOnOverlay) {
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) close();
-      });
+    if (this._defaults.injectCSS !== false) {
+      injectCSS(this._defaults.css || BASE_CSS);
     }
 
-    const esc = (e) => {
-      if (e.key === 'Escape') {
-        close();
-        document.removeEventListener('keydown', esc);
-      }
-    };
-    document.addEventListener('keydown', esc);
-  }
+    const cfg = merge(
+      {
+        title: '',
+        message: '',
+        html: null,
+        block: true,
+        blur: true,
+        closeOnOverlay: true,
+        closable: true,
+        animation: 'scale', // scale | slide | fade
+        actions: [],
+        theme: this._theme,
+      },
+      options
+    );
 
-  return { close };
-},
+    const theme = themes[cfg.theme] || themes.dark;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'jt-modal-overlay';
+
+    if (cfg.block) {
+      overlay.style.pointerEvents = 'all';
+    } else {
+      overlay.style.pointerEvents = 'none';
+    }
+
+    if (!cfg.blur) {
+      overlay.style.backdropFilter = 'none';
+      overlay.style.webkitBackdropFilter = 'none';
+    }
+
+    const modal = document.createElement('div');
+    modal.className = `jt-modal jt-anim-${cfg.animation}`;
+    modal.style.background = theme.bg;
+    modal.style.color = theme.color;
+    modal.style.border = theme.border || 'none';
+
+    if (cfg.title) {
+      const header = document.createElement('div');
+      header.className = 'jt-modal-header';
+      header.textContent = cfg.title;
+      modal.appendChild(header);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'jt-modal-body';
+    cfg.html
+      ? (body.innerHTML = sanitizeHTML(cfg.html))
+      : (body.textContent = cfg.message || '');
+    modal.appendChild(body);
+
+    if (cfg.actions?.length) {
+      const actions = document.createElement('div');
+      actions.className = 'jt-modal-actions';
+
+      cfg.actions.forEach((a) => {
+        const btn = document.createElement('button');
+        btn.className = 'jt-modal-btn' + (a.primary ? ' primary' : '');
+        btn.textContent = a.label || 'OK';
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          a.onClick?.(e);
+          if (a.closeOnClick !== false) close();
+        };
+        actions.appendChild(btn);
+      });
+
+      modal.appendChild(actions);
+    }
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    if (cfg.block) document.body.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('show');
+      modal.classList.add('show');
+    });
+
+    const close = () => {
+      overlay.classList.remove('show');
+      modal.classList.remove('show');
+      setTimeout(() => {
+        overlay.remove();
+        if (cfg.block) document.body.style.overflow = '';
+      }, 300);
+    };
+
+    if (cfg.closable) {
+      if (cfg.closeOnOverlay) {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) close();
+        });
+      }
+
+      const esc = (e) => {
+        if (e.key === 'Escape') {
+          close();
+          document.removeEventListener('keydown', esc);
+        }
+      };
+      document.addEventListener('keydown', esc);
+    }
+
+    return { close };
+  },
 
   _registerTypes() {
-    Object.keys(this._config).forEach(type => {
+    Object.keys(this._config).forEach((type) => {
       if (typeof this[type] === 'function' && !this[type].__auto) return;
       const fn = (payload) => this._enqueue(type, payload);
-      fn.__auto = true; this[type] = fn;
+      fn.__auto = true;
+      this[type] = fn;
     });
   },
 
@@ -456,29 +592,61 @@ modal(options = {}) {
     root.style.pointerEvents = 'none';
     root.style.display = 'flex';
     switch (position) {
-      case 'top-left': root.style.top = '20px'; root.style.left = '20px'; break;
-      case 'top-right': root.style.top = '20px'; root.style.right = '20px'; break;
-      case 'bottom-left': root.style.bottom = '20px'; root.style.left = '20px'; break;
-      case 'bottom-right': root.style.bottom = '20px'; root.style.right = '20px'; break;
-      case 'top-center': root.style.top = '20px'; root.style.left = '50%'; root.style.transform = 'translateX(-50%)'; break;
-      case 'bottom-center': root.style.bottom = '20px'; root.style.left = '50%'; root.style.transform = 'translateX(-50%)'; break;
-      default: root.style.bottom = '20px'; root.style.right = '20px';
+      case 'top-left':
+        root.style.top = '20px';
+        root.style.left = '20px';
+        break;
+      case 'top-right':
+        root.style.top = '20px';
+        root.style.right = '20px';
+        break;
+      case 'bottom-left':
+        root.style.bottom = '20px';
+        root.style.left = '20px';
+        break;
+      case 'bottom-right':
+        root.style.bottom = '20px';
+        root.style.right = '20px';
+        break;
+      case 'top-center':
+        root.style.top = '20px';
+        root.style.left = '50%';
+        root.style.transform = 'translateX(-50%)';
+        break;
+      case 'bottom-center':
+        root.style.bottom = '20px';
+        root.style.left = '50%';
+        root.style.transform = 'translateX(-50%)';
+        break;
+      default:
+        root.style.bottom = '20px';
+        root.style.right = '20px';
     }
     document.body.appendChild(root);
     this._roots.set(position, root);
     return root;
   },
 
-  _warn(msg) { if (this._defaults.dev && typeof console !== 'undefined') console.warn('[JuiceToast]', msg); },
+  _warn(msg) {
+    if (this._defaults.dev && typeof console !== 'undefined')
+      console.warn('[JuiceToast]', msg);
+  },
 
   _playSound(src) {
-    if (!isBrowser) return; const s = typeof src === 'string' && src ? src : this._defaults.playSound; if (!s) return;
-    try { const a = new Audio(s); a.volume = 0.6; a.play().catch(() => {}); } catch (e) {}
+    if (!isBrowser) return;
+    const s = typeof src === 'string' && src ? src : this._defaults.playSound;
+    if (!s) return;
+    try {
+      const a = new Audio(s);
+      a.volume = 0.6;
+      a.play().catch(() => {});
+    } catch (e) {}
   },
 
   _updateStackPositionsFor(root) {
     const children = Array.from(root.children);
-    const isBottom = root.dataset.position && root.dataset.position.includes('bottom');
+    const isBottom =
+      root.dataset.position && root.dataset.position.includes('bottom');
     children.forEach((el, i) => {
       const index = isBottom ? i : i;
       const offset = index * 12;
@@ -489,16 +657,31 @@ modal(options = {}) {
     });
   },
 
-  _runPlugins(ctx) { this._plugins.forEach(fn => { try { fn(ctx); } catch (e) { this._warn('Plugin error: ' + e.message); } }); },
+  _runPlugins(ctx) {
+    this._plugins.forEach((fn) => {
+      try {
+        fn(ctx);
+      } catch (e) {
+        this._warn('Plugin error: ' + e.message);
+      }
+    });
+  },
 
-  _normalizeGlass(value) { if (value === true) return 60; if (!value) return 0; const n = Number(value); return Number.isFinite(n) ? clamp(n, 0, 100) : 0; },
+  _normalizeGlass(value) {
+    if (value === true) return 60;
+    if (!value) return 0;
+    const n = Number(value);
+    return Number.isFinite(n) ? clamp(n, 0, 100) : 0;
+  },
 
   _showToast(type, payload = {}, id) {
     if (!isBrowser) return;
-    if (this._defaults.injectCSS !== false) injectCSS(this._defaults.css || BASE_CSS);
+    if (this._defaults.injectCSS !== false)
+      injectCSS(this._defaults.css || BASE_CSS);
 
     const base = this._config[type] || {};
-    const data = (typeof payload === 'object') ? payload : { message: String(payload) };
+    const data =
+      typeof payload === 'object' ? payload : { message: String(payload) };
     const cfg = merge(base, data);
     cfg.icon = cfg.icon ?? cfg.icon_left_top;
     cfg.position = cfg.position ?? cfg.toast ?? 'bottom-right';
@@ -520,28 +703,52 @@ modal(options = {}) {
     toast.style.color = cfg.color || theme.color;
     toast.style.border = cfg.border || theme.border || 'none';
 
-    if (cfg.size && sizePreset[cfg.size]) { const p = sizePreset[cfg.size]; if (p.width) toast.style.width = p.width; if (p.padding) toast.style.padding = p.padding; }
+    if (cfg.size && sizePreset[cfg.size]) {
+      const p = sizePreset[cfg.size];
+      if (p.width) toast.style.width = p.width;
+      if (p.padding) toast.style.padding = p.padding;
+    }
 
-    const content = document.createElement('div'); content.className = 'jt-content';
-    if (cfg.title) { const t = document.createElement('div'); t.className = 'jt-title'; t.textContent = cfg.title; content.appendChild(t); }
+    const content = document.createElement('div');
+    content.className = 'jt-content';
+    if (cfg.title) {
+      const t = document.createElement('div');
+      t.className = 'jt-title';
+      t.textContent = cfg.title;
+      content.appendChild(t);
+    }
 
-    const msg = document.createElement('div'); msg.className = 'jt-message';
-    if (cfg.html) { msg.innerHTML = sanitizeHTML(cfg.html); }
-    else if (typeof cfg.message === 'string') {
+    const msg = document.createElement('div');
+    msg.className = 'jt-message';
+    if (cfg.html) {
+      msg.innerHTML = sanitizeHTML(cfg.html);
+    } else if (typeof cfg.message === 'string') {
       const parts = cfg.message.split(/(`[^`]+`)/g);
-      parts.forEach(part => {
-        if (part.startsWith('`') && part.endsWith('`')) { const code = document.createElement('code'); code.textContent = part.slice(1, -1); msg.appendChild(code); }
-        else msg.appendChild(document.createTextNode(part));
+      parts.forEach((part) => {
+        if (part.startsWith('`') && part.endsWith('`')) {
+          const code = document.createElement('code');
+          code.textContent = part.slice(1, -1);
+          msg.appendChild(code);
+        } else msg.appendChild(document.createTextNode(part));
       });
-    } else if (cfg.message) { msg.textContent = String(cfg.message); }
+    } else if (cfg.message) {
+      msg.textContent = String(cfg.message);
+    }
 
     content.appendChild(msg);
 
     if (Array.isArray(cfg.actions) && cfg.actions.length) {
-      const actions = document.createElement('div'); actions.className = 'jt-actions';
-      cfg.actions.forEach(a => {
-        const btn = document.createElement('button'); btn.className = 'jt-action'; btn.textContent = a.label || 'Action';
-        btn.onclick = (ev) => { ev.stopPropagation(); a.onClick?.(ev); if (a.closeOnClick) removeNow(); };
+      const actions = document.createElement('div');
+      actions.className = 'jt-actions';
+      cfg.actions.forEach((a) => {
+        const btn = document.createElement('button');
+        btn.className = 'jt-action';
+        btn.textContent = a.label || 'Action';
+        btn.onclick = (ev) => {
+          ev.stopPropagation();
+          a.onClick?.(ev);
+          if (a.closeOnClick) removeNow();
+        };
         actions.appendChild(btn);
       });
       content.appendChild(actions);
@@ -549,14 +756,24 @@ modal(options = {}) {
 
     let icon = null;
     if (cfg.icon) {
-      icon = document.createElement('i'); icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
+      icon = document.createElement('i');
+      icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
       if (cfg.iconSize) icon.style.fontSize = cfg.iconSize;
       if (!reduceMotion) {
-        const anim = cfg.iconAnim || TYPE_ANIMATION[type]; if (anim) icon.classList.add(anim);
+        const anim = cfg.iconAnim || TYPE_ANIMATION[type];
+        if (anim) icon.classList.add(anim);
       }
       if (cfg.iconLink || cfg.iconAnimate) {
         icon.classList.add('icon-clickable');
-        icon.addEventListener('click', (e) => { e.stopPropagation(); if (cfg.iconAnimate) { icon.classList.remove(cfg.iconAnimate); void icon.offsetWidth; icon.classList.add(cfg.iconAnimate); } if (cfg.iconLink) window.open(cfg.iconLink, '_blank', 'noopener'); });
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (cfg.iconAnimate) {
+            icon.classList.remove(cfg.iconAnimate);
+            void icon.offsetWidth;
+            icon.classList.add(cfg.iconAnimate);
+          }
+          if (cfg.iconLink) window.open(cfg.iconLink, '_blank', 'noopener');
+        });
       }
     }
 
@@ -565,7 +782,10 @@ modal(options = {}) {
     let avatar = null;
     if (cfg.avatar) {
       avatar = document.createElement('img');
-      const src = (typeof cfg.avatar === 'string' && cfg.avatar) ? cfg.avatar : (cfg.avatarSrc || '');
+      const src =
+        typeof cfg.avatar === 'string' && cfg.avatar
+          ? cfg.avatar
+          : cfg.avatarSrc || '';
       if (src) avatar.src = src;
       avatar.alt = cfg.avatarAlt || cfg.title || 'avatar';
       avatar.className = 'jt-avatar';
@@ -590,7 +810,7 @@ modal(options = {}) {
 
     // Append order: avatar (left/top), icon, content — ensures avatar is sibling of content (not inside)
     // For avatarPosition === 'top', we switch layout to column for the toast
-    const avatarPos = (cfg.avatarPosition || 'left');
+    const avatarPos = cfg.avatarPosition || 'left';
     if (avatar && avatarPos === 'top') {
       // make toast column for top-avatar layout temporarily
       toast.classList.add('jt-avatar-top');
@@ -598,9 +818,18 @@ modal(options = {}) {
       toast.style.alignItems = 'flex-start';
       toast.appendChild(avatar);
       // then icon/content below
-      if (icon && cfg.iconPosition === 'top') { toast.appendChild(icon); toast.appendChild(content); }
-      else if (icon && cfg.iconPosition === 'right') { /* right icon in column layout -> place after content */ toast.appendChild(content); toast.appendChild(icon); }
-      else { if (icon) toast.appendChild(icon); toast.appendChild(content); }
+      if (icon && cfg.iconPosition === 'top') {
+        toast.appendChild(icon);
+        toast.appendChild(content);
+      } else if (icon && cfg.iconPosition === 'right') {
+        /* right icon in column layout -> place after content */ toast.appendChild(
+          content
+        );
+        toast.appendChild(icon);
+      } else {
+        if (icon) toast.appendChild(icon);
+        toast.appendChild(content);
+      }
     } else {
       // horizontal layout (default)
       toast.style.flexDirection = 'row';
@@ -630,19 +859,34 @@ modal(options = {}) {
 
     let progressEl = null;
     if (cfg.progress && (cfg.duration ?? this._defaults.duration) > 0) {
-      progressEl = document.createElement('div'); progressEl.className = 'jt-progress';
+      progressEl = document.createElement('div');
+      progressEl.className = 'jt-progress';
       if (cfg.progressColor) progressEl.style.background = cfg.progressColor;
       toast.appendChild(progressEl);
     }
 
     if (cfg.undo) {
-      const undoBtn = document.createElement('button'); undoBtn.className = 'jt-action'; undoBtn.textContent = 'Undo'; undoBtn.onclick = () => { try { cfg.undo(); } catch (e) {} removeNow(); };
+      const undoBtn = document.createElement('button');
+      undoBtn.className = 'jt-action';
+      undoBtn.textContent = 'Undo';
+      undoBtn.onclick = () => {
+        try {
+          cfg.undo();
+        } catch (e) {}
+        removeNow();
+      };
       content.appendChild(undoBtn);
     }
 
     if (cfg.closable) {
-      const close = document.createElement('span'); close.className = 'juice-toast-close'; close.tabIndex = 0; close.textContent = '×';
-      close.addEventListener('click', (e) => { e.stopPropagation(); removeNow(); });
+      const close = document.createElement('span');
+      close.className = 'juice-toast-close';
+      close.tabIndex = 0;
+      close.textContent = '×';
+      close.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeNow();
+      });
       toast.appendChild(close);
     }
 
@@ -650,18 +894,27 @@ modal(options = {}) {
     if (!root) return;
 
     if (cfg.groupId) {
-      const existing = Array.from(root.children).find(n => n.dataset.groupId === cfg.groupId);
+      const existing = Array.from(root.children).find(
+        (n) => n.dataset.groupId === cfg.groupId
+      );
       if (existing) {
         let countEl = existing.querySelector('.jt-count');
-        if (!countEl) { countEl = document.createElement('span'); countEl.className = 'jt-count'; countEl.style.marginLeft = '6px'; existing.querySelector('.jt-title')?.appendChild(countEl); countEl.textContent = '1'; }
-        countEl.textContent = String((parseInt(countEl.textContent || '1') + 1));
+        if (!countEl) {
+          countEl = document.createElement('span');
+          countEl.className = 'jt-count';
+          countEl.style.marginLeft = '6px';
+          existing.querySelector('.jt-title')?.appendChild(countEl);
+          countEl.textContent = '1';
+        }
+        countEl.textContent = String(parseInt(countEl.textContent || '1') + 1);
         return;
       }
       toast.dataset.groupId = cfg.groupId;
     }
 
     const max = this._defaults.maxVisible;
-    if (max && root.children.length >= max) root.removeChild(root.firstElementChild);
+    if (max && root.children.length >= max)
+      root.removeChild(root.firstElementChild);
     root.appendChild(toast);
 
     const meta = {
@@ -676,7 +929,7 @@ modal(options = {}) {
       paused: false,
       // bound handlers for robust cleanup
       _boundMove: null,
-      _boundUp: null
+      _boundUp: null,
     };
     this._activeMap.set(toastId, meta);
 
@@ -690,14 +943,23 @@ modal(options = {}) {
        - we DON'T install persistent global listeners.
        - listeners for move/up are added on pointerdown and removed on pointerup.
     ---------------- */
-    let startX = 0, startY = 0, curX = 0, curY = 0, dragging = false;
+    let startX = 0,
+      startY = 0,
+      curX = 0,
+      curY = 0,
+      dragging = false;
 
     const onPointerDown = (e) => {
-      const p = (e.touches ? e.touches[0] : e);
-      startX = p.clientX; startY = p.clientY; dragging = true;
+      const p = e.touches ? e.touches[0] : e;
+      startX = p.clientX;
+      startY = p.clientY;
+      dragging = true;
       meta.paused = true;
       // stop RAF while dragging
-      if (meta.raf) { cancelAnimationFrame(meta.raf); meta.raf = null; }
+      if (meta.raf) {
+        cancelAnimationFrame(meta.raf);
+        meta.raf = null;
+      }
       toast.style.transition = 'none';
 
       // bind move/up on document only while dragging
@@ -705,7 +967,9 @@ modal(options = {}) {
       meta._boundUp = onPointerUp;
 
       // touchmove needs passive:true to avoid blocking, but we still want to read coordinates
-      document.addEventListener('touchmove', meta._boundMove, { passive: true });
+      document.addEventListener('touchmove', meta._boundMove, {
+        passive: true,
+      });
       document.addEventListener('mousemove', meta._boundMove);
       document.addEventListener('touchend', meta._boundUp);
       document.addEventListener('mouseup', meta._boundUp);
@@ -713,9 +977,11 @@ modal(options = {}) {
 
     const onPointerMove = (e) => {
       if (!dragging) return;
-      const p = (e.touches ? e.touches[0] : e);
-      curX = p.clientX - startX; curY = p.clientY - startY;
-      if (Math.abs(curX) > Math.abs(curY)) toast.style.transform = `translateX(${curX}px)`;
+      const p = e.touches ? e.touches[0] : e;
+      curX = p.clientX - startX;
+      curY = p.clientY - startY;
+      if (Math.abs(curX) > Math.abs(curY))
+        toast.style.transform = `translateX(${curX}px)`;
       else toast.style.transform = `translateY(${curY}px)`;
     };
 
@@ -734,7 +1000,9 @@ modal(options = {}) {
 
       // remove temporary document listeners
       if (meta._boundMove) {
-        document.removeEventListener('touchmove', meta._boundMove, { passive: true });
+        document.removeEventListener('touchmove', meta._boundMove, {
+          passive: true,
+        });
         document.removeEventListener('mousemove', meta._boundMove);
         meta._boundMove = null;
       }
@@ -756,7 +1024,10 @@ modal(options = {}) {
     ---------------- */
     const onEnter = () => {
       meta.paused = true;
-      if (meta.raf) { cancelAnimationFrame(meta.raf); meta.raf = null; }
+      if (meta.raf) {
+        cancelAnimationFrame(meta.raf);
+        meta.raf = null;
+      }
     };
     const onLeave = () => {
       // unpause and restart the RAF timer loop
@@ -781,7 +1052,11 @@ modal(options = {}) {
       // if toast already removed, bail out
       if (!juiceToast._activeMap.has(toastId)) return;
       // if paused, don't continue RAF loop (will be restarted by onLeave/onPointerUp)
-      if (meta.paused) { meta.raf = null; meta.start = now(); return; }
+      if (meta.paused) {
+        meta.raf = null;
+        meta.start = now();
+        return;
+      }
 
       const delta = now() - meta.start;
       meta.remaining -= delta;
@@ -828,7 +1103,9 @@ modal(options = {}) {
 
       // Remove any document listeners in case they were left
       if (meta._boundMove) {
-        document.removeEventListener('touchmove', meta._boundMove, { passive: true });
+        document.removeEventListener('touchmove', meta._boundMove, {
+          passive: true,
+        });
         document.removeEventListener('mousemove', meta._boundMove);
         meta._boundMove = null;
       }
@@ -846,13 +1123,20 @@ modal(options = {}) {
 
       // cancel RAF & timers
       const metaLocal = juiceToast._activeMap.get(toastId);
-      if (metaLocal?.raf) { cancelAnimationFrame(metaLocal.raf); metaLocal.raf = null; }
-      if (metaLocal?.timer) { clearTimeout(metaLocal.timer); metaLocal.timer = null; }
+      if (metaLocal?.raf) {
+        cancelAnimationFrame(metaLocal.raf);
+        metaLocal.raf = null;
+      }
+      if (metaLocal?.timer) {
+        clearTimeout(metaLocal.timer);
+        metaLocal.timer = null;
+      }
 
       juiceToast._activeMap.delete(toastId);
 
       // remove from DOM and update stack
-      const parent = toast.parentNode; if (parent) parent.removeChild(toast);
+      const parent = toast.parentNode;
+      if (parent) parent.removeChild(toast);
       if (parent) juiceToast._updateStackPositionsFor(parent);
     }
 
@@ -860,7 +1144,8 @@ modal(options = {}) {
       meta.timer = setTimeout(removeNow, cfg.undoTimeout);
     }
 
-    if (cfg.playSound || this._defaults.playSound) this._playSound(cfg.playSound || this._defaults.playSound);
+    if (cfg.playSound || this._defaults.playSound)
+      this._playSound(cfg.playSound || this._defaults.playSound);
 
     return toastId;
   },
@@ -869,16 +1154,55 @@ modal(options = {}) {
 };
 
 /* ---------------- Backwards helpers ---------------- */
-function normalizeState(state, fallback) { if (!state) return { message: fallback }; if (typeof state === 'string') return { message: fallback }; return state; }
-function resolveState(state, value, fallback) { if (!state) return { message: fallback }; if (typeof state === 'function') return { message: state(value) }; if (typeof state === 'string') return { message: state }; return state; }
+function normalizeState(state, fallback) {
+  if (!state) return { message: fallback };
+  if (typeof state === 'string') return { message: fallback };
+  return state;
+}
+function resolveState(state, value, fallback) {
+  if (!state) return { message: fallback };
+  if (typeof state === 'function') return { message: state(value) };
+  if (typeof state === 'string') return { message: state };
+  return state;
+}
 
 /* ---------------- Default types ---------------- */
 juiceToast.setup({
-  success: { icon: 'fa-check', iconPack: 'fas', bg: '#16a34a', progress: true, duration: 4000 },
-  error: { icon: 'fa-xmark', iconPack: 'fas', bg: '#dc2626', progress: true, duration: 4000 },
-  info: { icon: 'fa-circle-info', iconPack: 'fas', bg: '#2563eb', progress: true, duration: 4000 },
-  warning: { icon: 'fa-triangle-exclamation', iconPack: 'fas', bg: '#f59e0b', progress: true, duration: 4000 },
-  loading: { icon: 'spinner', iconPack: 'fas', iconAnim: 'jt-spin', duration: 0, progress: true }
+  success: {
+    icon: 'fa-check',
+    iconPack: 'fas',
+    bg: '#16a34a',
+    progress: true,
+    duration: 4000,
+  },
+  error: {
+    icon: 'fa-xmark',
+    iconPack: 'fas',
+    bg: '#dc2626',
+    progress: true,
+    duration: 4000,
+  },
+  info: {
+    icon: 'fa-circle-info',
+    iconPack: 'fas',
+    bg: '#2563eb',
+    progress: true,
+    duration: 4000,
+  },
+  warning: {
+    icon: 'fa-triangle-exclamation',
+    iconPack: 'fas',
+    bg: '#f59e0b',
+    progress: true,
+    duration: 4000,
+  },
+  loading: {
+    icon: 'spinner',
+    iconPack: 'fas',
+    iconAnim: 'jt-spin',
+    duration: 0,
+    progress: true,
+  },
 });
 
 export default juiceToast;

@@ -32,18 +32,16 @@
     "node": ">=19"
   },
   "scripts": {
-    "format": "npx prettier --write src/"
+    "format": "npx prettier --write src/",
+    "build": "npx rollup -c"
   },
   "module": "dist/juice-toast.esm.js",
   "types": "dist/juice-toast.d.ts",
   "exports": {
     ".": {
       "import": "./dist/juice-toast.esm.js",
-      "types": "./dist/juice-toast.d.ts"
-    },
-    "./ios": {
-      "import": "./dist/juice-toast.ios.js",
-      "types": "./dist/juice-toast-ios.d.ts"
+      "types": "./dist/juice-toast.d.ts",
+      "require": "./dist/juice-toast.umd.js"
     }
   },
   "files": [

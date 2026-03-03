@@ -59,3 +59,5 @@ package-lock.json
 # Config
 # =========================
 .prettierrc
+prettier.config.js
+rollup.config.js
