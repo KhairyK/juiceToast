@@ -55,3 +55,13 @@ juiceToast.success("Hello, World"); // Available since version v1.3.2
 
 # Juice Toast Release v1.3.3
 See [CHANGELOG.md](https://github.com/KhairyK/juiceToast/blob/main/CHANGELOG.md)
+
+# Juice Toast Release v1.3.4
+```js
+juiceToast.success({
+  title: "New Message",
+  message: "You received a new message",
+  avatar: "https://example.com/avatar.jpg",
+  avatarPosition: "left"
+});
+```

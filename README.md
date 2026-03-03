@@ -1,5 +1,7 @@
 # 🍹 JuiceToast
 
+> Lightweight, powerful, modern toast notification library.  
+> Zero dependencies. Promise-ready. Plugin system. Priority queue.
 
   ![npm download wekkly](https://img.shields.io/npm/dw/juice-toast)
   ![npm download](https://img.shields.io/npm/dt/juice-toast)
@@ -12,234 +14,389 @@
   ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
   ![ts](https://img.shields.io/badge/types-TypeScript-blue)
   ![last commit](https://img.shields.io/github/last-commit/KhairyK/juiceToast)
-  
+
 ---
+
+## ❓ What is JuiceToast
 
 **JuiceToast** is a lightweight, flexible, and dependency-free toast notification library for modern web applications.  
 Designed with a **clean API**, **extensive customization**, and **strong backward compatibility**, JuiceToast fits both small projects and enterprise-scale systems.
 
-It supports **ESM**, **dynamic toast types**, **theme management**, **queue handling**, and **legacy API compatibility** out of the box.
+It supports **UMD & ESM**, **dynamic toast types**, **theme management**, **queue handling**,  **legacy API compatibility**, and more.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- 🚀 Zero dependencies
-- 📦 Supports **ESM**
-- 🔁 Built-in queue system (one toast displayed at a time)
-- 🎨 Theme system (light, dark, and custom themes)
-- 🧩 Dynamic toast types (`success`, `error`, etc.)
-- ⏳ Auto-dismiss & sticky toasts
-- ❌ Closable toasts
-- ⭐ Icon support (position, animation, link)
-- 📐 Size presets and manual sizing
-- 🧱 Full backward compatibility with legacy APIs
+- ⚡ Lightweight & fast
+- 📦 Zero dependencies
+- 🎨 Built-in themes (dark, light, glass)
+- 🧠 Promise support
+- 🔥 Priority queue (max-heap based)
+- 👆 Swipe to dismiss (mobile friendly)
+- ⏳ Animated progress bar
+- 🔁 Grouped notifications (auto counter)
+- 🎭 Avatar support
+- 🔊 Sound support
+- 🧩 Plugin system
+- ♿ Accessible (ARIA + focus/hover pause)
 
 ---
 
 ## 📦 Installation
 
+### NPM
+```bash
+npm install juice-toast
+```
+
 ### ESM
 ```js
-import juiceToast from "https://npdn.kyrt.my.id/npm/juice-toast@1.3.2dist/juice-toast.esm.js";
+import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast/dist/juice-toast.esm.js";
+```
+
+### UMD
+```html
+<script src="https://cdn.jsdelivr.net/npm/juice-toast/dist/juice-toast.umd.js"></script>
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Basic Usage
 
 ```js
-juiceToast.setup({
-  success: {
-    icon: "check",
-    theme: "light",
-    duration: 2000
-  },
-  error: {
-    icon: "x",
-    bg: "#7f1d1d",
-    color: "#fff",
-    closable: true
-  }
-});
-
-juiceToast.success("Operation completed successfully.");
-juiceToast.error({
-  title: "Error",
-  message: "An unexpected error occurred."
-});
-```
-
----
-
-## 🧠 Core Concepts
-
-### Toast Types
-
-Toasts are triggered based on **types** registered using `setup()` or `addType()`.
-
-```js
+juiceToast.success("Success!");
+juiceToast.error("Something went wrong!");
 juiceToast.info("Information message");
-juiceToast.warning({
-  message: "Proceed with caution",
-  duration: 4000
-});
+juiceToast.warning("Warning message");
 ```
-
-This approach allows a clear separation between **toast configuration** and **runtime usage**.
 
 ---
 
-## ⚙️ API Reference
+## 🧠 Advanced Usage
 
-### `setup(config)`
-Registers all toast types and their default configuration.
+### With Title
+
+```js
+juiceToast.success({
+  title: "Success",
+  message: "Data saved successfully!"
+});
+```
+
+---
+
+### HTML Content (Sanitized)
+
+```js
+juiceToast.info({
+  html: "<b>Hello</b> <i>World</i>"
+});
+```
+
+---
+
+### With Actions
+
+```js
+juiceToast.info({
+  message: "Delete this item?",
+  actions: [
+    {
+      label: "Confirm",
+      onClick: () => console.log("Confirmed"),
+      closeOnClick: true
+    }
+  ]
+});
+```
+
+---
+
+### With Avatar
+
+```js
+juiceToast.success({
+  title: "New Message",
+  message: "You received a new message",
+  avatar: "https://example.com/avatar.jpg",
+  avatarPosition: "left"
+});
+```
+
+Positions:
+- `left`
+- `right`
+- `top`
+
+---
+
+### Progress Bar
+
+```js
+juiceToast.success({
+  message: "Uploading...",
+  progress: true,
+  duration: 5000
+});
+```
+
+---
+
+### Custom Duration
+
+```js
+juiceToast.info({
+  message: "Auto close in 10s",
+  duration: 10000
+});
+```
+
+---
+
+## 🧠 Promise Support
+
+```js
+const request = fetch("/api/data");
+
+juiceToast.promise(request, {
+  loading: "Loading...",
+  success: "Data loaded!",
+  error: "Failed to fetch",
+  timeout: 5000,
+  timeoutMessage: "Request timeout"
+});
+```
+
+---
+
+## 🎨 Themes
+
+### Change Theme
+
+```js
+juiceToast.setTheme("light");
+```
+
+Available:
+- `dark`
+- `light`
+- `glass`
+
+---
+
+### Custom Theme
+
+```js
+juiceToast.defineTheme("myTheme", {
+  bg: "#111",
+  color: "#fff",
+  border: "1px solid #333"
+});
+
+juiceToast.setTheme("myTheme");
+```
+
+---
+
+## 📍 Positions
+
+```js
+juiceToast.success({
+  message: "Top Left",
+  position: "top-left"
+});
+```
+
+Available:
+- `top-left`
+- `top-right`
+- `bottom-left`
+- `bottom-right`
+- `top-center`
+- `bottom-center`
+
+---
+
+## ⚡ Priority System
+
+```js
+juiceToast.success({
+  message: "Urgent message",
+  priority: "urgent"
+});
+```
+
+Priority levels:
+- `low`
+- `normal`
+- `high`
+- `urgent`
+
+Internally powered by a max-heap queue system.
+
+---
+
+## 🔁 Grouped Toast
+
+```js
+juiceToast.info({
+  message: "New notification",
+  groupId: "notifications"
+});
+```
+
+Same `groupId` = counter increment instead of duplicate toast.
+
+---
+
+## 🔊 Sound Support
 
 ```js
 juiceToast.setup({
-  success: { bg: "green" },
-  error: { bg: "red" }
+  playSound: "/sound.mp3"
+});
+```
+
+Per toast:
+
+```js
+juiceToast.success({
+  message: "With sound",
+  playSound: "/sound.mp3"
 });
 ```
 
 ---
 
-### `addType(name, config)`
-Adds a new toast type dynamically at runtime.
+## 🔄 Undo Support
 
 ```js
-juiceToast.addType("warning", {
-  bg: "#facc15",
-  color: "#111"
+juiceToast.success({
+  message: "Item deleted",
+  undo: () => console.log("Undo action"),
+  undoTimeout: 5000
 });
 ```
 
 ---
 
-### `defineTheme(name, styles)`
-Creates or overrides a theme.
+## 🧩 Plugin System
 
 ```js
-juiceToast.defineTheme("ocean", {
-  bg: "#0ea5e9",
-  color: "#ffffff",
-  border: "1px solid #0284c7"
+juiceToast.use((ctx) => {
+  console.log("Toast created:", ctx);
+});
+```
+
+Plugin context:
+
+```js
+{
+  toast,
+  cfg,
+  type,
+  root
+}
+```
+
+---
+
+## ⚙ Global Setup
+
+```js
+juiceToast.setup({
+  duration: 3000,
+  maxVisible: 5,
+  swipeThreshold: 80,
+  glassUI: true,
+  dev: true
 });
 ```
 
 ---
 
-### `setTheme(name)`
-Sets the global theme.
+## 🗑 API
 
 ```js
-juiceToast.setTheme("dark");
+juiceToast.clear();    // Clear queue
+juiceToast.destroy();  // Remove all toast roots
 ```
 
 ---
 
-### `clear()`
-Clears all pending toast queues.
+# 🆚 Comparison
 
-```js
-juiceToast.clear();
-```
+| Feature | 🍹 JuiceToast | 🌟 SweetAlert2 | 🍞 Toastify |
+|----------|---------------|---------------|-------------|
+| Zero Dependency | ✅ | ❌ | ✅ |
+| Lightweight | ✅ | ❌ (larger bundle) | ✅ |
+| Promise Integration | ✅ Built-in | ✅ | ❌ |
+| Priority Queue | ✅ | ❌ | ❌ |
+| Grouped Toast Counter | ✅ | ❌ | ❌ |
+| Plugin System | ✅ | ❌ | ❌ |
+| Swipe to Dismiss | ✅ | ❌ | ❌ |
+| Avatar Support | ✅ | ❌ | ❌ |
+| Custom Themes | ✅ | ✅ | Limited |
+| Modal Support | ❌ (toast only) | ✅ | ❌ |
+| Designed for Toast Only | ✅ | ❌ (modal-focused) | ✅ |
 
----
+### Compared to SweetAlert2
 
-### `destroy()`
-Removes all queues and the root DOM element.
+SweetAlert2 is powerful and great for modal dialogs, but it's heavier and focused on popups rather than pure toast systems.
 
-```js
-juiceToast.destroy();
-```
-
----
-
-## 🧾 Toast Payload Interface
-
-```ts
-interface ToastPayload {
-  message?: string;
-  title?: string;
-
-  bg?: string;
-  color?: string;
-  border?: string;
-  theme?: string;
-
-  duration?: number; // milliseconds, 0 = sticky
-  position?: "top" | "center" | "bottom";
-  toast?: "top" | "center" | "bottom"; // legacy support
-
-  closable?: boolean;
-  closeable?: boolean; // legacy support
-
-  icon?: string;
-  iconPack?: string;
-  iconLink?: string;
-  iconAnimate?: string;
-  iconPosition?: "left" | "right" | "top";
-
-  size?: "sm" | "md" | "lg";
-  width?: string;
-  height?: string;
-
-  animation?: string;
-
-  actions?: {
-    label: string;
-    onClick?: (event: MouseEvent) => void;
-    closeOnClick?: boolean;
-  }[];
-
-  [key: string]: any;
-}
-```
+JuiceToast is:
+- Smaller
+- Toast-focused
+- Queue-driven
+- Plugin-extensible
 
 ---
 
-## 🔄 Backward Compatibility
+### Compared to Toastify
 
-JuiceToast automatically maps legacy options to the modern API.
+Toastify is simple and lightweight, but lacks:
 
-| Legacy Option | Current Option |
-|--------------|----------------|
-| `toast` | `position` |
-| `closeable` | `closable` |
-| `icon_left_top` | `icon` |
-| `icon_config` | `iconPack` |
-| `icon_onClick_url` | `iconLink` |
-| `icon_onClick_animate` | `iconAnimate` |
+- Priority queue
+- Promise integration
+- Grouping system
+- Plugin system
+- Advanced control
 
----
-
-## 🎨 Default Themes
-
-```js
-light: {
-  bg: "#ffffff",
-  color: "#111",
-  border: "1px solid #e5e7eb"
-}
-
-dark: {
-  bg: "#1f2937",
-  color: "#ffffff",
-  border: "1px solid rgba(255,255,255,.08)"
-}
-```
+JuiceToast provides more advanced architecture while staying dependency-free.
 
 ---
 
-## 📌 Notes
+# ♿ Accessibility
 
-- Browser-only (DOM required)
-- Root element is automatically created: `#juice-toast-root`
-- Suitable for frameworks, custom runtimes, etc.
+- `role="status"`
+- Hover pause
+- Focus pause
+- Reduced motion support
 
 ---
 
-## 📄 License
+# 📄 License
 
-MIT License © OpenDN Foundation
+MIT License (C) 2026 OpenDN Foundation
+
+---
+
+# ❤️ Contributing
+
+Pull requests are welcome.  
+If you find bugs, open an issue.
+
+---
+
+# 🔥 Why JuiceToast?
+
+Because simple toast libraries are boring.
+
+JuiceToast gives you:
+ - Real queue system
+ - Promise integration
+ - Plugins
+ - Advanced control
+ - Performance focus
+ - Clean modern UI

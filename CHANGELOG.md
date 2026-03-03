@@ -1,4 +1,4 @@
-## v1.4.0
+## v1.4.0 / v1.4.1
 - Add Smart Queue
 - Bugs fixed & Logic fixes
 - Fix the toast speed
@@ -8,7 +8,7 @@
 
 v1.3.4
 - Bug Fixes
-- Add profile image
+- Add Avatar
 
 v1.3.3
 - Bug Fixes on Closeable Toast & Logic

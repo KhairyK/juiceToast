@@ -20,6 +20,6 @@
 - Bug fixed
 - Bring UMD back (Cancel)
 - 
-# JuiceToast v1.4.0
+# JuiceToast v1.4.0 (or 1.4.1 | Done)
 
 - Bring UMD back
