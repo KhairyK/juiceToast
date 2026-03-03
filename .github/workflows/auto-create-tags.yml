@@ -31,6 +31,11 @@ jobs:
           echo "description<<EOF" >> $GITHUB_OUTPUT
           sed -n '/TAG_DESCRIPTION=`/,/`/p' gittag.release | sed '1d;$d' >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create Git Tag
+        run: |
+          git tag "${{ steps.config.outputs.tag_name }}"
+          git push origin "${{ steps.config.outputs.tag_name }}"    
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
