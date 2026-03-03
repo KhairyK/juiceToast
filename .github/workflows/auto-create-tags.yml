@@ -10,11 +10,10 @@ on:
 permissions:
   contents: write
   discussions: write
-  
-if: github.actor != 'github-actions'
 
 jobs:
   release:
+    if: github.actor != 'github-actions'
     runs-on: ubuntu-latest
 
     steps:
