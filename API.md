@@ -1,273 +1,311 @@
-# 🍹 JuiceToast API Reference
+# JuiceToast API Documentation
 
-JuiceToast is a lightweight, dependency-free toast notification library with rich customization, animation, accessibility, and plugin support.
+JuiceToast is a lightweight, customizable toast notification library with support for:
+
+- Priority queue system
+- Promise handling
+- Theming
+- Plugin system
+- Grouping
+- Swipe-to-dismiss
+- Progress bar
+- Sound support
+- Avatar & Icon support
 
 ---
 
-## 📦 Installation
+# Installation
 
 ```bash
 npm install juice-toast
 ```
 
+# ESM
+
 ```js
-import juiceToast from "juice-toast";
+import juiceToast from "https://cdn.jsdelivr.net/npm/juice-toast/dist/juice-toast.esm.js";
+```
+
+# UMD
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/juice-toast/dist/juice-toast.umd.js"></script>
 ```
 
 ---
 
-## 🚀 Quick Start
+# Basic Usage
+
+```js
+juiceToast.success("Success message");
+juiceToast.error("Error message");
+juiceToast.info("Information");
+juiceToast.warning("Warning message");
+juiceToast.loading("Loading...");
+```
+
+---
+
+# Global Configuration
+
+## `juiceToast.setup(options)`
+
+Configure global defaults.
 
 ```js
 juiceToast.setup({
   duration: 3000,
-  maxVisible: 3,
-  glassUI: true
+  maxVisible: 5,
+  swipeThreshold: 80,
+  injectCSS: true,
+  dev: true
 });
-
-juiceToast.success({
-  title: "Success",
-  message: "Data saved successfully"
-});
-```
-
----
-
-## ⚙️ Global Configuration (`setup`)
-
-```js
-juiceToast.setup(options);
 ```
 
 ### Options
 
-| Option           | Type             | Default | Description                     |
-| ---------------- | ---------------- | ------- | ------------------------------- |
-| `duration`       | number           | `2500`  | Toast display duration (ms)     |
-| `maxVisible`     | number           | `3`     | Max visible toasts per position |
-| `glassUI`        | boolean | number | `0`     | Enable glass effect (0–100)     |
-| `playSound`      | string | null    | `null`  | Global sound file               |
-| `injectCSS`      | boolean          | `true`  | Auto inject base CSS            |
-| `css`            | string | null    | `null`  | Custom CSS override             |
-| `swipeThreshold` | number           | `60`    | Swipe distance to dismiss       |
-| `dev`            | boolean          | `false` | Enable console warnings         |
+| Option | Type | Default | Description |
+|--------|------|----------|-------------|
+| duration | number | 2500 | Default auto-dismiss duration (ms) |
+| maxVisible | number | 3 | Maximum visible toasts per position |
+| swipeThreshold | number | 60 | Swipe distance required to dismiss |
+| injectCSS | boolean | true | Automatically inject base CSS |
+| css | string | internal | Custom CSS override |
+| dev | boolean | false | Enable debug logs |
+| playSound | string | null | Sound URL |
 
 ---
 
-## 🧩 Toast Methods
+# Toast Methods
 
-Each toast type is auto-generated from configuration or `addType`.
+Each toast type can accept:
 
 ```js
-juiceToast.success(payload);
-juiceToast.error(payload);
-juiceToast.info(payload);
-juiceToast.warning(payload);
-juiceToast.loading(payload);
+juiceToast.success(options)
 ```
 
-Payload can be a **string** or **object**.
+Or shortcut:
+
+```js
+juiceToast.success("Message")
+```
 
 ---
 
-## 📝 Toast Payload Options
+# Toast Options
 
-### Basic
+| Option | Type | Description |
+|--------|------|-------------|
+| message | string | Main text |
+| title | string | Toast title |
+| html | string | Render sanitized HTML |
+| duration | number | Auto close duration |
+| position | string | Toast position |
+| theme | string | Theme name |
+| icon | string | Icon class |
+| iconPack | string | Icon library prefix |
+| iconAnim | string | Icon animation class |
+| iconSize | string | Icon font size |
+| avatar | string | Avatar image URL |
+| avatarAlt | string | Avatar alt text |
+| avatarPosition | left/right/top | Avatar position |
+| closable | boolean | Show close button |
+| progress | boolean | Show progress bar |
+| progressColor | string | Custom progress color |
+| actions | array | Custom buttons |
+| undo | function | Undo callback |
+| undoTimeout | number | Timeout before auto-close |
+| groupId | string | Group multiple toasts |
+| dedupeKey | string | Prevent duplicate toasts |
+| priority | low/normal/high/urgent | Priority queue level |
+| playSound | string | Override sound |
+
+---
+
+# Positions
+
+Available positions:
+
+- `top-left`
+- `top-right`
+- `bottom-left`
+- `bottom-right`
+- `top-center`
+- `bottom-center`
+
+Default: `bottom-right`
+
+---
+
+# Themes
+
+Built-in themes:
+
+- `dark`
+- `light`
+- `glass`
+
+## Define Custom Theme
 
 ```js
-{
-  title: "Title",
-  message: "Message",
-  duration: 3000
-}
-```
-
-### Appearance
-
-```js
-{
-  theme: "dark",
-  bg: "#333",
+juiceToast.defineTheme("custom", {
+  bg: "#111",
   color: "#fff",
-  border: "1px solid #000",
-  size: "sm" | "md" | "lg",
-  compact: true
-}
-```
-
----
-
-## 🎬 Animation
-
-```js
-{
-  animation: "slide-in" | "fade-in" | "bounce-in",
-  enterAnimation: "pop" | "bounce" | "shake" | "wiggle" | "pulse" | "spin"
-}
-```
-
-> `enterAnimation` respects `prefers-reduced-motion` automatically.
-
----
-
-## 🧊 Glass UI
-
-```js
-{
-  glassUI: true        // default intensity (60)
-  glassUI: 80          // custom intensity
-}
-```
-
----
-
-## 📍 Position / Placement
-
-```js
-{
-  position: "top-left" |
-            "top-right" |
-            "top-center" |
-            "bottom-left" |
-            "bottom-right" |
-            "bottom-center"
-}
-```
-
----
-
-## 🎯 Icon System
-
-```js
-{
-  icon: "check-circle",
-  iconPack: "fa fa-solid",
-  iconSize: "18px",
-  iconPosition: "left" | "right" | "top",
-  iconAnimate: "bounce",
-  iconLink: "https://example.com"
-}
-```
-
----
-
-## 🔘 Actions Button
-
-```js
-{
-  actions: [
-    {
-      label: "Undo",
-      onClick: () => {},
-      closeOnClick: true
-    }
-  ]
-}
-```
-
----
-
-## ⏳ Progress Bar
-
-```js
-{
-  progress: true,
-  progressColor: "rgba(255,255,255,.7)"
-}
-```
-
----
-
-## 🔊 Sound
-
-```js
-{
-  playSound: "ding.mp3"
-}
-```
-
-Supported formats: `.mp3`, `.wav`, `.ogg`, `.opus`, `.aiff`, `.wma`
-
----
-
-## ✋ Interaction
-
-* Swipe to dismiss (touch devices)
-* Pause on hover / touch
-* Click close button (`closable: true`)
-
-```js
-{ closable: true }
-```
-
----
-
-## ♿ Accessibility (A11Y)
-
-* `role="alert"`
-* `aria-live="polite"`
-* Keyboard focusable
-* Reduced motion support
-
----
-
-## 🔌 Plugin System
-
-```js
-juiceToast.use(ctx => {
-  const { toast, cfg, type, root } = ctx;
+  border: "1px solid #333"
 });
 ```
 
----
-
-## 🎨 Theme API
+## Set Theme
 
 ```js
-juiceToast.defineTheme("ocean", {
-  bg: "#0ea5e9",
-  color: "#fff"
-});
-
-juiceToast.setTheme("ocean");
+juiceToast.setTheme("custom");
 ```
 
 ---
 
-## ➕ Custom Toast Type
+# Custom Toast Types
+
+## `juiceToast.addType(name, config)`
 
 ```js
 juiceToast.addType("custom", {
-  icon: "star",
-  bg: "gold",
-  color: "#000"
+  bg: "#9333ea",
+  icon: "fa-star",
+  duration: 5000
 });
 
-juiceToast.custom("Hello World");
+juiceToast.custom("Hello!");
 ```
 
 ---
 
-## Background image
+# Promise Toast
+
+## `juiceToast.promise(promise, options)`
+
 ```js
-juiceToast.setup({
-  image: { bgImage: "https://cdn.kyrt.my.id/image/ts-logo-128.svg" }
+juiceToast.promise(fetch("/api"), {
+  loading: "Loading...",
+  success: "Success!",
+  error: "Failed",
+  timeout: 5000,
+  timeoutMessage: "Request timeout"
 });
-
-juiceToast.image("Hi");
 ```
 
----
-
-## 🧹 Utilities
+### Returns
 
 ```js
-juiceToast.clear();   // Clear queue
-juiceToast.destroy(); // Remove all & cleanup
+{
+  cancel: Function
+}
 ```
 
 ---
 
-## 📄 License
+# Plugin System
 
-MIT License © 2026 OpenDN Foundation
+## `juiceToast.use(pluginFunction)`
+
+```js
+juiceToast.use(({ toast, cfg, type, root }) => {
+  console.log("Toast created:", type);
+});
+```
+
+---
+
+# Queue Management
+
+## Clear Queue
+
+```js
+juiceToast.clear();
+```
+
+## Destroy All Toast Roots
+
+```js
+juiceToast.destroy();
+```
+
+---
+
+# Advanced Features
+
+## Priority Queue
+
+Available priorities:
+
+- `low`
+- `normal`
+- `high`
+- `urgent`
+
+Example:
+
+```js
+juiceToast.success({
+  message: "Important",
+  priority: "urgent"
+});
+```
+
+---
+
+## Grouped Toast
+
+```js
+juiceToast.info({
+  message: "Grouped",
+  groupId: "network"
+});
+```
+
+---
+
+## Action Buttons
+
+```js
+juiceToast.success({
+  message: "Saved",
+  actions: [
+    {
+      label: "Undo",
+      onClick: () => console.log("Undo"),
+      closeOnClick: true
+    }
+  ]
+});
+```
+
+---
+
+# Accessibility
+
+- Uses `role="status"`
+- Keyboard focus support
+- Pause on hover & focus
+- Swipe support (touch & mouse)
+
+---
+
+# Internal Defaults
+
+```js
+{
+  duration: 2500,
+  maxVisible: 3,
+  swipeThreshold: 60,
+  glassUI: 0,
+  playSound: null,
+  dev: false,
+  injectCSS: true
+}
+```
+
+---
+
+# License
+
+MIT License
