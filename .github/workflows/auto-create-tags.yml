@@ -1,0 +1,51 @@
+name: Auto Create Release
+
+on:
+  push:
+    paths:
+      - 'gittag.release'
+    branches:
+      - main
+
+permissions:
+  contents: write
+  discussions: write
+  
+if: github.actor != 'github-actions'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read gittag.release
+        id: config
+        run: |
+          TAG_NAME=$(grep TAG_NAME gittag.release | cut -d '=' -f2-)
+          PRERELEASE=$(grep SET_PRERELEASE gittag.release | cut -d '=' -f2-)
+
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "prerelease=${PRERELEASE:-false}" >> $GITHUB_OUTPUT
+
+          echo "description<<EOF" >> $GITHUB_OUTPUT
+          sed -n '/TAG_DESCRIPTION=`/,/`/p' gittag.release | sed '1d;$d' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.config.outputs.tag_name }}
+          name: ${{ steps.config.outputs.tag_name }}
+          body: ${{ steps.config.outputs.description }}
+          prerelease: ${{ steps.config.outputs.prerelease }}
+
+      - name: Delete gittag.release
+        run: |
+          rm gittag.release
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -A
+          git commit -m "chore: remove gittag.release after release"
+          git push

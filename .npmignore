@@ -2,15 +2,15 @@ src/
 test/
 .github/
 npm.publish.auto
+gittag.release
 .gitignore
 .editorconfig
 log/
 output-ts/
 node_modules/
-eol/
 .prettierignore
 .prettierrc
-prettier.config.jd
+prettier.config.js
 index.html
 package-lock.json
 tsconfig.json

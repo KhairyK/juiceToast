@@ -1,7 +1,7 @@
 # MIT License
 
 **Project:** JuiceToast  
-**Copyright (c) 2026 OpenDN Foundation (Sholehuddin Khairy)**
+**Copyright (c) 2026 OpenDN Foundation (Sholehuddin Khairy / KhairyK)**
 
 ---
 

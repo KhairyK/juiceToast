@@ -1,4 +1,9 @@
-## v1.4.0 / v1.4.1
+## v1.4.2
+- Add modal
+- Bug fixes
+- improve documentation
+
+v1.4.0 / v1.4.1
 - Add Smart Queue
 - Bugs fixed & Logic fixes
 - Fix the toast speed

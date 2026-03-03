@@ -1,7 +1,7 @@
 import esbuild from "rollup-plugin-esbuild";
 
 export default {
-  input: "src/juice-toast.esm.src.js",
+  input: "src/source.js",
 
   output: [
     {

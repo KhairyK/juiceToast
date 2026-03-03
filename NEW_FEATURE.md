@@ -65,3 +65,38 @@ juiceToast.success({
   avatarPosition: "left"
 });
 ```
+
+# Juice Toast Release v1.4.1
+```js
+juiceToast.success({
+  html: "<b>Hello</b> <i>World</i>", 
+  priority: "normal", 
+});
+
+// Promise
+const request = fetch("/api/data");
+
+juiceToast.promise(request, {
+  loading: "Loading...",
+  success: "Data loaded!",
+  error: "Failed to fetch",
+  timeout: 5000,
+  timeoutMessage: "Request timeout"
+});
+```
+
+# Juice Toast Release v1.4.2
+```js
+juiceToast.modal({
+  title: "Delete File?",
+  message: "Are you sure you want to delete this file?",
+  actions: [
+    { label: "Cancel" },
+    { 
+      label: "Delete", 
+      onClick: () => console.log("Deleted!"),
+      closeOnClick: true 
+    }
+  ]
+});
+```

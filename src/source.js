@@ -75,6 +75,94 @@ const BASE_CSS = `
 
 /* avatar specific */
 .jt-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
+
+/* ---------------- Modal ---------------- */
+/* Overlay */
+.jt-modal-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.55);
+  backdrop-filter:blur(6px) saturate(120%);
+  -webkit-backdrop-filter:blur(6px) saturate(120%);
+  opacity:0;
+  transition:opacity .25s ease;
+  z-index:10000;
+}
+.jt-modal-overlay.show{
+  opacity:1;
+}
+
+/* Base modal */
+.jt-modal{
+  width:100%;
+  max-width:520px;
+  border-radius:18px;
+  padding:24px;
+
+  opacity:0;
+  transform:translateY(40px) scale(.96);
+  transition:
+    transform .35s cubic-bezier(.16,1,.3,1),
+    opacity .25s ease;
+}
+
+.jt-modal.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.jt-modal-header{
+  font-size:18px;
+  font-weight:600;
+  letter-spacing:.3px;
+  margin-bottom:10px;
+}
+
+.jt-modal-body{
+  font-size:14.5px;
+  line-height:1.6;
+  opacity:.85;
+  margin-bottom:22px;
+}
+
+.jt-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+}
+
+.jt-modal-btn{
+  min-width:88px;
+  padding:8px 16px;
+  border-radius:12px;
+  font-size:13.5px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .2s ease;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  color:inherit;
+}
+.jt-modal-btn:hover{
+  background:rgba(255,255,255,.08);
+  transform:translateY(-1px);
+}
+.jt-modal-btn:active{
+  transform:translateY(0);
+}
+
+.jt-modal-btn.primary{
+  background:#6366f1;
+  border-color:#6366f1;
+  color:#fff;
+}
+.jt-modal-btn.primary:hover{
+  background:#5458ee;
+}
 `;
 
 /**
@@ -164,6 +252,7 @@ const juiceToast = {
   _queueDedupe: new Set(),
   _activeMap: new Map(),
   _roots: new Map(),
+  _modalStack: [],
 
   setup(cfg = {}) {
     const { duration, maxVisible, ...types } = cfg;
@@ -206,6 +295,118 @@ const juiceToast = {
 
     return { cancel: () => { this._enqueue('info', { message: states.cancelMessage || 'Cancelled', groupId: id }); if (timer) { clearTimeout(timer); } } };
   },
+
+modal(options = {}) {
+  if (!isBrowser) return;
+
+  if (this._defaults.injectCSS !== false) {
+    injectCSS(this._defaults.css || BASE_CSS);
+  }
+
+  const cfg = merge({
+    title: '',
+    message: '',
+    html: null,
+    block: true, // 🔥 block content
+    blur: true,
+    closeOnOverlay: true,
+    closable: true,
+    animation: 'scale', // scale | slide | fade
+    actions: [],
+    theme: this._theme
+  }, options);
+
+  const theme = themes[cfg.theme] || themes.dark;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'jt-modal-overlay';
+
+  if (cfg.block) {
+    overlay.style.pointerEvents = 'all';
+  } else {
+    overlay.style.pointerEvents = 'none';
+  }
+
+  if (!cfg.blur) {
+    overlay.style.backdropFilter = 'none';
+    overlay.style.webkitBackdropFilter = 'none';
+  }
+
+  const modal = document.createElement('div');
+  modal.className = `jt-modal jt-anim-${cfg.animation}`;
+  modal.style.background = theme.bg;
+  modal.style.color = theme.color;
+  modal.style.border = theme.border || 'none';
+
+  if (cfg.title) {
+    const header = document.createElement('div');
+    header.className = 'jt-modal-header';
+    header.textContent = cfg.title;
+    modal.appendChild(header);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'jt-modal-body';
+  cfg.html ? body.innerHTML = sanitizeHTML(cfg.html)
+           : body.textContent = cfg.message || '';
+  modal.appendChild(body);
+
+  if (cfg.actions?.length) {
+    const actions = document.createElement('div');
+    actions.className = 'jt-modal-actions';
+
+    cfg.actions.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'jt-modal-btn' + (a.primary ? ' primary' : '');
+      btn.textContent = a.label || 'OK';
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        a.onClick?.(e);
+        if (a.closeOnClick !== false) close();
+      };
+      actions.appendChild(btn);
+    });
+
+    modal.appendChild(actions);
+  }
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  if (cfg.block) document.body.style.overflow = 'hidden';
+
+  requestAnimationFrame(() => {
+    overlay.classList.add('show');
+    modal.classList.add('show');
+  });
+
+  const close = () => {
+    overlay.classList.remove('show');
+    modal.classList.remove('show');
+    setTimeout(() => {
+      overlay.remove();
+      if (cfg.block) document.body.style.overflow = '';
+    }, 300);
+  };
+
+  if (cfg.closable) {
+    if (cfg.closeOnOverlay) {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) close();
+      });
+    }
+
+    const esc = (e) => {
+      if (e.key === 'Escape') {
+        close();
+        document.removeEventListener('keydown', esc);
+      }
+    };
+    document.addEventListener('keydown', esc);
+  }
+
+  return { close };
+},
 
   _registerTypes() {
     Object.keys(this._config).forEach(type => {

@@ -23,3 +23,5 @@
 # JuiceToast v1.4.0 (or 1.4.1 | Done)
 
 - Bring UMD back
+- Add Promise
+- Add priority

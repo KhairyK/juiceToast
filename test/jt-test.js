@@ -1,8 +1,14 @@
 import juiceToast from 'juice-toast/src';
 
-juiceToast.info({
-  avatar: './avatars/profile1.png', 
-  title: 'Incoming Message!', 
-  message: 'Incoming message from Khairy.', 
-  icon: ''
-})
+juiceToast.modal({
+  title: "Delete File?",
+  message: "Are you sure you want to delete this file?",
+  actions: [
+    { label: "Cancel" },
+    { 
+      label: "Delete", 
+      onClick: () => console.log("Deleted!"),
+      closeOnClick: true 
+    }
+  ]
+});

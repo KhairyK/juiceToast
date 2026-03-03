@@ -323,6 +323,23 @@ juiceToast.clear();    // Clear queue
 juiceToast.destroy();  // Remove all toast roots
 ```
 
+## Modal
+
+```js
+juiceToast.modal({
+  title: "Delete File?",
+  message: "Are you sure you want to delete this file?",
+  actions: [
+    { label: "Cancel" },
+    { 
+      label: "Delete", 
+      onClick: () => console.log("Deleted!"),
+      closeOnClick: true 
+    }
+  ]
+});
+```
+
 ---
 
 # 🆚 Comparison
@@ -338,7 +355,7 @@ juiceToast.destroy();  // Remove all toast roots
 | Swipe to Dismiss | ✅ | ❌ | ❌ |
 | Avatar Support | ✅ | ❌ | ❌ |
 | Custom Themes | ✅ | ✅ | Limited |
-| Modal Support | ❌ (toast only) | ✅ | ❌ |
+| Modal Support | ✅ | ✅ | ❌ |
 | Designed for Toast Only | ✅ | ❌ (modal-focused) | ✅ |
 
 ### Compared to SweetAlert2
