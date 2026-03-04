@@ -1,0 +1,9 @@
+TAG_NAME=v1.4.2
+TAG_DESCRIPTION=`
+# JuiceToast v1.4.2 Release
+
+See [CHANGELOG](https://github.com/KhairyK/juiceToast/blob/main/CHANGELOG.md) for an update
+See [NEW FEATURE](https://github.com/KhairyK/juiceToast/blob/main/NEW_FEATURE.md) for the new API
+`
+SET_PRERELEASE=false
+CREATE_DISCUSSION=false
