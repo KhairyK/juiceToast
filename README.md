@@ -395,7 +395,7 @@ JuiceToast provides more advanced architecture while staying dependency-free.
 
 # 📄 License
 
-MIT License (C) 2026 OpenDN Foundation
+Atrosfer 1.0 License (C) 2026 OpenDN Foundation
 
 ---
 

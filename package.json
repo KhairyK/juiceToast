@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",
@@ -17,7 +17,7 @@
     "frontend-ui",
     "browser-notification"
   ],
-  "license": "MIT",
+  "license": "Atrsofer-1.0",
   "author": "KhairyK",
   "homepage": "https://github.com/KhairyK/juiceToast",
   "bugs": {

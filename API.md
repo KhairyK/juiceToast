@@ -304,8 +304,15 @@ juiceToast.success({
 }
 ```
 
+# Parallax Mode
+```js
+juiceToast.success({
+  parallaxMode: true
+});
+```
+
 ---
 
 # License
 
-MIT License
+Atrosfer 1.0 License

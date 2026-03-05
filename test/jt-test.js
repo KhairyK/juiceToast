@@ -1,14 +1,19 @@
 import juiceToast from 'juice-toast/src';
 
-juiceToast.modal({
-  title: "Delete File?",
-  message: "Are you sure you want to delete this file?",
-  actions: [
-    { label: "Cancel" },
-    { 
-      label: "Delete", 
-      onClick: () => console.log("Deleted!"),
-      closeOnClick: true 
-    }
-  ]
+juiceToast.setup({custom:{}});
+
+juiceToast.custom({ 
+  title: "Custom", 
+  message: "Styled toast", 
+  bgImage: "https://images.unsplash.com/photo-1557683316-973673baf926?fit=crop&w=400&h=400", 
+  color: "#f0f0f0", 
+  glassUI: 85, 
+  progress: true, 
+  duration: 4000, 
+  avatar: "./avatars/profile1.png", 
+  size: "lg", 
+  width: "360px", 
+  position: "top-left", 
+  parallaxMode: true
 });
+juiceToast.success("Success")

@@ -378,7 +378,7 @@ JuiceToast provides more advanced architecture while staying dependency-free.
 
 # 📄 License
 
-MIT License
+Atrosfer 1.0 License
 
 ---
 

@@ -100,3 +100,10 @@ juiceToast.modal({
   ]
 });
 ```
+
+# Juice Toast Release v1.4.3
+```js
+juiceToast.success({
+  parallaxMode: true
+});
+```

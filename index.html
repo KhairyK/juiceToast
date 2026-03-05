@@ -350,7 +350,7 @@ juiceToast.destroy();
 juiceToast.success({
   width: "400px",
   size: "lg",
-  bgImage: "https://cdn.kyrt.my.id/image/ts-logo-128.svg"
+  bgImage: "https://images.unsplash.com/photo-1557683316-973673baf926?fit=crop&w=400&h=400"
 });
               </pre>
             </div>
@@ -362,7 +362,7 @@ juiceToast.success({
   </main>
 
   <footer class="container-main text-center muted">
-    <small>MIT License © 2026 OpenDN Foundation</small>
+    <small>Atrosfer 1.0 License © 2026 OpenDN Foundation</small>
   </footer>
 
   <!-- Fallback toast container -->
@@ -385,57 +385,8 @@ juiceToast.success({
 
   <!-- Scripts -->
   <script type="module">
-    let juiceToast = undefined;
-    (async () => {
-      try {
-        const mod = await import('../dist/juice-toast.esm.js');
-        juiceToast = mod.default ?? mod;
-      } catch (err) {
-        console.warn('juiceToast import failed, using fallback', err);
-      }
-    })();
-
-    // helper fallback toast (simple)
-    function showFallbackToast(text){
-      const wrap = document.getElementById('__fallback_toast');
-      const el = document.createElement('div');
-      el.className = 'fb-toast';
-      el.textContent = text;
-      wrap.appendChild(el);
-      setTimeout(()=> {
-        el.style.transition = 'opacity .3s ease';
-        el.style.opacity = '0';
-        setTimeout(()=> el.remove(), 350);
-      }, 1800);
-    }
-
-    // safe API to show success toasts
-    function safeSuccess(opts){
-      try {
-        if(juiceToast && typeof juiceToast.success === 'function'){
-          if(typeof opts === 'string') juiceToast.success(opts);
-          else juiceToast.success(opts);
-        } else {
-          const t = (opts && opts.title) ? `${opts.title} — ${opts.message || ''}` : (typeof opts === 'string' ? opts : (opts && opts.message) || 'Done');
-          showFallbackToast(t);
-        }
-      } catch(e){
-        showFallbackToast('Success');
-      }
-    }
-
-    // safe api for error/custom
-    function safeError(opts){
-      try {
-        if(juiceToast && typeof juiceToast.error === 'function'){
-          juiceToast.error(opts);
-        } else {
-          showFallbackToast((opts && opts.message) || 'Error');
-        }
-      } catch(e){
-        showFallbackToast('Error');
-      }
-    }
+    import juiceToast from './src/source.js';
+    juiceToast.setup({custom:{}});
 
     document.addEventListener('DOMContentLoaded', ()=>{
 
@@ -463,25 +414,23 @@ juiceToast.success({
         if(!codeEl) return;
         const text = codeEl.innerText.trim();
         navigator.clipboard.writeText(text).then(()=> {
-          safeSuccess({ title: "Copied!", message: "Code copied to clipboard." });
+          juiceToast.success({ title: "Copied!", message: "Code copied to clipboard." });
         }).catch(()=> {
-          // fallback when clipboard not available
-          showFallbackToast('Copied!');
+          console.error("Cannot Show Toast");
         });
       });
 
-      /* Demo toasts (delegation) */
       document.body.addEventListener('click', (e) => {
         const demo = e.target.closest('[data-demo]');
         if(!demo) return;
         const type = demo.getAttribute('data-demo');
-        if(type === 'success') safeSuccess("Operation successful!");
-        else if(type === 'error') safeError({ title: "Error", message: "Something failed" });
+        if(type === 'success') juiceToast.success("Operation successful!");
+        else if(type === 'error') juiceToast.error({ title: "Error", message: "Something failed" });
         else if(type === 'custom') {
           if(juiceToast && typeof juiceToast.custom === 'function'){
-            juiceToast.custom({ title: "Custom", message: "Styled toast", bg: "#2563eb", color: "#fff" });
+            juiceToast.custom({ title: "Custom", message: "Styled toast", bgImage: "https://images.unsplash.com/photo-1557683316-973673baf926?fit=crop&w=400&h=400", color: "#f0f0f0", glassUI: 85, progress: true, duration: 4000, icon: "fa-bell", iconPack: "fas"});
           } else {
-            showFallbackToast('Custom toast');
+            console.error("Cannot show toast");
           }
         }
       });

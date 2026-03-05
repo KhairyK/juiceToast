@@ -62,4 +62,4 @@ git push origin feature/your-feature-name
 ## Code of Conduct
 Read the [Code Of Conduct](https://github.com/KhairyK/juiceToast/blob/main/CODE_OF_CONDUCT.md)
 
-2026 (C) OpenDN Foundation / Released under MIT LICENSE
+2026 (C) OpenDN Foundation / Released under Atrosfer 1.0LICENSE

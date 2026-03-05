@@ -1,5 +1,6 @@
 'use strict';
 
+/* ---------------- env ---------------- */
 const isBrowser =
   typeof window !== 'undefined' && typeof document !== 'undefined';
 const reduceMotion =
@@ -71,128 +72,60 @@ class PriorityQueue {
     const A = this._heap[a],
       B = this._heap[b];
     if (A.priority !== B.priority) return A.priority - B.priority;
-    return B.seq - A.seq; // newer items first when equal priority
+    // Tie-breaker: prefer newer items (higher seq)
+    return A.seq - B.seq;
   }
 }
 
-/* ---------------- CSS Injection ---------------- */
+/* ---------------- CSS ---------------- */
 let __cssInjected = false;
 const BASE_CSS = `
-/* JuiceToast base (v1.4.0) */
+/* JuiceToast base (extended) */
 #juice-toast-root,[id^="juice-toast-root-"]{position:fixed;z-index:9999;display:flex;pointer-events:none;gap:10px}
 #juice-toast-root[data-position="bottom-right"],#juice-toast-root-bottom-right{bottom:20px;right:20px;flex-direction:column-reverse;align-items:flex-end}
 #juice-toast-root[data-position="top-right"]{top:20px;right:20px;flex-direction:column;align-items:flex-end}
 #juice-toast-root[data-position="bottom-left"]{bottom:20px;left:20px;flex-direction:column-reverse;align-items:flex-start}
 #juice-toast-root[data-position="top-left"]{top:20px;left:20px;flex-direction:column;align-items:flex-start}
 #juice-toast-root[data-position="top-center"],#juice-toast-root[data-position="bottom-center"]{left:50%;transform:translateX(-50%)}
-.juice-toast{pointer-events:auto;min-width:220px;max-width:420px;padding:12px 16px;margin:6px 0;border-radius:10px;background:linear-gradient(180deg,rgba(30,30,30,.95),rgba(20,20,20,.95));color:#fff;display:flex;gap:12px;align-items:flex-start;box-sizing:border-box;transition:opacity .28s ease,transform .32s ease}
-@keyframes jt-slide-in{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes jt-slide-out{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(20px) scale(0.95)}}
-.juice-toast.show{animation:jt-slide-in .32s cubic-bezier(0.4,0,0.2,1) forwards;opacity:1;transform:translateY(0)}
-.juice-toast.hide{animation:jt-slide-out .28s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0;transform:translateY(12px);pointer-events:none}
+.juice-toast{pointer-events:auto;min-width:220px;max-width:420px;padding:12px 16px;margin:6px 0;border-radius:10px;background:linear-gradient(180deg,rgba(30,30,30,.95),rgba(20,20,20,.95));color:#fff;display:flex;gap:12px;align-items:flex-start;box-sizing:border-box;transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; transform: translate3d(var(--jt-parallax-x,0), var(--jt-parallax-y,0), 0) translateX(var(--jt-drag-x,0)) translateY(var(--jt-drag-y,0)) scale(var(--jt-stack-scale,1));}
+@keyframes jt-slide-in{0%{opacity:0;transform:translateY(20px) scale(0.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes jt-slide-out{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(20px) scale(0.98)}}
+@keyframes jt-bounce{0%{transform:translateY(0)}25%{transform:translateY(-6px)}50%{transform:translateY(0)}75%{transform:translateY(-3px)}100%{transform:translateY(0)}}
+@keyframes jt-shake{0%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}100%{transform:translateX(0)}}
+@keyframes jt-pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes jt-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.juice-toast.show{animation:jt-slide-in .32s cubic-bezier(0.4,0,0.2,1) forwards;opacity:1}
+.juice-toast.hide{animation:jt-slide-out .28s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0;pointer-events:none}
 .juice-toast .icon{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.06)}
-.jt-content{display:flex;flex-direction:column;gap:4px;flex:1}
-.jt-title{font-weight:700;font-size:13px}
-.jt-message{font-size:13px;opacity:.95}
+.jt-content{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.jt-title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jt-message{font-size:13px;opacity:.95;word-break:break-word}
 .jt-actions{display:flex;gap:8px;margin-top:10px}
 .jt-action{border:1px solid currentColor;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;background:transparent}
 .jt-progress{position:absolute;left:0;bottom:0;height:4px;width:100%;border-radius:2px;background:linear-gradient(90deg,#4ade80,#22c55e);transform-origin:left;transform:scaleX(1);transition:transform linear}
-
-/* avatar specific */
+.juice-toast.swipe-dismissing {opacity: 0; transition: transform 0.22s ease-out, opacity 0.22s ease-out;}
 .jt-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
 
-/* ---------------- Modal ---------------- */
-/* Overlay */
+/* avatar top variant */
+.juice-toast.jt-avatar-top{flex-direction:column;align-items:flex-start}
+
+/* modal */
 .jt-modal-overlay{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(15,23,42,.55);
-  backdrop-filter:blur(6px) saturate(120%);
-  -webkit-backdrop-filter:blur(6px) saturate(120%);
-  opacity:0;
-  transition:opacity .25s ease;
-  z-index:10000;
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55);backdrop-filter:blur(6px) saturate(120%);-webkit-backdrop-filter:blur(6px) saturate(120%);opacity:0;transition:opacity .25s ease;z-index:10000;
 }
-.jt-modal-overlay.show{
-  opacity:1;
-}
-
-/* Base modal */
-.jt-modal{
-  width:100%;
-  max-width:520px;
-  border-radius:18px;
-  padding:24px;
-
-  opacity:0;
-  transform:translateY(40px) scale(.96);
-  transition:
-    transform .35s cubic-bezier(.16,1,.3,1),
-    opacity .25s ease;
-}
-
-.jt-modal.show{
-  opacity:1;
-  transform:translateY(0) scale(1);
-}
-
-.jt-modal-header{
-  font-size:18px;
-  font-weight:600;
-  letter-spacing:.3px;
-  margin-bottom:10px;
-}
-
-.jt-modal-body{
-  font-size:14.5px;
-  line-height:1.6;
-  opacity:.85;
-  margin-bottom:22px;
-}
-
-.jt-modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:12px;
-}
-
-.jt-modal-btn{
-  min-width:88px;
-  padding:8px 16px;
-  border-radius:12px;
-  font-size:13.5px;
-  font-weight:500;
-  cursor:pointer;
-  transition:all .2s ease;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.04);
-  color:inherit;
-}
-.jt-modal-btn:hover{
-  background:rgba(255,255,255,.08);
-  transform:translateY(-1px);
-}
-.jt-modal-btn:active{
-  transform:translateY(0);
-}
-
-.jt-modal-btn.primary{
-  background:#6366f1;
-  border-color:#6366f1;
-  color:#fff;
-}
-.jt-modal-btn.primary:hover{
-  background:#5458ee;
-}
+.jt-modal-overlay.show{opacity:1}
+.jt-modal{width:100%;max-width:520px;border-radius:18px;padding:24px;opacity:0;transform:translateY(40px) scale(.96);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s ease;}
+.jt-modal.show{opacity:1;transform:translateY(0) scale(1)}
+.jt-modal-header{font-size:18px;font-weight:600;letter-spacing:.3px;margin-bottom:10px}
+.jt-modal-body{font-size:14.5px;line-height:1.6;opacity:.85;margin-bottom:22px}
+.jt-modal-actions{display:flex;justify-content:flex-end;gap:12px}
+.jt-modal-btn{min-width:88px;padding:8px 16px;border-radius:12px;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .2s ease;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:inherit}
+.jt-modal-btn:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
+.jt-modal-btn.primary{background:#6366f1;border-color:#6366f1;color:#fff}
+#juice-toast-root[data-parallax="true"] .juice-toast{transition: transform 0.12s cubic-bezier(.2,.8,.2,1), opacity .2s}
 `;
 
-/**
- * injectCSS - improved: checks for existing element id to avoid double-injection
- */
+/* ---------------- helpers ---------------- */
 function injectCSS(css = BASE_CSS) {
   if (!isBrowser || __cssInjected) return;
   if (document.getElementById('juice-toast-style')) {
@@ -206,7 +139,6 @@ function injectCSS(css = BASE_CSS) {
   __cssInjected = true;
 }
 
-/* ---------------- Utilities ---------------- */
 const uid = (() => {
   let n = 1;
   return () => 'jt-' + n++;
@@ -221,9 +153,7 @@ function clamp(n, a, b) {
   return Math.max(a, Math.min(b, n));
 }
 
-/**
- * sanitizeHTML
- */
+/* simple HTML sanitizer */
 function sanitizeHTML(input) {
   if (!input) return '';
   const t = document.createElement('template');
@@ -261,7 +191,6 @@ function sanitizeHTML(input) {
         if (!allowed.includes(name)) {
           ch.replaceWith(...Array.from(ch.childNodes));
         } else {
-          // remove event handler attributes and dangerous URIs
           Array.from(ch.attributes || []).forEach((attr) => {
             const an = attr.name.toLowerCase();
             const av = attr.value || '';
@@ -273,7 +202,6 @@ function sanitizeHTML(input) {
             ) {
               ch.removeAttribute(attr.name);
             } else if (name === 'img' && an === 'srcset') {
-              // remove srcset to avoid complex parsing issues
               ch.removeAttribute(attr.name);
             }
           });
@@ -305,7 +233,7 @@ const sizePreset = {
   lg: { width: '420px', padding: '18px' },
 };
 
-/* ---------------- Animations map ---------------- */
+/* ---------------- Animations map (default) ---------------- */
 const TYPE_ANIMATION = {
   success: 'jt-bounce',
   error: 'jt-shake',
@@ -314,7 +242,7 @@ const TYPE_ANIMATION = {
   loading: 'jt-spin',
 };
 
-/* ---------------- Core ---------------- */
+/* ---------------- Core juiceToast ---------------- */
 const juiceToast = {
   _defaults: {
     duration: 2500,
@@ -325,20 +253,29 @@ const juiceToast = {
     dev: false,
     injectCSS: true,
     css: null,
+    autoDedupe: false, // whether to auto compute dedupe keys
+    maxVisiblePerType: {}, // e.g. { error: 2 }
+    parallaxMode: false, // apply a gentle parallax
+    autoFetchFA: true, // attempt to auto-inject FA stylesheet if needed
   },
   _config: {},
   _theme: 'dark',
   _plugins: [],
   _queue: new PriorityQueue(),
   _queueDedupe: new Set(),
-  _activeMap: new Map(),
-  _roots: new Map(),
+  _activeMap: new Map(), // id -> meta
+  _roots: new Map(), // position -> root element
   _modalStack: [],
+  _faInjected: false,
 
   setup(cfg = {}) {
     const { duration, maxVisible, ...types } = cfg;
-    if (duration) this._defaults.duration = duration;
-    if (maxVisible) this._defaults.maxVisible = maxVisible;
+    if (typeof duration === 'number') this._defaults.duration = duration;
+    if (typeof maxVisible === 'number') this._defaults.maxVisible = maxVisible;
+    if (typeof cfg.autoDedupe === 'boolean') this._defaults.autoDedupe = cfg.autoDedupe;
+    if (cfg.maxVisiblePerType) this._defaults.maxVisiblePerType = merge(this._defaults.maxVisiblePerType, cfg.maxVisiblePerType);
+    if (typeof cfg.parallaxMode === 'boolean') this._defaults.parallaxMode = cfg.parallaxMode;
+    if (typeof cfg.autoFetchFA === 'boolean') this._defaults.autoFetchFA = cfg.autoFetchFA;
     this._config = merge(this._config, types);
     this._registerTypes();
   },
@@ -346,26 +283,33 @@ const juiceToast = {
   use(plugin) {
     if (typeof plugin === 'function') this._plugins.push(plugin);
   },
+
   addType(name, cfg = {}) {
     this._config[name] = cfg;
     this._registerTypes();
   },
+
   defineTheme(name, styles = {}) {
     themes[name] = merge(themes[name] || {}, styles);
   },
+
   setTheme(name) {
     this._theme = name;
     if (!isBrowser) return;
     this._roots.forEach((r) => (r.dataset.theme = name));
   },
+
   clear() {
     this._queue = new PriorityQueue();
     this._queueDedupe.clear();
   },
+
   destroy() {
     this.clear();
     if (!isBrowser) return;
-    this._roots.forEach((r) => r.remove());
+    this._roots.forEach((r) => {
+      try { r.remove(); } catch (e) {}
+    });
     this._roots.clear();
   },
 
@@ -481,9 +425,7 @@ const juiceToast = {
 
     const body = document.createElement('div');
     body.className = 'jt-modal-body';
-    cfg.html
-      ? (body.innerHTML = sanitizeHTML(cfg.html))
-      : (body.textContent = cfg.message || '');
+    cfg.html ? (body.innerHTML = sanitizeHTML(cfg.html)) : (body.textContent = cfg.message || '');
     modal.appendChild(body);
 
     if (cfg.actions?.length) {
@@ -507,6 +449,7 @@ const juiceToast = {
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    this._modalStack.push(overlay);
 
     if (cfg.block) document.body.style.overflow = 'hidden';
 
@@ -515,13 +458,10 @@ const juiceToast = {
       modal.classList.add('show');
     });
 
-    const close = () => {
-      overlay.classList.remove('show');
-      modal.classList.remove('show');
-      setTimeout(() => {
-        overlay.remove();
-        if (cfg.block) document.body.style.overflow = '';
-      }, 300);
+    const esc = (e) => {
+      if (e.key === 'Escape') {
+        close();
+      }
     };
 
     if (cfg.closable) {
@@ -530,15 +470,22 @@ const juiceToast = {
           if (e.target === overlay) close();
         });
       }
-
-      const esc = (e) => {
-        if (e.key === 'Escape') {
-          close();
-          document.removeEventListener('keydown', esc);
-        }
-      };
       document.addEventListener('keydown', esc);
     }
+
+    const close = () => {
+      overlay.classList.remove('show');
+      modal.classList.remove('show');
+      setTimeout(() => {
+        try {
+          overlay.remove();
+        } catch (e) {}
+        if (cfg.block) document.body.style.overflow = '';
+        document.removeEventListener('keydown', esc);
+        const idx = this._modalStack.indexOf(overlay);
+        if (idx >= 0) this._modalStack.splice(idx, 1);
+      }, 300);
+    };
 
     return { close };
   },
@@ -553,16 +500,23 @@ const juiceToast = {
   },
 
   _enqueue(type, payload = {}) {
-    const priority = this._priorityMap?.[payload.priority] ?? 2;
-    const dedupeKey = payload.dedupeKey;
+    const priority =
+      typeof payload.priority === 'number'
+        ? payload.priority
+        : this._priorityMap?.[payload.priority] ?? 2;
+    const dedupeKey =
+      payload.dedupeKey ||
+      (this._defaults.autoDedupe ? this._computeDedupeKey(type, payload) : undefined);
+
     if (dedupeKey && this._queueDedupe.has(dedupeKey)) {
-      if (this._defaults.dev) console.log('[JuiceToast] deduped', dedupeKey);
+      if (this._defaults.dev) console.log('[JuiceToast] deduped (queue)', dedupeKey);
       return;
     }
     const item = { id: uid(), type, payload, priority };
     if (dedupeKey) this._queueDedupe.add(dedupeKey);
     this._queue.push(item, priority);
     this._processQueue();
+    return item.id;
   },
 
   _processQueue() {
@@ -573,10 +527,24 @@ const juiceToast = {
       if (!next) break;
       const position = next.payload?.position || 'bottom-right';
       const root = this._getRoot(position);
+      if (!root) break;
       const showing = Array.from(root.children).length;
+      // global cap
       if (showing >= max) {
+        // requeue slightly lower priority to try later
         this._queue.push(next, next.priority - 0.001);
         break;
+      }
+      // per-type cap
+      const perTypeCaps = this._defaults.maxVisiblePerType || {};
+      const capForType = perTypeCaps[next.type];
+      if (typeof capForType === 'number') {
+        const showingOfType = Array.from(root.children).filter((c) => c.dataset.toastType === next.type).length;
+        if (showingOfType >= capForType) {
+          // requeue a bit later
+          this._queue.push(next, next.priority - 0.001);
+          break;
+        }
       }
       this._showToast(next.type, next.payload, next.id);
     }
@@ -591,6 +559,8 @@ const juiceToast = {
     root.dataset.theme = this._theme;
     root.style.pointerEvents = 'none';
     root.style.display = 'flex';
+    root.style.flexDirection = 'column';
+    if (this._defaults.parallaxMode) root.dataset.parallax = 'true';
     switch (position) {
       case 'top-left':
         root.style.top = '20px';
@@ -623,6 +593,29 @@ const juiceToast = {
         root.style.right = '20px';
     }
     document.body.appendChild(root);
+    // If parallax mode enabled, attach listener
+    if (this._defaults.parallaxMode) {
+      const onMove = (e) => {
+        const rect = root.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        Array.from(root.children).forEach((child, index) => {
+          // `index` closer items move more
+          const depth = (index + 1) / Math.max(1, root.children.length);
+          const tx = clamp(((clientX - cx) / rect.width) * depth * 8, -12, 12); // px
+          const ty = clamp(((clientY - cy) / rect.height) * depth * 6, -10, 10);
+          // use CSS vars to avoid overwriting drag transforms
+          child.style.setProperty('--jt-parallax-x', `${tx}px`);
+          child.style.setProperty('--jt-parallax-y', `${ty}px`);
+        });
+      };
+      root._parallaxHandler = onMove;
+      root.addEventListener('mousemove', onMove);
+      root.addEventListener('touchmove', onMove, { passive: true });
+      root.dataset.parallax = 'true';
+    }
     this._roots.set(position, root);
     return root;
   },
@@ -630,6 +623,26 @@ const juiceToast = {
   _warn(msg) {
     if (this._defaults.dev && typeof console !== 'undefined')
       console.warn('[JuiceToast]', msg);
+  },
+
+  _ensureFA() {
+    if (!isBrowser || this._faInjected || !this._defaults.autoFetchFA) return;
+    // naive check: if a FA stylesheet present
+    const hasFA = !!document.querySelector('link[href*="fontawesome"], link[href*="font-awesome"], link[href*="cdnjs.cloudflare.com/ajax/libs/font-awesome"]');
+    if (hasFA) {
+      this._faInjected = true;
+      return;
+    }
+    try {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+      this._faInjected = true;
+    } catch (e) {
+      console.error("[JuiceToast]: Fetching icons failed:", e);
+    }
   },
 
   _playSound(src) {
@@ -662,7 +675,7 @@ const juiceToast = {
       try {
         fn(ctx);
       } catch (e) {
-        this._warn('Plugin error: ' + e.message);
+        this._warn('Plugin error: ' + (e?.message || e));
       }
     });
   },
@@ -674,10 +687,25 @@ const juiceToast = {
     return Number.isFinite(n) ? clamp(n, 0, 100) : 0;
   },
 
+  _computeDedupeKey(type, payload) {
+    try {
+      const t = type || '';
+      const title = payload.title || '';
+      const message = payload.message || payload.html || '';
+      // simple stable key: type + title + message (trimmed)
+      return `${t}::${String(title).trim().slice(0, 200)}::${String(message).trim().slice(0, 500)}`;
+    } catch (e) {
+      return undefined;
+    }
+  },
+
   _showToast(type, payload = {}, id) {
     if (!isBrowser) return;
     if (this._defaults.injectCSS !== false)
       injectCSS(this._defaults.css || BASE_CSS);
+
+    // auto fetch FA if needed
+    this._ensureFA();
 
     const base = this._config[type] || {};
     const data =
@@ -686,15 +714,47 @@ const juiceToast = {
     cfg.icon = cfg.icon ?? cfg.icon_left_top;
     cfg.position = cfg.position ?? cfg.toast ?? 'bottom-right';
     cfg.closable = cfg.closable ?? cfg.closeable ?? true;
-    cfg.duration = cfg.duration ?? this._defaults.duration;
+    cfg.duration = typeof cfg.duration === 'number' ? cfg.duration : this._defaults.duration;
 
     const theme = themes[cfg.theme || this._theme] || {};
     const toastId = id || uid();
+
+    // support auto computed dedupeKey: if exists in DOM, merge
+    const dedupeKey = cfg.dedupeKey || (this._defaults.autoDedupe ? this._computeDedupeKey(type, cfg) : undefined);
+    if (dedupeKey) {
+      // check existing in any root
+      for (const root of this._roots.values()) {
+        const existing = Array.from(root.children).find((n) => n.dataset.dedupeKey === dedupeKey);
+        if (existing) {
+          // merge: increment counter and update message if requested
+          let countEl = existing.querySelector('.jt-count');
+          if (!countEl) {
+            countEl = document.createElement('span');
+            countEl.className = 'jt-count';
+            countEl.style.marginLeft = '6px';
+            existing.querySelector('.jt-title')?.appendChild(countEl);
+            countEl.textContent = '1';
+          }
+          countEl.textContent = String(parseInt(countEl.textContent || '1') + 1);
+          // optionally update message
+          if (cfg.mergeMessage) {
+            const msgEl = existing.querySelector('.jt-message');
+            if (msgEl) {
+              if (cfg.html) msgEl.innerHTML = sanitizeHTML(cfg.html);
+              else msgEl.textContent = String(cfg.message || '');
+            }
+          }
+          return existing.dataset.toastId;
+        }
+      }
+    }
 
     const toast = document.createElement('div');
     toast.className = 'juice-toast';
     toast.dataset.toastId = toastId;
     toast.dataset.position = cfg.position;
+    toast.dataset.toastType = type;
+    if (dedupeKey) toast.dataset.dedupeKey = dedupeKey;
     toast.tabIndex = 0;
     toast.setAttribute('role', 'status');
     toast.style.position = 'relative';
@@ -702,6 +762,14 @@ const juiceToast = {
     toast.style.background = cfg.bg || theme.bg;
     toast.style.color = cfg.color || theme.color;
     toast.style.border = cfg.border || theme.border || 'none';
+    toast.style.minHeight = toast.style.minHeight || '';
+
+    // initialize transform vars (safe)
+    toast.style.setProperty('--jt-parallax-x', '0px');
+    toast.style.setProperty('--jt-parallax-y', '0px');
+    toast.style.setProperty('--jt-drag-x', '0px');
+    toast.style.setProperty('--jt-drag-y', '0px');
+    toast.style.setProperty('--jt-stack-scale', '1');
 
     if (cfg.size && sizePreset[cfg.size]) {
       const p = sizePreset[cfg.size];
@@ -734,7 +802,6 @@ const juiceToast = {
     } else if (cfg.message) {
       msg.textContent = String(cfg.message);
     }
-
     content.appendChild(msg);
 
     if (Array.isArray(cfg.actions) && cfg.actions.length) {
@@ -747,17 +814,28 @@ const juiceToast = {
         btn.onclick = (ev) => {
           ev.stopPropagation();
           a.onClick?.(ev);
-          if (a.closeOnClick) removeNow();
+          if (a.closeOnClick) this.remove(toastId);
         };
         actions.appendChild(btn);
       });
       content.appendChild(actions);
     }
 
+    if (cfg.bgImage) {
+      toast.style.backgroundImage = `url(${cfg.bgImage})`;
+      toast.style.backgroundSize = cfg.bgSize || 'cover';
+      toast.style.backgroundPosition = cfg.bgPosition || 'center';
+    } else {
+      toast.style.background = cfg.bg || theme.bg;
+    }
+
+    // ICON
     let icon = null;
     if (cfg.icon) {
       icon = document.createElement('i');
-      icon.className = ['icon', cfg.iconPack || '', cfg.icon].join(' ').trim();
+      // ensure font-awesome class if user passed short name
+      const iconClass = cfg.icon.startsWith('fa') ? cfg.icon : `fa-${cfg.icon}`;
+      icon.className = ['icon', cfg.iconPack || '', iconClass].join(' ').trim();
       if (cfg.iconSize) icon.style.fontSize = cfg.iconSize;
       if (!reduceMotion) {
         const anim = cfg.iconAnim || TYPE_ANIMATION[type];
@@ -777,8 +855,7 @@ const juiceToast = {
       }
     }
 
-    // --- Avatar handling (fixed placement + small upgrade)
-    // cfg.avatar can be string (src) or truthy; cfg.avatarPosition: 'left'|'right'|'top' (default 'left')
+    // Avatar handling
     let avatar = null;
     if (cfg.avatar) {
       avatar = document.createElement('img');
@@ -790,54 +867,44 @@ const juiceToast = {
       avatar.alt = cfg.avatarAlt || cfg.title || 'avatar';
       avatar.className = 'jt-avatar';
       avatar.loading = cfg.avatarLazy ? 'lazy' : 'eager';
-      // base inline styles (kept lightweight)
       avatar.style.width = avatar.style.width || '36px';
       avatar.style.height = avatar.style.height || '36px';
       avatar.style.borderRadius = avatar.style.borderRadius || '50%';
       avatar.style.objectFit = avatar.style.objectFit || 'cover';
       avatar.style.flexShrink = '0';
-      // positioning spacing depending on requested position
       const aPos = cfg.avatarPosition || 'left';
       if (aPos === 'left') {
         avatar.style.marginRight = cfg.avatarSpacing ?? '10px';
       } else if (aPos === 'right') {
         avatar.style.marginLeft = cfg.avatarSpacing ?? '10px';
       } else if (aPos === 'top') {
-        // for top we will append before content and add column layout to toast when necessary
         avatar.style.marginBottom = cfg.avatarSpacing ?? '8px';
       }
     }
 
-    // Append order: avatar (left/top), icon, content — ensures avatar is sibling of content (not inside)
-    // For avatarPosition === 'top', we switch layout to column for the toast
+    // Append order
     const avatarPos = cfg.avatarPosition || 'left';
     if (avatar && avatarPos === 'top') {
-      // make toast column for top-avatar layout temporarily
       toast.classList.add('jt-avatar-top');
       toast.style.flexDirection = 'column';
       toast.style.alignItems = 'flex-start';
       toast.appendChild(avatar);
-      // then icon/content below
       if (icon && cfg.iconPosition === 'top') {
         toast.appendChild(icon);
         toast.appendChild(content);
       } else if (icon && cfg.iconPosition === 'right') {
-        /* right icon in column layout -> place after content */ toast.appendChild(
-          content
-        );
+        toast.appendChild(content);
         toast.appendChild(icon);
       } else {
         if (icon) toast.appendChild(icon);
         toast.appendChild(content);
       }
     } else {
-      // horizontal layout (default)
       toast.style.flexDirection = 'row';
       toast.style.alignItems = 'center';
       if (avatar && avatarPos === 'left') toast.appendChild(avatar);
 
       if (icon && cfg.iconPosition === 'right') {
-        // content first, then icon
         toast.appendChild(content);
         toast.appendChild(icon);
       } else if (icon && cfg.iconPosition === 'top') {
@@ -850,9 +917,6 @@ const juiceToast = {
       }
 
       if (avatar && avatarPos === 'right') {
-        // avatar to the far right; margin-left handles spacing
-        // ensure content takes remaining space
-        // content is already flex:1 per CSS (.jt-content), so avatar remains right
         toast.appendChild(avatar);
       }
     }
@@ -873,7 +937,7 @@ const juiceToast = {
         try {
           cfg.undo();
         } catch (e) {}
-        removeNow();
+        this.remove(toastId);
       };
       content.appendChild(undoBtn);
     }
@@ -883,9 +947,10 @@ const juiceToast = {
       close.className = 'juice-toast-close';
       close.tabIndex = 0;
       close.textContent = '×';
+      close.style.marginLeft = '8px';
       close.addEventListener('click', (e) => {
         e.stopPropagation();
-        removeNow();
+        this.remove(toastId);
       });
       toast.appendChild(close);
     }
@@ -912,6 +977,7 @@ const juiceToast = {
       toast.dataset.groupId = cfg.groupId;
     }
 
+    // enforce per-root max (drop oldest if needed)
     const max = this._defaults.maxVisible;
     if (max && root.children.length >= max)
       root.removeChild(root.firstElementChild);
@@ -921,58 +987,93 @@ const juiceToast = {
       id: toastId,
       toast,
       cfg,
+      type,
       createdAt: now(),
       remaining: cfg.duration ?? this._defaults.duration,
       raf: null,
       timer: null,
       start: now(),
       paused: false,
-      // bound handlers for robust cleanup
       _boundMove: null,
       _boundUp: null,
+      _onPointerDown: null,
+      _onEnter: null,
+      _onLeave: null,
+      dedupeKey,
+      // lifecycle hooks
+      hooks: {
+        onShow: cfg.onShow,
+        onShown: cfg.onShown,
+        onClose: cfg.onClose,
+        onRemoved: cfg.onRemoved,
+      },
     };
     this._activeMap.set(toastId, meta);
 
-    this._runPlugins({ toast, cfg, type, root });
+    // lifecycle: onShow
+    try {
+      meta.hooks.onShow?.({ id: toastId, toast, cfg, type });
+    } catch (e) {}
+
+    // allow plugins to mutate DOM / cfg
+    this._runPlugins({ toast, cfg, type, root, meta });
+
     this._updateStackPositionsFor(root);
 
-    // show animation
-    requestAnimationFrame(() => toast.classList.add('show'));
+    // show animation (but respect reduced motion)
+    requestAnimationFrame(() => {
+      if (!reduceMotion) {
+        toast.classList.add('show');
+        // call onShown after animation
+        const animTime = 320;
+        setTimeout(() => {
+          try {
+            meta.hooks.onShown?.({ id: toastId, toast, cfg, type });
+          } catch (e) {}
+        }, animTime);
+      } else {
+        toast.style.opacity = '1';
+        meta.hooks.onShown?.({ id: toastId, toast, cfg, type });
+      }
+    });
 
-    /* ---------------- Pointer drag handling (optimized)
-       - we DON'T install persistent global listeners.
-       - listeners for move/up are added on pointerdown and removed on pointerup.
-    ---------------- */
+    /* ---------------- Pointer drag handling (robust) ---------------- */
     let startX = 0,
       startY = 0,
       curX = 0,
       curY = 0,
-      dragging = false;
+      dragging = false,
+      dragAxis = null,
+      lastMoveTime = 0,
+      lastMoveX = 0;
 
     const onPointerDown = (e) => {
       const p = e.touches ? e.touches[0] : e;
       startX = p.clientX;
       startY = p.clientY;
+      curX = 0;
+      curY = 0;
       dragging = true;
+      dragAxis = null;
       meta.paused = true;
-      // stop RAF while dragging
+
       if (meta.raf) {
         cancelAnimationFrame(meta.raf);
         meta.raf = null;
       }
+      // disable transition during drag to get immediate response
       toast.style.transition = 'none';
 
-      // bind move/up on document only while dragging
       meta._boundMove = onPointerMove;
       meta._boundUp = onPointerUp;
 
-      // touchmove needs passive:true to avoid blocking, but we still want to read coordinates
-      document.addEventListener('touchmove', meta._boundMove, {
-        passive: true,
-      });
+      document.addEventListener('touchmove', meta._boundMove, { passive: true });
       document.addEventListener('mousemove', meta._boundMove);
       document.addEventListener('touchend', meta._boundUp);
       document.addEventListener('mouseup', meta._boundUp);
+
+      lastMoveTime = now();
+      lastMoveX = startX;
     };
 
     const onPointerMove = (e) => {
@@ -980,29 +1081,58 @@ const juiceToast = {
       const p = e.touches ? e.touches[0] : e;
       curX = p.clientX - startX;
       curY = p.clientY - startY;
-      if (Math.abs(curX) > Math.abs(curY))
-        toast.style.transform = `translateX(${curX}px)`;
-      else toast.style.transform = `translateY(${curY}px)`;
+
+      if (!dragAxis) {
+        if (Math.abs(curX) > 6) dragAxis = 'x';
+        else if (Math.abs(curY) > 6) dragAxis = 'y';
+      }
+
+      if (dragAxis === 'x') {
+        // use CSS var for drag X
+        toast.style.setProperty('--jt-drag-x', `${curX}px`);
+      } else if (dragAxis === 'y') {
+        toast.style.setProperty('--jt-drag-y', `${curY}px`);
+      }
+
+      lastMoveTime = now();
+      lastMoveX = p.clientX;
     };
 
-    const onPointerUp = () => {
+    const onPointerUp = (e) => {
       dragging = false;
       meta.paused = false;
-      toast.style.transition = '';
-      const swiped = Math.abs(curX) > (this._defaults.swipeThreshold || 60);
-      if (swiped) {
-        toast.style.transform = `translateX(${curX > 0 ? 1000 : -1000}px)`;
-        setTimeout(removeNow, 220);
-      } else {
-        toast.style.transform = '';
-      }
-      startX = startY = curX = curY = 0;
 
-      // remove temporary document listeners
+      const absX = Math.abs(curX);
+      const absY = Math.abs(curY);
+      const axis = dragAxis || (absX > absY ? 'x' : 'y');
+
+      const dt = Math.max(1, now() - lastMoveTime);
+      const vx = dt ? (curX / dt) * 1000 : 0; // px/sec rough
+
+      const swipedX = axis === 'x' && (absX > (juiceToast._defaults.swipeThreshold || 60) || Math.abs(vx) > 800);
+      const swipedY = axis === 'y' && (absY > (juiceToast._defaults.swipeThreshold || 80));
+
+      if (swipedX || swipedY) {
+        // animate dismissal via CSS var so parallax not overwritten
+        const sign = curX >= 0 ? 1 : -1;
+        if (axis === 'x') {
+          toast.style.setProperty('--jt-drag-x', `${sign * 1000}px`);
+        } else {
+          toast.style.setProperty('--jt-drag-y', `${1000}px`);
+        }
+        toast.classList.add('swipe-dismissing');
+        setTimeout(() => this.remove(toastId), 220);
+      } else {
+        // snap back
+        toast.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
+        toast.style.setProperty('--jt-drag-x', `0px`);
+        toast.style.setProperty('--jt-drag-y', `0px`);
+      }
+
+      curX = curY = 0;
+
       if (meta._boundMove) {
-        document.removeEventListener('touchmove', meta._boundMove, {
-          passive: true,
-        });
+        document.removeEventListener('touchmove', meta._boundMove);
         document.removeEventListener('mousemove', meta._boundMove);
         meta._boundMove = null;
       }
@@ -1012,16 +1142,16 @@ const juiceToast = {
         meta._boundUp = null;
       }
 
-      // restart RAF loop if needed
+      // resume timer
       startTimerLoop();
     };
 
+    // store references for reliable removal later
+    toast._onPointerDown = onPointerDown;
     toast.addEventListener('touchstart', onPointerDown, { passive: true });
     toast.addEventListener('mousedown', onPointerDown);
 
-    /* ---------------- Hover / focus pause handling
-       - we cancel RAF on enter and restart on leave only when needed.
-    ---------------- */
+    /* ---------------- Hover / focus pause handling ---------------- */
     const onEnter = () => {
       meta.paused = true;
       if (meta.raf) {
@@ -1030,28 +1160,23 @@ const juiceToast = {
       }
     };
     const onLeave = () => {
-      // unpause and restart the RAF timer loop
       if (!meta.paused) return;
       meta.paused = false;
-      // refresh start time and restart tick loop
       meta.start = now();
       startTimerLoop();
     };
+    meta._onEnter = onEnter;
+    meta._onLeave = onLeave;
     toast.addEventListener('mouseenter', onEnter);
     toast.addEventListener('mouseleave', onLeave);
     toast.addEventListener('focusin', onEnter);
     toast.addEventListener('focusout', onLeave);
 
-    /* ---------------- Timer / RAF loop (optimized)
-       - we avoid a RAF loop while paused
-       - startTimerLoop will ensure only ONE RAF is active per toast
-    ---------------- */
+    /* ---------------- Timer / RAF loop (optimized) ---------------- */
     const duration = cfg.duration ?? this._defaults.duration;
 
     function tick() {
-      // if toast already removed, bail out
       if (!juiceToast._activeMap.has(toastId)) return;
-      // if paused, don't continue RAF loop (will be restarted by onLeave/onPointerUp)
       if (meta.paused) {
         meta.raf = null;
         meta.start = now();
@@ -1064,13 +1189,12 @@ const juiceToast = {
 
       if (progressEl) {
         const scale = Math.max(0, meta.remaining / duration);
-        // transform is GPU-accelerated; keep it
         progressEl.style.transform = `scaleX(${scale})`;
       }
 
       if (meta.remaining <= 0) {
-        toast.classList.remove('show');
-        setTimeout(removeNow, 280);
+        if (!reduceMotion) toast.classList.remove('show');
+        setTimeout(() => juiceToast.remove(toastId), 280);
         meta.raf = null;
         return;
       }
@@ -1078,13 +1202,13 @@ const juiceToast = {
       meta.raf = requestAnimationFrame(tick);
     }
 
-    function startTimerLoop() {
+    const startTimerLoop = () => {
       if (duration <= 0) return;
-      if (meta.raf) return; // already running
-      if (meta.paused) return; // don't start while paused
+      if (meta.raf) return;
+      if (meta.paused) return;
       meta.start = now();
       meta.raf = requestAnimationFrame(tick);
-    }
+    };
 
     if (duration > 0) {
       meta.start = now();
@@ -1092,53 +1216,8 @@ const juiceToast = {
       startTimerLoop();
     }
 
-    /* ---------------- removeNow + robust cleanup ---------------- */
-    function removeNow() {
-      if (!juiceToast._activeMap.has(toastId)) return;
-      toast.classList.add('hide');
-
-      // Remove pointerstart listeners attached to toast
-      toast.removeEventListener('touchstart', onPointerDown);
-      toast.removeEventListener('mousedown', onPointerDown);
-
-      // Remove any document listeners in case they were left
-      if (meta._boundMove) {
-        document.removeEventListener('touchmove', meta._boundMove, {
-          passive: true,
-        });
-        document.removeEventListener('mousemove', meta._boundMove);
-        meta._boundMove = null;
-      }
-      if (meta._boundUp) {
-        document.removeEventListener('touchend', meta._boundUp);
-        document.removeEventListener('mouseup', meta._boundUp);
-        meta._boundUp = null;
-      }
-
-      // Remove hover/focus listeners
-      toast.removeEventListener('mouseenter', onEnter);
-      toast.removeEventListener('mouseleave', onLeave);
-      toast.removeEventListener('focusin', onEnter);
-      toast.removeEventListener('focusout', onLeave);
-
-      // cancel RAF & timers
-      const metaLocal = juiceToast._activeMap.get(toastId);
-      if (metaLocal?.raf) {
-        cancelAnimationFrame(metaLocal.raf);
-        metaLocal.raf = null;
-      }
-      if (metaLocal?.timer) {
-        clearTimeout(metaLocal.timer);
-        metaLocal.timer = null;
-      }
-
-      juiceToast._activeMap.delete(toastId);
-
-      // remove from DOM and update stack
-      const parent = toast.parentNode;
-      if (parent) parent.removeChild(toast);
-      if (parent) juiceToast._updateStackPositionsFor(parent);
-    }
+    /* ---------------- remove wrapper that calls lifecycle hooks ---------------- */
+    const removeNow = () => this.remove(toastId);
 
     if (cfg.undoTimeout) {
       meta.timer = setTimeout(removeNow, cfg.undoTimeout);
@@ -1150,13 +1229,145 @@ const juiceToast = {
     return toastId;
   },
 
+  // public remove by id
+  remove(id) {
+    const meta = this._activeMap.get(id);
+    if (!meta) return false;
+    const { toast, cfg, type } = meta;
+
+    // lifecycle hook: onClose
+    try {
+      meta.hooks.onClose?.({ id, toast, cfg, type });
+    } catch (e) {}
+
+    if (!reduceMotion) toast.classList.add('hide');
+    else toast.style.opacity = '0';
+
+    // Remove pointerstart listeners attached to toast (use stored refs)
+    try {
+      if (toast._onPointerDown) {
+        toast.removeEventListener('touchstart', toast._onPointerDown);
+        toast.removeEventListener('mousedown', toast._onPointerDown);
+      }
+    } catch (e) {}
+
+    // Remove any document listeners in case they were left
+    if (meta._boundMove) {
+      try {
+        document.removeEventListener('touchmove', meta._boundMove);
+        document.removeEventListener('mousemove', meta._boundMove);
+      } catch (e) {}
+      meta._boundMove = null;
+    }
+    if (meta._boundUp) {
+      try {
+        document.removeEventListener('touchend', meta._boundUp);
+        document.removeEventListener('mouseup', meta._boundUp);
+      } catch (e) {}
+      meta._boundUp = null;
+    }
+
+    // Remove hover/focus listeners (use stored refs)
+    try {
+      if (meta._onEnter) toast.removeEventListener('mouseenter', meta._onEnter);
+      if (meta._onLeave) toast.removeEventListener('mouseleave', meta._onLeave);
+      if (meta._onEnter) toast.removeEventListener('focusin', meta._onEnter);
+      if (meta._onLeave) toast.removeEventListener('focusout', meta._onLeave);
+    } catch (e) {}
+
+    // cancel RAF & timers
+    if (meta.raf) {
+      cancelAnimationFrame(meta.raf);
+      meta.raf = null;
+    }
+    if (meta.timer) {
+      clearTimeout(meta.timer);
+      meta.timer = null;
+    }
+
+    this._activeMap.delete(id);
+
+    // remove from DOM and update stack
+    const parent = toast.parentNode;
+    if (parent) parent.removeChild(toast);
+    if (parent) this._updateStackPositionsFor(parent);
+
+    // remove dedupe key if any (use meta so auto computed keys get removed too)
+    if (meta.dedupeKey) {
+      try {
+        this._queueDedupe.delete(meta.dedupeKey);
+      } catch (e) {}
+    }
+
+    // lifecycle hook: onRemoved
+    try {
+      meta.hooks.onRemoved?.({ id, cfg, type });
+    } catch (e) {}
+
+    return true;
+  },
+
+  // public update by id
+  update(id, newCfg = {}) {
+    const meta = this._activeMap.get(id);
+    if (!meta) {
+      this._warn('update: id not found ' + id);
+      return false;
+    }
+    const { toast } = meta;
+    // merge cfg
+    meta.cfg = merge(meta.cfg, newCfg);
+    // update DOM: title, message, actions, progress, bg, theme, icon etc.
+    if (meta.cfg.title) {
+      const t = toast.querySelector('.jt-title');
+      if (t) t.textContent = meta.cfg.title;
+    }
+    const msgEl = toast.querySelector('.jt-message');
+    if (msgEl) {
+      if (meta.cfg.html) msgEl.innerHTML = sanitizeHTML(meta.cfg.html);
+      else msgEl.textContent = String(meta.cfg.message || '');
+    }
+    // update bg/color
+    const theme = themes[meta.cfg.theme || this._theme] || {};
+    toast.style.background = meta.cfg.bg || theme.bg;
+    toast.style.color = meta.cfg.color || theme.color;
+    toast.style.border = meta.cfg.border || theme.border || 'none';
+    // progress duration reset
+    if (meta.cfg.duration !== undefined) {
+      meta.remaining = meta.cfg.duration;
+      meta.start = now();
+      if (!meta.paused && !meta.raf) meta.raf = requestAnimationFrame(function tick() {
+        if (!juiceToast._activeMap.has(id)) return;
+        const m = juiceToast._activeMap.get(id);
+        if (!m) return;
+        const delta = now() - m.start;
+        m.remaining -= delta;
+        m.start = now();
+        const progressEl = m.toast.querySelector('.jt-progress');
+        if (progressEl) {
+          const scale = Math.max(0, m.remaining / (m.cfg.duration ?? juiceToast._defaults.duration));
+          progressEl.style.transform = `scaleX(${scale})`;
+        }
+        if (m.remaining <= 0) {
+          if (!reduceMotion) m.toast.classList.remove('show');
+          setTimeout(() => juiceToast.remove(id), 280);
+          return;
+        }
+        m.raf = requestAnimationFrame(tick);
+      });
+    }
+    // allow plugins
+    this._runPlugins({ toast, cfg: meta.cfg, type: meta.type, meta });
+    return true;
+  },
+
   _priorityMap: { low: 1, normal: 2, high: 3, urgent: 4 },
 };
 
 /* ---------------- Backwards helpers ---------------- */
 function normalizeState(state, fallback) {
   if (!state) return { message: fallback };
-  if (typeof state === 'string') return { message: fallback };
+  if (typeof state === 'string') return { message: state };
   return state;
 }
 function resolveState(state, value, fallback) {
@@ -1197,7 +1408,8 @@ juiceToast.setup({
     duration: 4000,
   },
   loading: {
-    icon: 'spinner',
+    // ensure FA spinner class is correct
+    icon: 'fa-spinner',
     iconPack: 'fas',
     iconAnim: 'jt-spin',
     duration: 0,
@@ -1205,5 +1417,6 @@ juiceToast.setup({
   },
 });
 
+/* ---------------- Exports ---------------- */
 export default juiceToast;
 export { juiceToast };

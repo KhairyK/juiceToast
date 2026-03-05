@@ -1,4 +1,10 @@
-## v1.4.2
+## v1.4.3
+- Add Parallax Mode
+- Fixes Animation
+- Auto-fecth **Font Awesome** Icons
+- Smart Dedup
+
+v1.4.2
 - Add modal
 - Bug fixes
 - improve documentation
