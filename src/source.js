@@ -81,13 +81,38 @@ class PriorityQueue {
 let __cssInjected = false;
 const BASE_CSS = `
 /* JuiceToast base (extended) */
-#juice-toast-root,[id^="juice-toast-root-"]{position:fixed;z-index:9999;display:flex;pointer-events:none;gap:10px}
+#juice-toast-root,[id^="juice-toast-root-"]{position:fixed;z-index:9999;display:flex;pointer-events:none;gap:10px;perspective:800px}
 #juice-toast-root[data-position="bottom-right"],#juice-toast-root-bottom-right{bottom:20px;right:20px;flex-direction:column-reverse;align-items:flex-end}
 #juice-toast-root[data-position="top-right"]{top:20px;right:20px;flex-direction:column;align-items:flex-end}
 #juice-toast-root[data-position="bottom-left"]{bottom:20px;left:20px;flex-direction:column-reverse;align-items:flex-start}
 #juice-toast-root[data-position="top-left"]{top:20px;left:20px;flex-direction:column;align-items:flex-start}
 #juice-toast-root[data-position="top-center"],#juice-toast-root[data-position="bottom-center"]{left:50%;transform:translateX(-50%)}
-.juice-toast{pointer-events:auto;min-width:220px;max-width:420px;padding:12px 16px;margin:6px 0;border-radius:10px;background:linear-gradient(180deg,rgba(30,30,30,.95),rgba(20,20,20,.95));color:#fff;display:flex;gap:12px;align-items:flex-start;box-sizing:border-box;transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; transform: translate3d(var(--jt-parallax-x,0), var(--jt-parallax-y,0), 0) translateX(var(--jt-drag-x,0)) translateY(var(--jt-drag-y,0)) scale(var(--jt-stack-scale,1));}
+
+/* store parallax/3d vars */
+.juice-toast {
+  pointer-events:auto;
+  min-width:220px;
+  max-width:420px;
+  padding:12px 16px;
+  margin:6px 0;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(30,30,30,.95),rgba(20,20,20,.95));
+  color:#fff;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  box-sizing:border-box;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease;
+  transform:
+    translate3d(var(--jt-parallax-x,0), var(--jt-parallax-y,0), var(--jt-parallax-z,0))
+    translateX(var(--jt-drag-x,0))
+    translateY(var(--jt-drag-y,0))
+    rotateX(var(--jt-rot-x,0))
+    rotateY(var(--jt-rot-y,0))
+    scale(var(--jt-stack-scale,1));
+  transform-style:preserve-3d;
+  will-change: transform, opacity;
+}
 @keyframes jt-slide-in{0%{opacity:0;transform:translateY(20px) scale(0.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes jt-slide-out{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(20px) scale(0.98)}}
 @keyframes jt-bounce{0%{transform:translateY(0)}25%{transform:translateY(-6px)}50%{transform:translateY(0)}75%{transform:translateY(-3px)}100%{transform:translateY(0)}}
@@ -114,8 +139,18 @@ const BASE_CSS = `
   position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55);backdrop-filter:blur(6px) saturate(120%);-webkit-backdrop-filter:blur(6px) saturate(120%);opacity:0;transition:opacity .25s ease;z-index:10000;
 }
 .jt-modal-overlay.show{opacity:1}
-.jt-modal{width:100%;max-width:520px;border-radius:18px;padding:24px;opacity:0;transform:translateY(40px) scale(.96);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s ease;}
-.jt-modal.show{opacity:1;transform:translateY(0) scale(1)}
+.jt-modal{
+  width:100%;
+  max-width:520px;
+  border-radius:18px;
+  padding:24px;
+  opacity:0;
+  transform:translateY(40px) scale(.96) rotateX(6deg);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s ease;
+  transform-style:preserve-3d;
+  will-change:transform,opacity;
+}
+.jt-modal.show{opacity:1;transform:translateY(0) scale(1) rotateX(0deg)}
 .jt-modal-header{font-size:18px;font-weight:600;letter-spacing:.3px;margin-bottom:10px}
 .jt-modal-body{font-size:14.5px;line-height:1.6;opacity:.85;margin-bottom:22px}
 .jt-modal-actions{display:flex;justify-content:flex-end;gap:12px}
@@ -151,6 +186,9 @@ function merge(a, b) {
 }
 function clamp(n, a, b) {
   return Math.max(a, Math.min(b, n));
+}
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 /* simple HTML sanitizer */
@@ -253,18 +291,20 @@ const juiceToast = {
     dev: false,
     injectCSS: true,
     css: null,
-    autoDedupe: false, // whether to auto compute dedupe keys
-    maxVisiblePerType: {}, // e.g. { error: 2 }
-    parallaxMode: false, // apply a gentle parallax
-    autoFetchFA: true, // attempt to auto-inject FA stylesheet if needed
+    autoDedupe: false,
+    maxVisiblePerType: {},
+    parallaxMode: false,
+    autoFetchFA: true,
+    use3d: false, // NEW: enable 3D transforms for toasts and modals
+    parallaxSmoothing: 0.12, // NEW: lerp factor 0..1 (higher = faster)
   },
   _config: {},
   _theme: 'dark',
   _plugins: [],
   _queue: new PriorityQueue(),
   _queueDedupe: new Set(),
-  _activeMap: new Map(), // id -> meta
-  _roots: new Map(), // position -> root element
+  _activeMap: new Map(),
+  _roots: new Map(),
   _modalStack: [],
   _faInjected: false,
 
@@ -276,6 +316,8 @@ const juiceToast = {
     if (cfg.maxVisiblePerType) this._defaults.maxVisiblePerType = merge(this._defaults.maxVisiblePerType, cfg.maxVisiblePerType);
     if (typeof cfg.parallaxMode === 'boolean') this._defaults.parallaxMode = cfg.parallaxMode;
     if (typeof cfg.autoFetchFA === 'boolean') this._defaults.autoFetchFA = cfg.autoFetchFA;
+    if (typeof cfg.use3d === 'boolean') this._defaults.use3d = cfg.use3d;
+    if (typeof cfg.parallaxSmoothing === 'number') this._defaults.parallaxSmoothing = clamp(cfg.parallaxSmoothing, 0, 1);
     this._config = merge(this._config, types);
     this._registerTypes();
   },
@@ -308,7 +350,15 @@ const juiceToast = {
     this.clear();
     if (!isBrowser) return;
     this._roots.forEach((r) => {
-      try { r.remove(); } catch (e) {}
+      try { 
+        // clean up raf & listeners (if any)
+        if (r._parallaxRAF) cancelAnimationFrame(r._parallaxRAF);
+        if (r._parallaxHandler) {
+          r.removeEventListener('mousemove', r._parallaxHandler);
+          r.removeEventListener('touchmove', r._parallaxHandler);
+        }
+        r.remove();
+      } catch (e) {}
     });
     this._roots.clear();
   },
@@ -390,10 +440,12 @@ const juiceToast = {
         animation: 'scale', // scale | slide | fade
         actions: [],
         theme: this._theme,
+        use3d: undefined, // allow override per-modal
       },
       options
     );
 
+    const use3d = cfg.use3d === undefined ? this._defaults.use3d : !!cfg.use3d;
     const theme = themes[cfg.theme] || themes.dark;
 
     const overlay = document.createElement('div');
@@ -415,6 +467,12 @@ const juiceToast = {
     modal.style.background = theme.bg;
     modal.style.color = theme.color;
     modal.style.border = theme.border || 'none';
+
+    if (use3d) {
+      // make overlay provide perspective for 3D
+      overlay.style.perspective = overlay.style.perspective || '900px';
+      modal.style.transform = 'translateY(40px) scale(.96) rotateX(8deg)';
+    }
 
     if (cfg.title) {
       const header = document.createElement('div');
@@ -456,6 +514,10 @@ const juiceToast = {
     requestAnimationFrame(() => {
       overlay.classList.add('show');
       modal.classList.add('show');
+      if (use3d) {
+        // animate rotate to 0 to create depth effect
+        modal.style.transform = 'translateY(0) scale(1) rotateX(0deg)';
+      }
     });
 
     const esc = (e) => {
@@ -476,6 +538,9 @@ const juiceToast = {
     const close = () => {
       overlay.classList.remove('show');
       modal.classList.remove('show');
+      if (use3d) {
+        modal.style.transform = 'translateY(40px) scale(.96) rotateX(8deg)';
+      }
       setTimeout(() => {
         try {
           overlay.remove();
@@ -561,6 +626,7 @@ const juiceToast = {
     root.style.display = 'flex';
     root.style.flexDirection = 'column';
     if (this._defaults.parallaxMode) root.dataset.parallax = 'true';
+
     switch (position) {
       case 'top-left':
         root.style.top = '20px';
@@ -593,29 +659,133 @@ const juiceToast = {
         root.style.right = '20px';
     }
     document.body.appendChild(root);
-    // If parallax mode enabled, attach listener
-    if (this._defaults.parallaxMode) {
-      const onMove = (e) => {
+
+    // If parallax mode enabled, attach smoothed parallax listener
+    if (this._defaults.parallaxMode && !reduceMotion) {
+      const smoothing = this._defaults.parallaxSmoothing ?? 0.12;
+
+      // Each child will have target vars set; RAF loop lerps toward targets
+      const handler = (e) => {
         const rect = root.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
         Array.from(root.children).forEach((child, index) => {
-          // `index` closer items move more
           const depth = (index + 1) / Math.max(1, root.children.length);
-          const tx = clamp(((clientX - cx) / rect.width) * depth * 8, -12, 12); // px
-          const ty = clamp(((clientY - cy) / rect.height) * depth * 6, -10, 10);
-          // use CSS vars to avoid overwriting drag transforms
-          child.style.setProperty('--jt-parallax-x', `${tx}px`);
-          child.style.setProperty('--jt-parallax-y', `${ty}px`);
+          const tx = clamp(((clientX - cx) / rect.width) * depth * 12, -18, 18);
+          const ty = clamp(((clientY - cy) / rect.height) * depth * 8, -14, 14);
+          const tz = clamp(-depth * 8, -30, 0); // slight Z offset for deeper items
+          // small rotation based on cursor offset
+          const rotY = clamp((clientX - cx) / rect.width * depth * -6, -12, 12); // degrees
+          const rotX = clamp((clientY - cy) / rect.height * depth * 4, -8, 8);
+
+          child._jtTarget = child._jtTarget || {};
+          child._jtTarget.tx = tx;
+          child._jtTarget.ty = ty;
+          child._jtTarget.tz = tz;
+          child._jtTarget.rotX = rotX;
+          child._jtTarget.rotY = rotY;
         });
+
+        // start RAF if not running
+        if (!root._parallaxRAF) {
+          const step = () => {
+            let running = false;
+            Array.from(root.children).forEach((child, index) => {
+              child._jtPrev = child._jtPrev || { tx: 0, ty: 0, tz: 0, rotX: 0, rotY: 0 };
+              const target = child._jtTarget || { tx: 0, ty: 0, tz: 0, rotX: 0, rotY: 0 };
+              const prev = child._jtPrev;
+              // lerp each
+              const nx = lerp(prev.tx, target.tx || 0, smoothing);
+              const ny = lerp(prev.ty, target.ty || 0, smoothing);
+              const nz = lerp(prev.tz, target.tz || 0, smoothing);
+              const nrotX = lerp(prev.rotX, target.rotX || 0, smoothing);
+              const nrotY = lerp(prev.rotY, target.rotY || 0, smoothing);
+
+              // set CSS vars
+              child.style.setProperty('--jt-parallax-x', `${nx}px`);
+              child.style.setProperty('--jt-parallax-y', `${ny}px`);
+              child.style.setProperty('--jt-parallax-z', `${nz}px`);
+              child.style.setProperty('--jt-rot-x', `${nrotX}deg`);
+              child.style.setProperty('--jt-rot-y', `${nrotY}deg`);
+
+              // store prev
+              child._jtPrev.tx = nx;
+              child._jtPrev.ty = ny;
+              child._jtPrev.tz = nz;
+              child._jtPrev.rotX = nrotX;
+              child._jtPrev.rotY = nrotY;
+
+              // detect if still moving
+              if (Math.abs(nx - (target.tx || 0)) > 0.1 ||
+                  Math.abs(ny - (target.ty || 0)) > 0.1 ||
+                  Math.abs(nz - (target.tz || 0)) > 0.5 ||
+                  Math.abs(nrotX - (target.rotX || 0)) > 0.1 ||
+                  Math.abs(nrotY - (target.rotY || 0)) > 0.1) {
+                running = true;
+              }
+            });
+
+            if (running) {
+              root._parallaxRAF = requestAnimationFrame(step);
+            } else {
+              root._parallaxRAF = null;
+            }
+          };
+          root._parallaxRAF = requestAnimationFrame(step);
+        }
       };
-      root._parallaxHandler = onMove;
-      root.addEventListener('mousemove', onMove);
-      root.addEventListener('touchmove', onMove, { passive: true });
-      root.dataset.parallax = 'true';
+
+      root._parallaxHandler = handler;
+      root.addEventListener('mousemove', handler);
+      root.addEventListener('touchmove', handler, { passive: true });
+
+      // Reset positions on leave
+      const reset = () => {
+        Array.from(root.children).forEach((child) => {
+          child._jtTarget = { tx: 0, ty: 0, tz: 0, rotX: 0, rotY: 0 };
+        });
+        if (!root._parallaxRAF) {
+          root._parallaxRAF = requestAnimationFrame(function stepReset() {
+            let running = false;
+            Array.from(root.children).forEach((child) => {
+              child._jtPrev = child._jtPrev || { tx: 0, ty: 0, tz: 0, rotX: 0, rotY: 0 };
+              const prev = child._jtPrev;
+              const target = child._jtTarget || { tx: 0, ty: 0, tz: 0, rotX: 0, rotY: 0 };
+              const nx = lerp(prev.tx, target.tx || 0, 0.16);
+              const ny = lerp(prev.ty, target.ty || 0, 0.16);
+              const nz = lerp(prev.tz, target.tz || 0, 0.16);
+              const nrotX = lerp(prev.rotX, target.rotX || 0, 0.16);
+              const nrotY = lerp(prev.rotY, target.rotY || 0, 0.16);
+
+              child.style.setProperty('--jt-parallax-x', `${nx}px`);
+              child.style.setProperty('--jt-parallax-y', `${ny}px`);
+              child.style.setProperty('--jt-parallax-z', `${nz}px`);
+              child.style.setProperty('--jt-rot-x', `${nrotX}deg`);
+              child.style.setProperty('--jt-rot-y', `${nrotY}deg`);
+
+              child._jtPrev.tx = nx;
+              child._jtPrev.ty = ny;
+              child._jtPrev.tz = nz;
+              child._jtPrev.rotX = nrotX;
+              child._jtPrev.rotY = nrotY;
+
+              if (Math.abs(nx) > 0.5 || Math.abs(ny) > 0.5 || Math.abs(nz) > 0.5 || Math.abs(nrotX) > 0.5 || Math.abs(nrotY) > 0.5) {
+                running = true;
+              }
+            });
+            if (running) root._parallaxRAF = requestAnimationFrame(stepReset);
+            else root._parallaxRAF = null;
+          });
+        }
+      };
+
+      root.addEventListener('mouseleave', reset);
+      root.addEventListener('touchend', reset);
     }
+
     this._roots.set(position, root);
     return root;
   },
@@ -667,6 +837,8 @@ const juiceToast = {
       el.style.setProperty('--jt-stack-scale', 1 - index * 0.04);
       el.style.setProperty('--jt-stack-opacity', 1 - index * 0.12);
       el.style.zIndex = 1000 - index;
+      // add a small Z base based on stack
+      el.style.setProperty('--jt-parallax-z', `${-index * 2}px`);
     });
   },
 
@@ -722,11 +894,9 @@ const juiceToast = {
     // support auto computed dedupeKey: if exists in DOM, merge
     const dedupeKey = cfg.dedupeKey || (this._defaults.autoDedupe ? this._computeDedupeKey(type, cfg) : undefined);
     if (dedupeKey) {
-      // check existing in any root
       for (const root of this._roots.values()) {
         const existing = Array.from(root.children).find((n) => n.dataset.dedupeKey === dedupeKey);
         if (existing) {
-          // merge: increment counter and update message if requested
           let countEl = existing.querySelector('.jt-count');
           if (!countEl) {
             countEl = document.createElement('span');
@@ -736,7 +906,6 @@ const juiceToast = {
             countEl.textContent = '1';
           }
           countEl.textContent = String(parseInt(countEl.textContent || '1') + 1);
-          // optionally update message
           if (cfg.mergeMessage) {
             const msgEl = existing.querySelector('.jt-message');
             if (msgEl) {
@@ -767,8 +936,11 @@ const juiceToast = {
     // initialize transform vars (safe)
     toast.style.setProperty('--jt-parallax-x', '0px');
     toast.style.setProperty('--jt-parallax-y', '0px');
+    toast.style.setProperty('--jt-parallax-z', '0px');
     toast.style.setProperty('--jt-drag-x', '0px');
     toast.style.setProperty('--jt-drag-y', '0px');
+    toast.style.setProperty('--jt-rot-x', '0deg');
+    toast.style.setProperty('--jt-rot-y', '0deg');
     toast.style.setProperty('--jt-stack-scale', '1');
 
     if (cfg.size && sizePreset[cfg.size]) {
@@ -833,7 +1005,6 @@ const juiceToast = {
     let icon = null;
     if (cfg.icon) {
       icon = document.createElement('i');
-      // ensure font-awesome class if user passed short name
       const iconClass = cfg.icon.startsWith('fa') ? cfg.icon : `fa-${cfg.icon}`;
       icon.className = ['icon', cfg.iconPack || '', iconClass].join(' ').trim();
       if (cfg.iconSize) icon.style.fontSize = cfg.iconSize;
@@ -1000,7 +1171,6 @@ const juiceToast = {
       _onEnter: null,
       _onLeave: null,
       dedupeKey,
-      // lifecycle hooks
       hooks: {
         onShow: cfg.onShow,
         onShown: cfg.onShown,
@@ -1088,7 +1258,6 @@ const juiceToast = {
       }
 
       if (dragAxis === 'x') {
-        // use CSS var for drag X
         toast.style.setProperty('--jt-drag-x', `${curX}px`);
       } else if (dragAxis === 'y') {
         toast.style.setProperty('--jt-drag-y', `${curY}px`);
@@ -1113,7 +1282,6 @@ const juiceToast = {
       const swipedY = axis === 'y' && (absY > (juiceToast._defaults.swipeThreshold || 80));
 
       if (swipedX || swipedY) {
-        // animate dismissal via CSS var so parallax not overwritten
         const sign = curX >= 0 ? 1 : -1;
         if (axis === 'x') {
           toast.style.setProperty('--jt-drag-x', `${sign * 1000}px`);
@@ -1123,7 +1291,6 @@ const juiceToast = {
         toast.classList.add('swipe-dismissing');
         setTimeout(() => this.remove(toastId), 220);
       } else {
-        // snap back
         toast.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
         toast.style.setProperty('--jt-drag-x', `0px`);
         toast.style.setProperty('--jt-drag-y', `0px`);
@@ -1408,7 +1575,6 @@ juiceToast.setup({
     duration: 4000,
   },
   loading: {
-    // ensure FA spinner class is correct
     icon: 'fa-spinner',
     iconPack: 'fas',
     iconAnim: 'jt-spin',
