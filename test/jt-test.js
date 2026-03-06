@@ -11,9 +11,7 @@ juiceToast.custom({
   progress: true, 
   duration: 4000, 
   avatar: "./avatars/profile1.png", 
-  size: "lg", 
-  width: "360px", 
   position: "top-left", 
-  parallaxMode: true
+  parallaxMode: true, 
+  use3d: true
 });
-juiceToast.success("Success")

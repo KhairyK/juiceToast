@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "1.4.3",
+  "version": "1.4.4-beta.1",
   "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",
@@ -52,7 +52,7 @@
     "README.md",
     "CONTRIBUTING.md",
     "WARNER_NEXT_VERSION.md",
-    "EoL.md",
+    "Notice.md",
     "NEW_FUNCTION.md",
     "API.md"
   ],

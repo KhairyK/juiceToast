@@ -107,3 +107,10 @@ juiceToast.success({
   parallaxMode: true
 });
 ```
+
+# Juice Toast Release v1.4.4 (Pack 0)
+```js
+juiceToast.success({
+  use3d: true
+});
+```

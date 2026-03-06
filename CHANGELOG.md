@@ -1,4 +1,8 @@
-## v1.4.3
+## v1.4.4 Pack 0 (Beta 1)
+- Fix Parallax Mode
+- Experimental **3D Mode** (unstable)
+
+v1.4.3
 - Add Parallax Mode
 - Fixes Animation
 - Auto-fecth **Font Awesome** Icons

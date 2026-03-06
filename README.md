@@ -7,7 +7,6 @@
   ![npm download](https://img.shields.io/npm/dt/juice-toast)
   ![npm version](https://img.shields.io/npm/v/juice-toast)
   ![license](https://img.shields.io/npm/l/juice-toast)
-  ![stars](https://img.shields.io/github/stars/KhairyK/juiceToast)
   ![issues](https://img.shields.io/github/issues/KhairyK/juiceToast)
   ![repo size](https://img.shields.io/github/repo-size/KhairyK/juiceToast)
   ![browser](https://img.shields.io/badge/browser-all%20modern-brightgreen)

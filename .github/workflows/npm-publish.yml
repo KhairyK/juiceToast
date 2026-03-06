@@ -6,7 +6,7 @@ permissions:
 
 on:
   release:
-    types: [published, created]
+    types: [created]
 
 jobs:
   build:
@@ -47,7 +47,7 @@ jobs:
           TAG="latest"
           
           if [[ "$VERSION" == *alpha* ]]; then
-            TAG="alpha-release"
+            TAG="alpha"
           elif [[ "$VERSION" == *beta* ]]; then
             TAG="test"
           elif [[ "$VERSION" == *rc* ]]; then
