@@ -54,6 +54,8 @@ jobs:
             TAG="next"
           elif [[ "$VERSION" == *fr* ]]; then
             TAG="final-release"
+          elif [[ "$VERSION" == *lts* ]]; then
+            TAG="lts"
           fi
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
