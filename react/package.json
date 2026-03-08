@@ -1,7 +1,7 @@
 {
-  "name": "juice-toast",
-  "version": "1.4.4-beta.2",
-  "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support",
+  "name": "@juice-toast/plugins-react",
+  "version": "1.0.0-beta.1",
+  "description": "Zero dependency React toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",
     "toast-js",
@@ -35,37 +35,22 @@
     "format": "npx prettier --write src/",
     "build": "npx rollup -c"
   },
-  "module": "dist/juice-toast.esm.js",
-  "types": "dist/juice-toast.d.ts",
+  "module": "./index.js",
   "exports": {
     ".": {
-      "import": "./dist/juice-toast.esm.js",
-      "types": "./dist/juice-toast.d.ts",
-      "require": "./dist/juice-toast.umd.js"
+      "import": "./index.js"
     }
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md",
-    "CODE_OF_CONDUCT.md",
-    "LICENSE",
-    "README.md",
-    "CONTRIBUTING.md",
-    "WARNER_NEXT_VERSION.md",
-    "Notice.md",
-    "NEW_FUNCTION.md",
-    "API.md"
-  ],
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
-  "unpkg": "dist/juice-toast.esm.js",
-  "jsdelivr": "dist/juice-toast.esm.js",
+ "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+
   "devDependencies": {
-    "esbuild": "^0.27.3",
-    "prettier": "^3.8.1",
-    "rollup": "^4.59.0",
-    "rollup-plugin-esbuild": "^6.2.1"
+    "vite": "^5.0.0"
   }
 }

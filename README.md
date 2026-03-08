@@ -13,6 +13,7 @@
   ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
   ![ts](https://img.shields.io/badge/types-TypeScript-blue)
   ![last commit](https://img.shields.io/github/last-commit/KhairyK/juiceToast)
+  [![Socket Badge](https://badge.socket.dev/npm/package/juice-toast/1.4.3)](https://badge.socket.dev/npm/package/juice-toast/1.4.3)
 
 ---
 

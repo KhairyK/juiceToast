@@ -1,4 +1,11 @@
-## v1.4.4 Pack 0 (Beta 1)
+## v1.4.4 Pack 1 (Beta 2)
+- Fix Parallax, 3D Mode, Promise, & Toast Animation
+- Adding `pauseAll()`, `resumeAll()` & `listActive(filter)`
+- Fix RAF
+- Fix Scheduler
+- Reduce Memory Leak's
+
+v1.4.4 Pack 0 (Beta 1)
 - Fix Parallax Mode
 - Experimental **3D Mode** (unstable)
 

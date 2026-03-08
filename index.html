@@ -149,6 +149,7 @@
             <a class="list-group-item list-group-item-action" href="#plugins">Plugins</a>
             <a class="list-group-item list-group-item-action" href="#utils">Utilities</a>
             <a class="list-group-item list-group-item-action" href="#image">Background Image</a>
+            <a class="list-group-item list-group-item-action" href="#promises">Promise Toast</a>
           </div>
         </nav>
       </aside>
@@ -169,6 +170,7 @@
               <li>Accessibility ready</li>
               <li>Plugin system</li>
               <li>Custom toast types</li>
+              <li>Promise Toast</li>
             </ul>
           </div>
         </section>
@@ -335,6 +337,9 @@ juiceToast.use(ctx => {
               <pre id="utilCode" class="p-3 bg-dark text-light rounded">
 juiceToast.clear();
 juiceToast.destroy();
+juiceToast.pauseAll();
+juiceToast.resumeAll();
+juiceToast.dismissAll(filter);
               </pre>
             </div>
           </div>
