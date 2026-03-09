@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import juiceToast from "../core/juicetoast"
+import juiceToast from "../core/juiceToast"
 
 export const ToastContext = createContext(juiceToast)
 

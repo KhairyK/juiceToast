@@ -41,11 +41,17 @@ It supports **UMD & ESM**, **dynamic toast types**, **theme management**, **queu
 - 🧩 Plugin system
 - ♿ Accessible (ARIA + focus/hover pause)
 
+Try a new [React JuiceToast](https://npmjs.com/package/@juice-toast/plugins-react) plugin!
+
 ---
 
 ## 📦 Installation
 
 ### NPM
+```bash
+npm install juice-toast --no-optional
+```
+#### With Optional (React Plugins)
 ```bash
 npm install juice-toast
 ```

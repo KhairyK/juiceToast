@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import juiceToast from "../core/juicetoast"
+import juiceToast from "../core/juiceToast"
 
 export default function JuiceToast(props) {
 
