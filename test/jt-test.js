@@ -6,8 +6,9 @@ juiceToast.setup({
     glassOnly: true, 
     duration: 4000
   },
-  maxVisible: 10,
-  glassUI: true
+  maxVisible: 4,
+  glassUI: true, 
+  urgentSkipsQueue: true
   });
 
 juiceToast.full({ 
@@ -24,6 +25,7 @@ juiceToast.full({
   use3d: true, 
   size: "lg"
 });
+
 juiceToast.glass("Glass Only");
 juiceToast.success("Success");
 juiceToast.error("Error");
@@ -60,8 +62,43 @@ juiceToast.modal({
 juiceToast.promise(
   fetch("https://jsonplaceholder.typicode.com/posts/1").then(r => r.json()),
   {
-    loading: { message: "Fetching post..." },
     success: { message: "Success to fecth the JSON!", icon: "fa-check" }, 
     error: { message: "Failed to fecth the JSON." }
   }
 );
+
+juiceToast.error({
+  message: "This is a high priority",
+  priority: "high",
+  position: "top-left",
+  size: "lg",
+  width: "480px"
+});
+
+juiceToast.info({
+  title: "Hello There",
+  message: "Lorem ipsum dolor sit amet, this is low priority",
+  position: "top-left",
+  size: "lg",
+  priority: "low"
+});
+
+juiceToast.success({
+  message: "This is a normal priority",
+  priority: "normal",
+  position: "top-left",
+  size: "md"
+});
+
+juiceToast.error({
+  message: "This is a urgent priority",
+  priority: "urgent",
+  position: "top-left",
+  size: "md"
+});
+
+juiceToast.full({
+  message: "Swipe Threshold Test", 
+  bg: "#0f172a", 
+  swipeThreshold: 60
+})
