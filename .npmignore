@@ -14,3 +14,4 @@ prettier.config.js
 index.html
 package-lock.json
 tsconfig.json
+react/
