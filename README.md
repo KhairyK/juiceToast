@@ -327,6 +327,10 @@ juiceToast.setup({
 ```js
 juiceToast.clear();    // Clear queue
 juiceToast.destroy();  // Remove all toast roots
+juiceToast.pauseAll(); // Pause all toast
+juiceToast.resumeAll(); // Resume all toast
+juiceToast.dismissAll(); // Dismiss all toast
+juiceToast.listActive(filter); // See all active toast
 ```
 
 ## Modal
@@ -362,7 +366,6 @@ juiceToast.modal({
 | Avatar Support | ✅ | ❌ | ❌ |
 | Custom Themes | ✅ | ✅ | Limited |
 | Modal Support | ✅ | ✅ | ❌ |
-| Designed for Toast Only | ✅ | ❌ (modal-focused) | ✅ |
 
 ### Compared to SweetAlert2
 
@@ -423,3 +426,5 @@ JuiceToast gives you:
  - Advanced control
  - Performance focus
  - Clean modern UI
+
+:)

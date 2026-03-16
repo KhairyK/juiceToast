@@ -311,6 +311,21 @@ juiceToast.success({
 });
 ```
 
+# Urgent Skip Queue
+```js
+juiceToast.setup({
+  urgentSkipsQueue: true
+});
+```
+
+# Utility
+```js
+juiceToast.pauseAll();
+juiceToast.resumeAll();
+juiceToast.dismissAll();
+juiceToast.listActive(filter);
+```
+
 ---
 
 # License

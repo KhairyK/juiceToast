@@ -1,9 +1,14 @@
-## v1.4.3 LTS / v1.4.4 (Final)
+## v1.4.4 (Stable)
+- Fix priority queue
+- Reduce memory leak's
+- Fix documentation
+
+v1.4.3 LTS / v1.4.4 (Final)
 - Fix priority queue
 - Fix Promise
 - Adding `urgentSkipsQueue`
 
-## v1.4.4 Pack 1 (Beta 2)
+v1.4.4 Pack 1 (Beta 2)
 - Fix Parallax, 3D Mode, Promise, & Toast Animation
 - Adding `pauseAll()`, `resumeAll()` & `listActive(filter)`
 - Fix RAF
