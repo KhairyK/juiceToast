@@ -56,7 +56,6 @@ log/
 package-lock.json
 yarn.lock
 pnpm.lock
-hcc.lock
 
 # =========================
 # Config

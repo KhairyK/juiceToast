@@ -1,4 +1,11 @@
-## v1.4.4 (Stable)
+# MAJOR UPDATE
+## v2.0.0
+- Adding DevTools
+- CONTRIBUTION: Source code file now are in modules
+- Adding Groups Toast
+- Fix & Upgrade HTML Sanitizer
+
+v1.4.4
 - Fix priority queue
 - Reduce memory leak's
 - Fix documentation

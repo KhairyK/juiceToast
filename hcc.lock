@@ -1,0 +1,26 @@
+hcc: 4.3
+lock: 4.4
+rollup: 4.59.0
+rollup-plugins-esbuild: 6.2.1
+yml_lock: 1.7 [{JDX}]
+
+hcc_autorun_if:
+ - on[<git pull>]
+ run: npm run build
+
+done: then:
+ - git add .
+ - git commit -m "BUILD: Distribution file builded with rollup"
+ - git hcc
+ - git push
+end
+
+done: then:
+ - id_code = git commit hash
+ if id_code = {null}:
+  echo "COMMIT FAILED, EXIT 1"
+  exit 1
+ else:
+  echo "COMMIT HASH: ${id_code}"
+  exit 0
+end

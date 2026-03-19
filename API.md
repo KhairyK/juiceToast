@@ -208,8 +208,17 @@ juiceToast.promise(fetch("/api"), {
 ## `juiceToast.use(pluginFunction)`
 
 ```js
-juiceToast.use(({ toast, cfg, type, root }) => {
-  console.log("Toast created:", type);
+juiceToast.use({
+  name: 'logger',
+  onCreate(ctx) {
+    console.log('create', ctx.id, ctx.type);
+  },
+  onShow(ctx) {
+    console.log('show', ctx.id);
+  },
+  onRemove(ctx) {
+    console.log('remove', ctx.id);
+  },
 });
 ```
 
@@ -324,6 +333,38 @@ juiceToast.pauseAll();
 juiceToast.resumeAll();
 juiceToast.dismissAll();
 juiceToast.listActive(filter);
+```
+
+# Choose Sanitizer Engine
+```js
+juiceToast.setup({
+  sanitizer: {
+    engine: 'builtin',
+  },
+});
+```
+
+# Grouping Toast
+```js
+juiceToast.info({
+  title: 'Upload',
+  message: 'File 1 sedang diproses',
+  groupId: 'upload-01',
+  groupStrategy: 'merge',
+});
+```
+
+# Sanitizer with DOMPurify
+```js
+import juiceToast from 'juice-toast';
+import DOMPurify from 'dompurify';
+
+juiceToast.setup({
+  sanitizer: {
+    engine: 'dompurify',
+    dompurify: DOMPurify,
+  },
+});
 ```
 
 ---
