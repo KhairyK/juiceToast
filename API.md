@@ -348,7 +348,7 @@ juiceToast.setup({
 ```js
 juiceToast.info({
   title: 'Upload',
-  message: 'File 1 sedang diproses',
+  message: 'File 1 under process',
   groupId: 'upload-01',
   groupStrategy: 'merge',
 });
@@ -364,6 +364,13 @@ juiceToast.setup({
     engine: 'dompurify',
     dompurify: DOMPurify,
   },
+});
+```
+
+# DevTools
+```js
+juiceToast.setup({
+  devTools: true
 });
 ```
 

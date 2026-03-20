@@ -1,3 +1,9 @@
+/**
+ * JuiceToast Core Engine
+ * 2026 (C).OpenDN Foundation
+ * v2.0.0
+ */
+
 import {
   isBrowser,
   uid,

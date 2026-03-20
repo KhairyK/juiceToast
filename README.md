@@ -6,14 +6,14 @@
   ![npm download wekkly](https://img.shields.io/npm/dw/juice-toast)
   ![npm download](https://img.shields.io/npm/dt/juice-toast)
   ![npm version](https://img.shields.io/npm/v/juice-toast)
-  ![license](https://img.shields.io/npm/l/juice-toast)
+  [![License: Atrosfer 1.0](https://img.shields.io/badge/License-Atrosfer_1.0-blue.svg)](https://atrosfer.opendnf.cloud/1.0)
   ![issues](https://img.shields.io/github/issues/KhairyK/juiceToast)
   ![repo size](https://img.shields.io/github/repo-size/KhairyK/juiceToast)
   ![browser](https://img.shields.io/badge/browser-all%20modern-brightgreen)
   ![deps](https://img.shields.io/badge/dependencies-0-brightgreen)
   ![ts](https://img.shields.io/badge/types-TypeScript-blue)
   ![last commit](https://img.shields.io/github/last-commit/KhairyK/juiceToast)
-  [![Socket Badge](https://badge.socket.dev/npm/package/juice-toast/1.4.3)](https://badge.socket.dev/npm/package/juice-toast/1.4.3)
+  [![Socket Badge](https://badge.socket.dev/npm/package/juice-toast/2.0.0-beta.1)](https://badge.socket.dev/npm/package/juice-toast/2.0.0-beta.1)
 
 ---
 
@@ -41,7 +41,7 @@ It supports **UMD & ESM**, **dynamic toast types**, **theme management**, **queu
 - 🧩 Plugin system
 - ♿ Accessible (ARIA + focus/hover pause)
 
-Try a new [React JuiceToast](https://npmjs.com/package/@juice-toast/plugins-react) plugin!
+Try a new [React JuiceToast](https://npmjs.com/package/@juice-toast/plugins-react) plugin & [Vue JuiceToast](https://npmjs.com/package/@juice-toast/plugins-vue) plugin! 
 
 ---
 
@@ -51,7 +51,7 @@ Try a new [React JuiceToast](https://npmjs.com/package/@juice-toast/plugins-reac
 ```bash
 npm install juice-toast --no-optional
 ```
-#### With Optional (React Plugins)
+#### With Optional (With Plugins)
 ```bash
 npm install juice-toast
 ```
@@ -350,6 +350,13 @@ juiceToast.modal({
 });
 ```
 
+## DevTools
+```js
+juiceToast.setup({
+  devTools: true
+});
+```
+
 ---
 
 # 🆚 Comparison
@@ -366,6 +373,7 @@ juiceToast.modal({
 | Avatar Support | ✅ | ❌ | ❌ |
 | Custom Themes | ✅ | ✅ | Limited |
 | Modal Support | ✅ | ✅ | ❌ |
+| DevTools      | ✅ | ❌ | ❌ |
 
 ### Compared to SweetAlert2
 

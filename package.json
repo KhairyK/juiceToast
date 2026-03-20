@@ -1,6 +1,6 @@
 {
   "name": "juice-toast",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.1",
   "description": "Zero dependency JavaScript toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",

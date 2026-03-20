@@ -114,3 +114,48 @@ juiceToast.success({
   use3d: true
 });
 ```
+
+# JuiceToast v1.4.4 (Pack 1)
+```js
+juiceToast.pauseAll();
+juiceToast.resumeAll();
+juiceToast.dismissAll();
+juiceToast.listActive(filter);
+```
+
+# JuiceToast v1.4.4 (Final)
+```js
+juiceToast.setup({
+  urgentSkipsQueue: true
+});
+```
+
+# JuiceToast Major 2.0.0 (Pack 0)
+
+[!NOTE]
+The Type Registration API has changed.
+
+Custom toast types should now be defined using the `types` option in `setup()`.
+
+```js
+import juiceToast from 'juice-toast';
+import DOMPurify from 'dompurify';
+
+juiceToast.setup({
+  sanitizer: {
+    engine: 'dompurify',
+    dompurify: DOMPurify,
+  },
+  types: {
+    typeName: {} // juiceToast.typeName
+  }, 
+  devTools: true
+});
+
+juiceToast.info({
+  title: 'Upload',
+  message: 'File 1 under process',
+  groupId: 'upload-01',
+  groupStrategy: 'merge',
+});
+```

@@ -1,5 +1,5 @@
 # MAJOR UPDATE
-## v2.0.0
+## v2.0.0 (Pack 0)
 - Adding DevTools
 - CONTRIBUTION: Source code file now are in modules
 - Adding Groups Toast
@@ -104,3 +104,5 @@ v1.0.1
 
 v1.0.0
 - Initial release
+
+WARNING: v2.0.0 is a breaking change, please use 1.4.4-lts

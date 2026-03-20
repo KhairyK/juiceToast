@@ -10,7 +10,7 @@ juiceToast.setup({
   }, 
   maxVisible: 4,
   glassUI: true, 
-  urgentSkipsQueue: true
+  urgentSkipsQueue: true, 
   });
 
 juiceToast.full({ 
@@ -102,5 +102,9 @@ juiceToast.error({
 juiceToast.full({
   message: "Swipe Threshold Test", 
   bg: "#0f172a", 
-  swipeThreshold: 60
+  swipeThreshold: 60,
+  bgImage: "https://images.unsplash.com/photo-1557683316-973673baf926?fit=crop&w=400&h=400",
+  glassUI: 85,
+  progress: true,
+  duration: 4000,
 })
