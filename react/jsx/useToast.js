@@ -1,18 +1,19 @@
-import juiceToast from "../core/juiceToast"
+import { useEffect, useState } from "react"
+import { toast } from "./JuiceToast"
 
-export function useToast() {
+export function useToast(){
 
-  return {
-    success: (msg, cfg = {}) =>
-      juiceToast.success({ message: msg, ...cfg }),
+  const [mounted,setMounted] = useState(false)
 
-    error: (msg, cfg = {}) =>
-      juiceToast.error({ message: msg, ...cfg }),
+  useEffect(()=>{
+    setMounted(true)
+  },[])
 
-    info: (msg, cfg = {}) =>
-      juiceToast.info({ message: msg, ...cfg }),
-
-    promise: juiceToast.promise
+  if(!mounted){
+    return new Proxy({},{
+      get:()=>()=>{}
+    })
   }
 
+  return toast
 }

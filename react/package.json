@@ -1,6 +1,6 @@
 {
   "name": "@juice-toast/plugins-react",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Zero dependency React toast notification library with animations, dark mode, auto CSS injection, and mobile support",
   "keywords": [
     "toast",
@@ -32,8 +32,8 @@
     "node": ">=19"
   },
   "scripts": {
-    "format": "npx prettier --write src/",
-    "build": "npx rollup -c"
+    "format": "npx prettier --write .",
+    "test": "vite"
   },
   "module": "./index.js",
   "exports": {
@@ -48,8 +48,11 @@
   "devDependencies": {
     "vite": "^5.0.0"
   },
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "dependencies": {
+    "juice-toast": "^1.4.4-beta.2"
   }
 }

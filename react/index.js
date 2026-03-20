@@ -1,5 +1,4 @@
-import JuiceToast from "./jsx/JuiceToast"
-import { ToastProvider } from "./jsx/JuiceToastProvider"
+import { toast } from "./jsx/JuiceToast"
 import { useToast } from "./jsx/useToast"
 
-export { JuiceToast, ToastProvider, useToast }
+export { toast, useToast }
