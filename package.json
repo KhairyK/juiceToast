@@ -63,7 +63,7 @@
   "jsdelivr": "dist/juice-toast.esm.js",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "esbuild": "^0.27.3",
     "prettier": "^3.8.1",
     "rollup": "^4.59.0",
