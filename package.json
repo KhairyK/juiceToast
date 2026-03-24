@@ -69,7 +69,7 @@
     "rollup": "^4.59.0",
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-esbuild": "^6.2.1",
-    "typescript": "^5.4.0"
+    "typescript": "^6.0.2"
   },
   "optionalDependencies": {
     "@juice-toast/plugins-react": "^1.0.0-beta.2"
